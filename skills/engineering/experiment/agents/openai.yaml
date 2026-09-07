@@ -1,0 +1,3 @@
+interface:
+  display_name: "Experiment"
+  short_description: "Compare alternatives and keep the evidence-backed one"
