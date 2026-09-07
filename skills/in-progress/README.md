@@ -16,3 +16,7 @@ npx skills@latest add mattpocock/skills --skill=<name>
 - **[setup-ts-deep-modules](./setup-ts-deep-modules/SKILL.md)**: Wire dependency-cruiser into a TypeScript repo so each package is a deep module: implementation hidden in subfolders, reachable only through its entry-point files, tests exercising it through those. User-invoked.
 - **[implement-spec](./implement-spec/SKILL.md)**: Implement a whole spec on one branch. Works the tickets as a task graph rather than a list, running implementer subagents across the ready frontier for maximum concurrency, and lands the result as a single PR. User-invoked.
 - **[retro](./retro/SKILL.md)**: Suggest improvements to the coding agent's environment (steering files, coding standards, automated checks, tooling) after a session. STUB: design notes only, not functional yet. User-invoked.
+- **[ux-design](./ux-design/SKILL.md)**: Design user experience, information architecture, user flows, and states from a product spec, ahead of visual design.
+- **[ui-design](./ui-design/SKILL.md)**: Turn a validated UX flow into a coherent visual interface and reusable component system.
+- **[experiment](./experiment/SKILL.md)**: Run a controlled experiment on a product, UX, UI, prompt, or implementation choice, and keep only evidence-backed improvements.
+- **[test](./test/SKILL.md)**: Validate a finished piece of work against its acceptance criteria, covering the happy path, edge cases, and regressions.

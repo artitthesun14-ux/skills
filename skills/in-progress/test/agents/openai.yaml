@@ -1,0 +1,3 @@
+interface:
+  display_name: "Test"
+  short_description: "Validate work against acceptance criteria"
