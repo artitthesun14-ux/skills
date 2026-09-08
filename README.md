@@ -214,6 +214,7 @@ Skills I use daily for code work.
 - **[wizard](./skills/engineering/wizard/SKILL.md)**: Generate an interactive bash wizard that walks a human through steps only they can perform: provisioning infrastructure, setting up credentials or CI secrets, walking an unfamiliar third-party dashboard, or running a one-off migration or cutover.
 - **[ux-design](./skills/engineering/ux-design/SKILL.md)**: Design the user experience from the spec (goals, information architecture, primary and alternative flows, system states, accessibility) and hand `ui-design` a screen/state map.
 - **[ui-design](./skills/engineering/ui-design/SKILL.md)**: Turn a validated UX into an implementation-ready visual design system: hierarchy, typography and spacing, reusable components, responsive rules, component states, and design tokens.
+- **[design-system](./skills/engineering/design-system/SKILL.md)**: Own the visual rules between `ui-design` and `prototype`: semantic colour roles, type and spacing scales, component states, accessibility, and implementation-ready design tokens, kept as the single source of truth.
 - **[test](./skills/engineering/test/SKILL.md)**: Validate a change against its acceptance criteria across happy path, failure and edge cases, then check for regressions before it reaches review.
 - **[experiment](./skills/engineering/experiment/SKILL.md)**: Run a controlled loop (hypothesis, change, run, measure, compare, keep/reject, record) to decide between alternatives from measured evidence rather than guesswork.
 

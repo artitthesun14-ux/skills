@@ -30,9 +30,9 @@ The leading idea is the reusable component with all its states. `ui-design` inve
 `ui-design` is a chain step on the product-building flow, taking the resolved UX and handing a buildable visual spec to implementation:
 
 ```txt
-ux-design → ui-design → prototype → implement
+ux-design → ui-design → design-system → prototype → implement
 ```
 
-Its neighbours are [ux-design](https://aihero.dev/skills-ux-design), which gives it the flows and states to dress, and [prototype](https://aihero.dev/skills-prototype), the throwaway-code detour for when a visual question is easier to answer by seeing it than by specifying it. Downstream, [implement](https://aihero.dev/skills-implement) builds against the spec it produces.
+Its neighbours are [ux-design](https://aihero.dev/skills-ux-design), which gives it the flows and states to dress, and [design-system](https://aihero.dev/skills-design-system), which systematises its visual choices into reusable tokens before anything is built. Where a visual question is easier to answer by seeing it, [prototype](https://aihero.dev/skills-prototype) is the throwaway-code detour, and downstream [implement](https://aihero.dev/skills-implement) builds against what these produce.
 
 [ask-matt](https://aihero.dev/skills-ask-matt) is the router over the whole set when you are not sure which flow you are in.

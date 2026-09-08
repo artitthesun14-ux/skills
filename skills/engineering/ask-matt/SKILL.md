@@ -33,12 +33,13 @@ The limit on this is the **[smart zone](https://www.aihero.dev/ai-coding-diction
 
 ## Design
 
-When the work has a UI, two model-invoked skills sit between the spec and the build, and the agent can reach for them the moment a feature needs an interface designed rather than just coded. They run in order:
+When the work has a UI, three model-invoked skills sit between the spec and the build, and the agent can reach for them the moment a feature needs an interface designed rather than just coded. They run in order:
 
 - **`/ux-design`** works from the spec to the *experience*: user goals, information architecture, the primary and alternative flows, and the empty/loading/error/permission/destructive states each flow has to survive. It produces a **screen/state map**, not a screen.
 - **`/ui-design`** takes that map to the *visual system*: layout hierarchy, typography and spacing, reusable components with all their states, responsive rules, and design tokens, ready to build against.
+- **`/design-system`** systematises those visual choices into the **single source of truth**: semantic colour roles, type/spacing/radius/elevation scales, component states, accessibility, and implementation-ready **design tokens**, so every screen reuses one visual language instead of drifting. Worth it when consistency across many screens is the risk; skip it for a one-off view.
 
-Both feed the same build step as everything else. When a design question is easier to answer by seeing it than by specifying it, detour through **`/prototype`** (step 2 above), instead of or alongside `/ui-design`.
+All three feed the same build step as everything else. When a design question is easier to answer by seeing it than by specifying it, detour through **`/prototype`** (step 2 above): it exercises the system on real interface, and a visual problem it surfaces loops back to **`/design-system`** (update the system, then the prototype) rather than being patched only in the prototype.
 
 ## On-ramps
 
