@@ -1,0 +1,3 @@
+# ภาพหน้าจอที่ browser-test.js สร้างขึ้นใหม่ทุกครั้ง
+.shots/
+node_modules/
