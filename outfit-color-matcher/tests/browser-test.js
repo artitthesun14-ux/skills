@@ -149,7 +149,6 @@ const small=await page.evaluate(()=>{
   const bad=[];
   document.querySelectorAll('button,input,select,a[href]').forEach(el=>{
     if(el.classList.contains('visually-hidden')||el.offsetParent===null) return;
-    if(el.classList.contains('pbar__seg')) return;      // segment ของกราฟ มี legend เป็นทางเข้าหลัก
     const r=el.getBoundingClientRect();
     if(!r.width||!r.height) return;
     if(r.height>=44) return;                 // กล่องใหญ่พออยู่แล้ว
@@ -162,10 +161,13 @@ const small=await page.evaluate(()=>{
   return bad;
 });
 t('touch target สูง >=44px ทุกตัว', small.length===0, small.join(' | '));
-t('ทุก segment ของแถบสัดส่วนโฟกัสด้วยคีย์บอร์ดได้ (เป็น button)',
-  await page.locator('.pbar__seg').first().evaluate(e=>e.tagName)==='BUTTON');
-t('segment มี aria-label บอกชื่อสี+%+role',
-  /%/.test(await page.locator('.pbar__seg').first().getAttribute('aria-label')));
+// เดิม segment เป็น <button> ที่โฟกัสได้ ซึ่งขัดกับ role="img" ของแถบทั้งอัน
+// (ผู้ใช้คีย์บอร์ด tab เข้าไปในสิ่งที่ AT ประกาศว่าเป็นภาพเดียว) และช่องสูง 12px
+// ก็ต่ำกว่าเกณฑ์ touch target ตอนนี้เป็น span ที่กดได้ ค่าทุกตัวอ่านได้จาก legend
+t('segment ไม่เป็น control ที่โฟกัสได้ (อยู่ใน role="img")',
+  await page.locator('.pbar__seg').first().evaluate(e=>e.tagName)!=='BUTTON');
+t('segment ไม่มี tabindex ที่ทำให้ tab เข้าไปได้',
+  await page.locator('.pbar__seg').first().evaluate(e=>!e.hasAttribute('tabindex')));
 t('แถบสัดส่วนมี aria-label สรุปทั้งแถบ',
   (await page.locator('.pbar__track').first().getAttribute('aria-label')).startsWith('สัดส่วนสี:'));
 t('ModeToggle เป็น radiogroup จริง', await page.locator('.modetoggle').getAttribute('role')==='radiogroup');

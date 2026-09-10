@@ -1,89 +1,93 @@
 # PROJECT_STATE: Outfit Color Matcher
 
 > ไฟล์นี้เป็น "ตัวชี้ทาง" สำหรับทำงานต่อ ไม่ใช่สำเนาเอกสาร รายละเอียดเต็มอยู่ในไฟล์ที่อ้างถึง
-> อัปเดตล่าสุด: หลังสร้างเฟส 1 เสร็จ
+> อัปเดตล่าสุด: หลังสร้างเฟส 1 (ระบบทรงเสื้อผ้า SVG) และ publish ทับ artifact เดิม
 
 ## 1. โปรเจกต์คืออะไร
 เว็บไซต์หน้าเดียว (single-page website) ช่วยแต่งตัว: เสนอชุดที่สีเข้ากันให้ทันที พร้อมคำแนะนำอิงทฤษฎีสีและสัดส่วนสีของลุค **โดยไม่ให้คะแนน/ไม่ตัดสินการแต่งตัว**
 ส่งมอบเป็น Claude Artifact (ลิงก์เว็บ) + ไฟล์ `.html`
 
-## 2. เอกสารและไฟล์ (source of truth)
-ทุกอย่างอยู่ในโฟลเดอร์ `outfit-color-matcher/` ของรีโป `artitthesun14-ux/skills` บรานช์ `claude/ready-to-use-qhe3ak`
+## 2. เอกสารโปรเจกต์ (source of truth)
+ทุก path อ้างจากโฟลเดอร์ `outfit-color-matcher/` ใน repo `artitthesun14-ux/skills`
 
 | ไฟล์ | บทบาท | สถานะ |
 |---|---|---|
-| `app.html` | **โค้ดจริงทั้งหมด** (แหล่งความจริงเดียว รูปแบบ artifact ไม่มี doctype/head/body) | เฟส 1 เสร็จ |
-| `outfit-color-matcher.html` | ไฟล์ที่เปิดตรงๆ ได้ สร้างจาก `app.html` ด้วย `./build.sh` | ของที่ generate ห้ามแก้มือ |
-| `build.sh` | ห่อ `app.html` เป็นไฟล์ `.html` สมบูรณ์ | |
-| `tests/engine-test.js` | เทสต์ engine + คอนทราสต์ (node ล้วน) | ผ่านทั้งหมด |
-| `tests/browser-test.js` | เทสต์ AC ผ่านเบราว์เซอร์จริง + เก็บภาพหน้าจอ | ผ่านทั้งหมด |
-| `tests/image-test.js` | เทสต์ดึงสีจากรูป, AC4, quota เต็ม | ผ่านทั้งหมด |
-| `docs/spec-outfit-color-matcher.md` | **สเปกหลัก** (engine 4.1-4.7, FR-0..FR-6 + AC, data model, 7A/7B/7C, เฟส, backlog) | ใช้อ้างอิงหลัก |
-| `docs/ux-outfit-color-matcher.md` | UX (target user, IA, screen/state map A-E, flows, 7B micro-copy, a11y) | เสร็จ |
-| `docs/ui-outfit-color-matcher.md` | UI (tokens, component inventory + states, layout, responsive, a11y, **§9 สิ่งที่เปลี่ยนตอนสร้าง**) | อัปเดตหลังสร้างแล้ว |
+| `docs/spec-outfit-color-matcher.md` | **สเปกหลัก** (ปัญหา, non-goals, engine 4.1-4.7, FR-0..FR-6 + AC, data model, 7A สี, 7B การ์ด/carousel, 7C states, เฟส, backlog) | เสร็จ ใช้อ้างอิงหลัก |
+| `docs/ux-outfit-color-matcher.md` | UX (target user, IA, screen/state map A-E, flows, interaction rules, 7B micro-copy, a11y) | เสร็จ |
+| `docs/ui-outfit-color-matcher.md` | UI (tokens, component inventory + states, §3.7 ระบบทรงเสื้อผ้า, responsive, a11y พร้อมคอนทราสต์ที่วัดจริง) | เสร็จ |
+| `docs/plan-phase1-shape-migration.md` | แผนย้ายจากระบบรูปถ่ายมาเป็นทรง SVG + บันทึกผลหลังลงมือ | เสร็จ |
 | `docs/outfit-color-matcher-grill-summary.md` | บันทึกผลการ grill (12 ข้อตัดสิน) | อ้างอิงย้อนหลัง |
-| `research/color-matching-for-outfit-website.md` | งานวิจัยสี (อยู่ที่รากรีโป) | อ้างอิง |
+| `docs/outfit-color-matcher.md` | สรุปโปรเจกต์ฉบับผู้ใช้อ่าน (ก่อนแปลงเป็นสเปกวิศวกรรม) | ถูกแทนที่โดย spec-* |
+| `docs/working-guidelines.md` | แนวทางการทำงานที่ตกลงยึด (Karpathy 4 หลัก) | ใช้ตลอดการสร้าง |
+| `HANDOFF.md` | เอกสารส่งต่อสำหรับเซสชันใหม่ | อ่านก่อนเริ่มงานต่อ |
+| `../research/color-matching-for-outfit-website.md` | งานวิจัยสี | อ้างอิง |
 
 ## 3. การตัดสินใจ/ข้อจำกัดที่ต้องรักษาไว้ (ห้ามหลุด)
 **ผลิตภัณฑ์**
-- ไม่มีคะแนน ไม่ตัดสิน/วิจารณ์การแต่งตัว จึงแสดง **สัดส่วนสี + คำแนะนำ template** แทน
+- ไม่มีคะแนน ไม่ตัดสิน/วิจารณ์การแต่งตัว → แสดง **สัดส่วนสี + คำแนะนำ template** แทน
 - เสื้อผ้า 1 ชิ้น = 1 สี ไม่มีลาย
-- Target = **ใครก็ได้** (ปัจเจกใช้แต่งตัวให้ตัวเอง) ใช้คำบุรุษที่ 1 "ของฉัน", **ห้ามใช้คำว่า "ลูกค้า"**
-- 2 โหมดเป็นตัวสลับหลัก: `สีที่เราแนะนำ` (idea) / `จากตู้ของฉัน` (wardrobe)
+- Target = **ใครก็ได้** (ปัจเจกใช้แต่งตัวให้ตัวเอง) → ใช้คำบุรุษที่ 1 "ของฉัน", **ห้ามใช้คำว่า "ลูกค้า"**
+- 2 โหมดเป็นตัวสลับหลัก: `สีที่เราแนะนำ` (idea, ไม่ต้องมีของจริง) / `จากตู้ของฉัน` (wardrobe)
 - ชุดครบ = ต้องมี **บน+ล่าง**; นอก/รองเท้า/แอกเซส = เสริม
-- โอกาส (Occasion) มีผลต่อ **การเอนโทนสีเท่านั้น**
+- โอกาส (Occasion) มีผลต่อ **การเอนโทนสีเท่านั้น** (ไม่แสร้งรู้ความเป็นทางการของเสื้อผ้า)
 - แบตช์ละ **3-4 ชุด**, ปุ่ม `<` `>` **วนลูปในแบตช์**, ปุ่มแยก **"เจนชุดใหม่"** จึงสร้างแบตช์ใหม่
-- Favorite สูงสุด **20 ชุด**, เก็บ **snapshot สี+ชื่อ** (เฟส 2)
-- localStorage เต็ม: เตือน + **เซฟชิ้นนั้นแบบไม่มีรูป**
+- Favorite สูงสุด **20 ชุด**, เก็บ **snapshot สี+ชื่อ** (ลบ garment แล้ว favorite ยังโชว์ได้)
+- localStorage: ไม่ใช่ข้อจำกัดอีกแล้ว (Garment = `{id,name,category,shapeId,color}` ไม่กี่สิบไบต์); ถ้าเต็มจริงให้เตือน ห้ามเงียบ
 - **no silent state change**: auto mode switch / ชุดตัวอย่าง / ดึงสีเสร็จ ต้องมี micro-copy กำกับ
+
+**ทรงเสื้อผ้า (เพิ่มหลัง ui-design)**
+- **ไม่มีการอัปโหลดรูป** ผู้ใช้เลือก **ทรงจากคลัง SVG** (**21 ทรง** 5 หมวด: บน 7 · ล่าง 6 · นอก 3 · รองเท้า 2 · แอกเซส 3) + เลือกสีเอง
+- ทรงเดียวกันย้อมได้ทั้งสีจริงและสีที่แนะนำ → 2 โหมดใช้ภาษาภาพเดียวกัน
+- เส้นใน SVG (`--garment-line`) คำนวณจาก **ความสว่างของสีเสื้อ** (L>=0.55 เส้นเข้ม, ต่ำกว่าเส้นสว่าง) threshold เดียว ไม่มี hysteresis
+- **`shapeId` เป็นสัญญาถาวร**: ห้ามเปลี่ยน/ลบหลังปล่อย · วาดใหม่ได้แต่คง id · เลิกใช้ให้ `deprecated: true`
+- **Fallback บังคับ:** shapeId ไม่รู้จัก → วาดทรงเริ่มต้นของหมวด + หมายเหตุ ห้ามหน้าพัง
+- **migration ห้ามเขียนทับ `shapeId` ที่มีอยู่แล้ว** (เติมได้เฉพาะกรณีไม่มีฟิลด์) ไม่งั้นทรงที่ผู้ใช้เลือกหายถาวรและ fallback กลายเป็นโค้ดตาย
+- เกิน ~30 ทรงเมื่อไร ShapePicker ต้องมีช่องค้นหา
 
 **เทคนิค**
 - self-contained, **ไม่ใช้ capability ใดๆ** (localStorage ล้วน) เพื่อแชร์ลิงก์สาธารณะได้
 - คำแนะนำเป็น **template ล้วน ไม่เรียก AI ตอบสด**
-- ไม่มี external fetch/รูป/สคริปต์ (ผ่าน CSP); รูปเป็น data URL ย่อ <=2/ชิ้น
+- ไม่มี external fetch/รูป/สคริปต์ (ผ่าน CSP); ไม่มี `<img>` เหลือในหน้าแล้ว ภาพเสื้อผ้าเป็น inline SVG ล้วน
 - light/dark, responsive, a11y: **ไม่สื่อด้วยสีอย่างเดียว**, เคารพ prefers-reduced-motion
 
 **Engine**
-- harmony rule = มุม hue **"เพิ่มโอกาสให้กลมกลืนภายใต้กฎ"** ไม่ใช่การันตี (ถ่วงด้วย contrast + สัดส่วน neutral + Color Role)
+- harmony rule = มุม hue **"เพิ่มโอกาสให้กลมกลืนภายใต้กฎ"** ไม่ใช่การันตี (ต้องถ่วงด้วย contrast + สัดส่วน neutral + Color Role)
 - คะแนนความกลมกลืน = **คำนวณเงียบเบื้องหลังเพื่อคัด/เรียงเท่านั้น ห้ามแสดงต่อผู้ใช้**
-  (ตอนสร้างเก็บไว้ใน `WeakMap` นอก object ที่ render จึงหลุดเข้า DOM ไม่ได้เลย แข็งแรงกว่าฟิลด์ `_harmony` ที่สเปกเขียนไว้)
 - **Color Role** (Primary/Secondary/Neutral/Accent) เป็นแกนจัดองค์ประกอบ map เข้ากับ 60-30-10; Accent ไม่เกิน 1
 
-**ภาพ**
+**ภาพ (จาก ui-design)**
 - แดง `--accent` = ใช้เฉพาะ **การกระทำ** ห้ามเป็นสีของข้อมูล
-- **`--accent` เฉพาะที่ไม่ใช่ตัวอักษร** (ขอบ/focus ring) ส่วนที่มีตัวอักษรเกี่ยวใช้ `--accent-solid` เพราะคอนทราสต์
 - สีเสื้อผ้าต้องอยู่ในภาชนะที่มี **`--data-ring` 1px + ป้ายข้อความ** เสมอ
 - ตัวอักษรใช้โทเคน ink เสมอ **ไม่เคยใส่สีของข้อมูล**
 - ProportionBar: ช่องว่าง 2px ระหว่าง segment, legend เสมอ, direct label เฉพาะ >=12%
 
-## 4. การเปลี่ยนแปลงของสเตจนี้ (สร้างเฟส 1)
-ทุกข้อมาจากการวัด/รันจริง รายละเอียดเต็มอยู่ใน `docs/ui-outfit-color-matcher.md` §9
-
-1. **คอนทราสต์ตกจริง 2 จุด** `#FFFFFF` บน `#E23A4E` = 4.24:1 และ `#E23A4E` เป็นตัวอักษรบนพื้น = 4.07:1 แก้ด้วยการแยกโทเคน `--accent-solid` (`#C62F41`)
-2. **`--data-gap` เปลี่ยนเป็น `--pb-bg`** ที่ตั้งใน scope คอมโพเนนต์
-3. **ป้ายใต้ tile เป็น 3 บรรทัด** และ hex ห้ามถูกตัด (ของเดิม 2 บรรทัดล้นไปทับ tile ข้างๆ)
-4. **ปุ่มแก้ไข/ลบ รวมเป็นปุ่ม `⋯` เดียว 44x44** เพราะพื้นที่แตะของสองปุ่มเล็กทับกัน เสี่ยงกดลบพลาด
-5. **ProportionBar ใช้ legend เป็นทางเข้าหลัก** tooltip เป็นของแถมบน pointer ที่ hover ได้
-6. **เพิ่ม StickyNav + Hero เข้า component inventory**
-7. **carousel ต้องมี wrapper** เพราะ padding แบบ % อ้างอิงกล่องแม่ ทำให้ peek เพี้ยนไปข้างเดียว
-8. **ปรับนิยาม neutral:** HSL saturation หลอกตาในสีอ่อน (ครีม `#EFE6D2` ได้ S=47%) จึงถ่วงด้วยระยะห่าง R-G-B (`NEUTRAL_SPREAD_MAX = 32`)
-9. **StickyNav มี 3 รายการ** (แนะนำ / ตู้เสื้อผ้า / ธีม) ไม่ใช่ 4 ตาม ux §3 เพราะ Favorites กับ Analysis ยังไม่มีในเฟส 1 ไม่ใส่เมนูที่กดแล้วไม่มีอะไร
+## 4. การเปลี่ยนแปลงจากสเปก/ดีไซน์ก่อนหน้า (delta ของสเตจนี้)
+1. **Label:** `สีที่ลูกค้ามี` → **`จากตู้ของฉัน`** ทุกที่ (spec + ux) และตัดคำว่า "ลูกค้า" ออก
+2. **UX §0 Target user & wording** เพิ่มใหม่ (ยืนยัน target = ใครก็ได้, IA = ตู้เดียวต่อเครื่อง ไม่มีหลายโปรไฟล์)
+3. **UX §7B Micro-copy** เพิ่มใหม่ (กฎ no silent state change)
+4. **spec §4.7 Color Role** เพิ่มใหม่; §4.2 เพิ่มข้อจำกัดความซื่อสัตย์ของ harmony; §4.4 เปลี่ยนเป็น "น้ำหนักตามหมวด + map เข้ากับ Color Role"; `colorBreakdown` เพิ่มฟิลด์ `role`
+5. **UI doc (ใหม่ทั้งฉบับ)** เพิ่มโทเคนนอกเหนือ 7A: `--surface-sunken`, `--data-ring`, `--data-gap`, `--danger`, type scale, spacing, radius, elevation, motion, breakpoints
+6. **การตัดสินใจเชิงภาพในสเตจนี้:** OccasionChips ที่เลือกใช้ `--ink` (ไม่ใช่ accent) เพื่อสงวนแดงให้ CTA · DiversityBar [P3] ใช้สีเดียวทุกแถบ (งานคือเทียบขนาด ไม่ใช่บอกตัวตน)
 
 ## 5. เรื่องที่ยังไม่ปิด (open)
-- **dog-ear มุมการ์ด** ยังไม่ใส่ (ตัดสินว่าไม่คุ้มความซับซ้อนของ `clip-path`) เปิดทีหลังได้
-- **"ผ่อนเงื่อนไข" ใน No-match (A4)** ยังเป็นแค่ปุ่มสลับโหมด รอทำจริงพร้อม FR-5 ในเฟส 3
-- **ค่าที่จูนแล้วรอบแรก** (`NEUTRAL_MAX_S=20`, `NEUTRAL_SPREAD_MAX=32`, `VIVID_MIN_S=55`, ช่วงองศาราย rule, ย่านสุ่ม idea `S 35-75` / `L 30-70`) อยู่บนสุดของ script ในไฟล์ ปรับได้ทันที ควรจูนอีกครั้งหลังใช้กับตู้จริงของผู้ใช้
-- ยังไม่มี issue tracker เอกสารทุกฉบับเป็นไฟล์ในรีโป
-- **นอกโปรเจกต์นี้:** PR #2 ของรีโป `artitthesun14-ux/skills` ยังเปิดค้างอยู่
+- **การ์ดชุดถูกยืดตามการ์ดที่สูงที่สุด** (flex `align-items:stretch`) วัดแล้วเกิดทุกความกว้าง ไม่ใช่แค่เดสก์ท็อป: ที่ว่างส่วนเกินท้ายการ์ด 111-136px ที่ 375px และสูงสุด 212px ที่ 1280px แก้ได้ด้วย `align-items:flex-start` บรรทัดเดียว ยังไม่แก้ รอผู้ใช้สั่ง
+- **ค่าที่ต้องจูนจากผลจริงตอนสร้าง:** threshold neutral `S < 20%`, ช่วงองศาของแต่ละ harmony rule, ย่าน S/L ที่ "สวย" ตอนสุ่มสี
+- **dog-ear มุมการ์ด** เป็นลูกเล่นทางเลือก ยังไม่ฟันธงว่าใส่หรือไม่
+- **พฤติกรรม "ผ่อนเงื่อนไข" ใน No-match (A4)** ระบุไว้ระดับ UX ยังไม่ลงรายละเอียดว่าคลายอะไรก่อน
+- ยังไม่มี issue tracker → เอกสารทุกฉบับส่งเป็นไฟล์ ไม่ได้ publish ลง tracker
+- **นอกโปรเจกต์นี้:** PR #2 ของ repo `artitthesun14-ux/skills` **merge เข้า main แล้ว** (10 ก.ย. 2026) งานต่อจากนี้ต้องเริ่มบรานช์ใหม่จาก main ไม่ต่อท้ายประวัติที่ merge ไปแล้ว
 
 ## 6. สเตจ
-- **สเตจปัจจุบัน (จบแล้ว): สร้างเฟส 1** ส่งมอบ `app.html` + `outfit-color-matcher.html` + เทสต์ 3 ชุด
-- **สเตจถัดไป: เฟส 2** FR-2 Swap One Item + FR-3 Favorites
-  - ของที่วางรากไว้ให้แล้ว: `FavoriteButton`/`SwapControl` มีสเปกใน ui doc §3.1, `CategoryTile` มีสถานะ `locked`/`disabled-swap` เตรียมไว้, storage มีคีย์ `favorites` ว่างรออยู่แล้ว
-  - เริ่มเมื่อผู้ใช้สั่ง
+- **สเตจปัจจุบัน (จบแล้ว): สร้างเฟส 1 + ย้ายมาใช้ระบบทรงเสื้อผ้า SVG**
+  - artifact: `https://claude.ai/code/artifact/ee952a4d-7525-4446-a827-548546fe68b0` (Version 3, ลิงก์เดิม localStorage ไม่หาย)
+  - แหล่งความจริงของโค้ด: `app.html` (รูปแบบ artifact) รัน `./build.sh` ได้ `outfit-color-matcher.html` ที่เปิดตรงๆ ได้
+  - แผนที่ใช้: `docs/plan-phase1-shape-migration.md`
+  - ผลตรวจ (Version 3) รวม 208 ข้อ ผ่านหมด: syntax 6/6 · `tests/engine-test.js` 44 · `tests/browser-test.js` 70 · `tests/shape-test.js` 17/17 · `tests/migration-test.js` 10/10 · `tests/ac-test.js` 45/45 (FR-0/FR-1 AC + §7C) · `tests/a11y-test.js` 20/20 (คอนทราสต์วัดจริง/คีย์บอร์ด/ทัช/ธีม/responsive) · `tests/regress.js` 2/2 (700 แบตช์ 2,800 ชุด) · ไม่มี JS error · ไม่มี external request
+  - แก้จากผลทดสอบ 3 จุด: ข้อความหลังแก้ไขชิ้นบอกผิดว่า "เพิ่มเข้าตู้" · สวอทช์พรีเซ็ตสี 34px ไม่ถึงเกณฑ์แตะ 44px · `.pbar__seg` เป็น `<button>` อยู่ใน `role="img"` ทำให้ tab เข้าไปในสิ่งที่ AT บอกว่าเป็นภาพ
+- **สเตจถัดไป: เฟส 2** (FR-2 Swap One Item + FR-3 Favorites) เริ่มเมื่อผู้ใช้สั่ง
 
 ## 7. ลำดับเฟสที่ตกลงไว้
-- **เฟส 1 (เสร็จ):** FR-0 Wardrobe + Engine (4.1-4.7) + FR-1 Today Outfit (2 โหมด, carousel, batch 3-4) + seed ตัวอย่าง + ดีไซน์ฐาน light/dark + a11y
+- **เฟส 1:** FR-0 Wardrobe + Engine (4.1-4.7) + FR-1 Today Outfit (2 โหมด, carousel, batch 3-4) + seed ตัวอย่าง + ดีไซน์ฐาน
 - **เฟส 2:** FR-2 Swap One Item + FR-3 Favorites
 - **เฟส 3:** FR-4 Wardrobe Analysis + FR-5 Color-first + FR-6 Outfit Generator
-- **Backlog:** ตาม spec §11
+- **Backlog:** ตาม spec §11 (thumbnail favorite, แท็กโอกาส/ฤดู, worn log, undo ลบ, รูปคมขึ้น ฯลฯ)

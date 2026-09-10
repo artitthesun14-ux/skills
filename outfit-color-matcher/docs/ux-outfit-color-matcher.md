@@ -20,7 +20,7 @@
 ## 2. User Journey (end-to-end)
 ```
 รู้จัก/เปิดลิงก์ → เห็นคุณค่าทันที (ชุดตัวอย่าง) → ลองกด "วันนี้แต่งอะไรดี?"
-   → [อยากได้ของจริง] เพิ่มเสื้อผ้า (ดึงสีจากรูป) → แมทจากตู้
+   → [อยากได้ของจริง] เพิ่มเสื้อผ้า (เลือกทรง + เลือกสี) → แมทจากตู้
    → เจอชุดที่ชอบ → Favorite / Swap ปรับ / เจนใหม่
    → กลับมาใช้ซ้ำ (ตู้+favorite ยังอยู่ในเครื่อง)
 ```
@@ -59,9 +59,9 @@
 ### View B: Wardrobe (ตู้) [P1]
 - B0 Empty (จริงๆ): ชวนเพิ่มชิ้นแรก
 - B1 มีของ: กริดชิปสี (ชื่อ+หมวด+ชื่อสี)
-- B2 Add/Edit form: ชื่อ, หมวด, อัปโหลดรูป→ดึงสี, ช่อง hex แก้ได้, บันทึก
-- B3 Loading: กำลังดึงสี (spinner บนช่องรูป)
-- B4 Image error / Storage error / Quota: ข้อความตาม 7C
+- B2 Add/Edit form: **หมวด → ทรง (ShapePicker) → สี (พรีเซ็ต/color/hex) → ชื่อ (ไม่บังคับ)** พร้อมพรีวิวสด
+- B3 Storage error: ข้อความตาม 7C (ไม่มีสถานะ loading/image-error แล้ว เพราะไม่มีการอ่านไฟล์รูป)
+- B4 Unknown shape: `shapeId` ไม่รู้จัก → วาดทรงเริ่มต้นของหมวดแทน + หมายเหตุ
 
 ### View C: Outfit Detail / actions [P1-P2]
 - การ์ดที่โฟกัส: ช่องหมวด (บน→ล่าง→รองเท้า) + แถบสัดส่วน 60-30-10 + คำแนะนำ
@@ -96,21 +96,22 @@
 - **< > วนลูปในแบตช์เท่านั้น**; สร้างชุดใหม่ต้องกด "เจนชุดใหม่" (แยกชัด กันสับสน)
 - **Swap = แตะช่องหมวดในการ์ด** เปลี่ยนเฉพาะหมวดนั้น วนตัวถัดไป [P2]
 - **Favorite = toggle** กดซ้ำเอาออก; เต็ม 20 เตือนก่อน [P2]
-- **แก้ hex เขียนทับสีที่ดึงจากรูปได้เสมอ** (ผู้ใช้คือผู้ตัดสินสุดท้าย)
-- ทุก action ที่ลบ/แทนที่ (ลบชิ้น, แทนที่รูป) มี confirm หรือ undo ที่เข้าใจได้
+- **เปลี่ยนทรงกับเปลี่ยนสีทำแยกกันได้** ไม่ต้องกรอกใหม่ทั้งชิ้น (ผู้ใช้คือผู้ตัดสินสุดท้าย)
+- ทุก action ที่ลบ/แทนที่ (ลบชิ้น, เปลี่ยนทรง) มี confirm หรือ undo ที่เข้าใจได้
 
 ## 7B. Micro-copy สำหรับ state ที่เปลี่ยนแบบเงียบ (สำคัญ)
 ทุกครั้งที่ระบบเปลี่ยนสถานะให้ผู้ใช้เองโดยไม่ได้กด ต้อง **มี label/ข้อความบอก** ไม่ให้ผู้ใช้เดา:
 - **ชุดตัวอย่าง (sample data):** การ์ด/ชิ้นที่ seed ต้องมีป้าย **"ตัวอย่าง"** ชัดทุกใบ + แถบบนสุดครั้งแรก: "นี่คือชุดตัวอย่างให้ลองเล่น เพิ่มเสื้อผ้าของคุณเพื่อดูชุดจากตู้จริง" + ปุ่ม "ล้างตัวอย่าง"
 - **Auto mode switch:** เมื่อระบบเปิดโหมดให้อัตโนมัติ (ตู้ไม่พอ -> เด้งไป "สีที่เราแนะนำ") ต้องมีข้อความ inline ที่ตัวสลับ: "ตู้ยังมีของไม่พอจัดชุด เลยแสดง 'ไอเดียสีที่แนะนำ' ให้ก่อน" (ไม่สลับเงียบ)
 - **โหมดถูกจำค่า:** ถ้าคืนค่าโหมดล่าสุดจาก localStorage ให้ผู้ใช้เห็นว่าตัวสลับอยู่โหมดไหน (สถานะ active ชัด) ไม่ใช่เดา
-- **ดึงสีจากรูปเสร็จ:** ข้อความสั้น "เดาสีจากรูปให้แล้ว แก้ค่าได้" กำกับช่อง hex (ให้รู้ว่าค่านี้มาจากระบบ ไม่ใช่ค่าที่ผู้ใช้ยืนยัน)
+- **ทรงถูกแทนด้วยทรงเริ่มต้น (unknown shape):** หมายเหตุเล็กที่ช่องนั้น "ทรงเดิมไม่พร้อมใช้งาน แสดงทรงเริ่มต้นแทน" ไม่เปลี่ยนเงียบ
 - **บันทึกอัตโนมัติลงเครื่อง:** ครั้งแรกที่เพิ่มของ บอกครั้งเดียวว่า "บันทึกไว้ในเครื่องนี้เท่านั้น" (คุมความคาดหวังเรื่องข้อมูลข้ามเครื่อง)
 - **เจนชุดใหม่ทับของเดิม:** ก่อน/ขณะแทนแบตช์ ให้ feedback ว่า "สร้างชุดใหม่แล้ว" (กันงงว่าทำไมการ์ดเปลี่ยน)
 หลัก: **no silent state change** ทุกการเปลี่ยนที่ระบบทำเอง = มองเห็นได้ + อธิบายสั้นๆ
 
 ## 8. System states (สรุปจาก 7C ผูกกับ view)
-Empty / Loading / Insufficient / No-match / Storage-blocked / Quota-full / Image-error / Deleted-garment(favorite snapshot) / Single-item(swap disabled) / All-neutral / Large-wardrobe / Reduced-motion / Shared-empty / Favorites-full
+Empty / Loading(คำนวณแบตช์) / Insufficient / No-match / Storage-blocked / **Unknown-shape** / Deleted-garment(favorite snapshot) / Single-item(swap disabled) / All-neutral / Large-wardrobe / Reduced-motion / Shared-empty / Favorites-full
+*(ตัด Image-error และ Quota-full ออกจากรายการหลัก เพราะเลิกอัปโหลดรูปแล้ว ข้อมูลต่อชิ้นเหลือไม่กี่สิบไบต์)*
 - ทุกสถานะต้องมี "ข้อความ + ทางออก" ไม่ปล่อยจอว่าง/ค้าง
 
 ## 9. Accessibility & usability
@@ -131,7 +132,7 @@ Empty / Loading / Insufficient / No-match / Storage-blocked / Quota-full / Image
 ## 11. ส่งต่อ ui-design
 พร้อมให้ ui-design ทำ component inventory + tokens จาก:
 - View A-E + states, พาเลตต์ 7A (off-white/ดำ/แดง), การ์ด+carousel 7B
-- คอมโพเนนต์หลักที่คาดว่าต้องมี: ModeToggle, OccasionPicker, OutfitCard (+CategoryTile, ProportionBar, AdviceText), Carousel(+NavButtons, PositionIndicator), GarmentChip, GarmentForm(+ColorFromImage, HexInput), Empty/Prompt/ErrorBanner, FavoriteButton, SwapControl
+- คอมโพเนนต์หลักที่คาดว่าต้องมี: ModeToggle, OccasionPicker, OutfitCard (+CategoryTile, ProportionBar, AdviceText), Carousel(+NavButtons, PositionIndicator), GarmentShape, GarmentChip, GarmentForm(+CategorySelect, ShapePicker, ColorPicker), Empty/Prompt/ErrorBanner, FavoriteButton, SwapControl
 
 ---
 *โฟกัสส่งมอบ: View A + View B + Primary Flow (เฟส 1); View C actions/D/E ตามเฟส 2-3*

@@ -1,3 +1,4 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1"><style>:root{color-scheme:light}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <title>Outfit Color Matcher</title>
 <style>
 /* ============================================================
@@ -225,7 +226,7 @@ body{padding-bottom:calc(var(--nav-h) + env(safe-area-inset-bottom))}
   border:1px solid var(--data-ring);   /* วงแหวนกันกลืน บังคับ (ui doc §0 ข้อ 2) */
   overflow:hidden;position:relative;background:var(--surface-sunken)
 }
-.tile__box img{width:100%;height:100%;object-fit:cover}
+.tile__box .shape{width:100%;height:100%}
 .tile__label{min-width:0;flex:1;overflow:hidden}
 .tile__cat,.tile__name,.tile__color{display:block;overflow:hidden}
 .tile__cat{font-size:var(--fs-xs);color:var(--ink-muted);text-transform:uppercase;letter-spacing:.06em;
@@ -247,7 +248,7 @@ body{padding-bottom:calc(var(--nav-h) + env(safe-area-inset-bottom))}
 .pbar{margin-top:var(--sp-4)}
 .pbar__track{display:flex;gap:2px;height:12px}   /* ช่องว่าง 2px โปร่ง เห็นพื้น --pb-bg */
 .pbar__seg{
-  min-width:6px;height:12px;padding:0;
+  min-width:6px;height:12px;padding:0;cursor:pointer;
   box-shadow:inset 0 0 0 1px var(--data-ring);
   transition:filter var(--dur-fast) var(--ease)
 }
@@ -290,7 +291,7 @@ body{padding-bottom:calc(var(--nav-h) + env(safe-area-inset-bottom))}
   aspect-ratio:1;border-radius:var(--r-sm);border:1px solid var(--data-ring);
   overflow:hidden;margin-bottom:var(--sp-3);background:var(--surface-sunken)
 }
-.gchip__box img{width:100%;height:100%;object-fit:cover}
+.gchip__box .shape{width:100%;height:100%}
 .gchip__name{
   font-size:var(--fs-sm);font-weight:600;
   display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden
@@ -340,16 +341,33 @@ body{padding-bottom:calc(var(--nav-h) + env(safe-area-inset-bottom))}
   width:44px;height:44px;padding:2px;border:1px solid var(--line);
   border-radius:var(--r-sm);background:var(--bg);cursor:pointer
 }
-.drop{
-  aspect-ratio:1;max-width:220px;border:1.5px dashed var(--line);border-radius:var(--r-md);
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--sp-2);
-  color:var(--ink-muted);font-size:var(--fs-sm);text-align:center;padding:var(--sp-3);
-  position:relative;overflow:hidden;width:100%
-}
-.drop.is-over{border-color:var(--accent);border-style:solid}
-.drop img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.drop__over{position:absolute;inset:auto 0 0 0;display:flex;gap:var(--sp-2);padding:var(--sp-2);background:var(--surface);border-top:1px solid var(--line)}
 .form__actions{display:flex;gap:var(--sp-3);flex-wrap:wrap}
+
+/* --- 4.5b ทรงเสื้อผ้า SVG (ui doc §3.7) --- */
+/* .shape ตั้ง --garment-fill / --garment-line เป็น inline style แล้ว path ข้างใน <symbol>
+   อ่านค่าผ่าน var() ที่สืบทอดเข้า shadow tree ของ <use> (class selector ข้ามเข้าไปไม่ได้) */
+.shape{display:block;width:100%;height:100%}
+.shapepick{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--sp-2)}
+.shapepick__opt{
+  border:1px solid var(--line);border-radius:var(--r-sm);background:var(--surface);
+  padding:var(--sp-2);display:flex;flex-direction:column;align-items:center;gap:4px;
+  transition:background var(--dur-fast) var(--ease)
+}
+.shapepick__opt:hover{background:var(--surface-sunken)}
+.shapepick__opt[aria-checked="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.shapepick__box{width:100%;aspect-ratio:1;max-width:72px}
+.shapepick__name{font-size:var(--fs-xs);color:var(--ink-muted);text-align:center;line-height:1.3}
+.shapepick__opt[aria-checked="true"] .shapepick__name{color:var(--ink);font-weight:600}
+
+.presets{display:flex;flex-wrap:wrap;gap:var(--sp-2);margin-bottom:var(--sp-3)}
+.preset{
+  width:44px;height:44px;border-radius:var(--r-sm);padding:0;   /* ux §9: touch target >= 44 */
+  border:1px solid var(--data-ring)   /* วงแหวนกันกลืน: สีขาว/ดำต้องยังเห็นขอบ */
+}
+.preset[aria-pressed="true"]{box-shadow:0 0 0 2px var(--accent)}
+.previewrow{display:flex;align-items:center;gap:var(--sp-3);margin-bottom:var(--sp-3)}
+.previewrow__box{width:64px;height:64px;flex:0 0 64px;border:1px solid var(--data-ring);border-radius:var(--r-sm);background:var(--surface-sunken)}
+.previewrow__txt{font-size:var(--fs-sm);color:var(--ink-muted);min-width:0}
 
 /* --- 4.6 การสื่อสาร (ui doc §3.6) --- */
 .banner{
@@ -419,8 +437,7 @@ body{padding-bottom:calc(var(--nav-h) + env(safe-area-inset-bottom))}
     margin-inline:auto;
     max-width:min(100%, calc(var(--card-w) + 2 * (var(--peek) + var(--sp-3))))
   }
-  .drop{max-width:200px}
-  .form__grid{display:grid;grid-template-columns:200px 1fr;gap:var(--sp-5);align-items:start}
+  .shapepick{grid-template-columns:repeat(4,1fr)}
 }
 @media (min-width:1024px){
   :root{--card-w:480px;--peek:72px}
@@ -439,6 +456,208 @@ body{padding-bottom:calc(var(--nav-h) + env(safe-area-inset-bottom))}
   .card--adjacent{transform:none;opacity:.4}
 }
 </style>
+
+<!-- ============================================================
+     คลังทรงเสื้อผ้า (ui doc §3.7) นิยามครั้งเดียว อ้างซ้ำด้วย <use>
+     สไตล์ต้องเป็น inline style ในตัว symbol เพราะ class selector ของเอกสาร
+     ไม่ match เข้า shadow tree ของ <use> แต่ custom property สืบทอดเข้าไปได้
+     ============================================================ -->
+<svg width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute">
+<defs>
+<style>
+  .sf{fill:var(--garment-fill,#888)}
+  .sl{fill:none;stroke:var(--garment-line,rgba(0,0,0,.55));stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+</style>
+
+<!-- ===== TOP ===== -->
+<symbol id="sh-tee-crew" viewBox="0 0 120 120">
+  <path style="fill:var(--garment-fill)" d="M43 25 28 31 13 47 27 61 36 52 36 101 84 101 84 52 93 61 107 47 92 31 77 25C73 33 67 37 60 37 53 37 47 33 43 25Z"/>
+  <g style="fill:none;stroke:var(--garment-line);stroke-width:2;stroke-linejoin:round;stroke-linecap:round">
+    <path d="M43 25 28 31 13 47 27 61 36 52 36 101 84 101 84 52 93 61 107 47 92 31 77 25C73 33 67 37 60 37 53 37 47 33 43 25Z"/>
+    <path d="M36 95h48"/>
+  </g>
+</symbol>
+<symbol id="sh-tee-v" viewBox="0 0 120 120">
+  <path style="fill:var(--garment-fill)" d="M43 25 28 31 13 47 27 61 36 52 36 101 84 101 84 52 93 61 107 47 92 31 77 25 60 46Z"/>
+  <g style="fill:none;stroke:var(--garment-line);stroke-width:2;stroke-linejoin:round;stroke-linecap:round">
+    <path d="M43 25 28 31 13 47 27 61 36 52 36 101 84 101 84 52 93 61 107 47 92 31 77 25 60 46Z"/>
+    <path d="M36 95h48"/>
+  </g>
+</symbol>
+<symbol id="sh-polo" viewBox="0 0 120 120">
+  <path style="fill:var(--garment-fill)" d="M43 25 28 31 13 47 27 61 36 52 36 101 84 101 84 52 93 61 107 47 92 31 77 25 60 34Z"/>
+  <g style="fill:none;stroke:var(--garment-line);stroke-width:2;stroke-linejoin:round;stroke-linecap:round">
+    <path d="M43 25 28 31 13 47 27 61 36 52 36 101 84 101 84 52 93 61 107 47 92 31 77 25 60 34Z"/>
+    <path d="M45 26 54 38 60 33 66 38 75 26"/>
+    <path d="M60 33v18"/>
+    <circle cx="60" cy="39" r="1.8"/><circle cx="60" cy="47" r="1.8"/>
+  </g>
+</symbol>
+<symbol id="sh-shirt-long" viewBox="0 0 120 120">
+  <path style="fill:var(--garment-fill)" d="M44 24 26 32 14 48 20 96 36 96 36 106 84 106 84 96 100 96 106 48 94 32 76 24 60 38Z"/>
+  <g style="fill:none;stroke:var(--garment-line);stroke-width:2;stroke-linejoin:round;stroke-linecap:round">
+    <path d="M44 24 26 32 14 48 20 96 36 96 36 106 84 106 84 96 100 96 106 48 94 32 76 24 60 38Z"/>
+    <path d="M44 24 50 34 60 38 70 34 76 24"/>
+    <path d="M60 38v68"/><path d="M20 88h16"/><path d="M84 88h16"/>
+  </g>
+</symbol>
+<symbol id="sh-shirt-short" viewBox="0 0 120 120">
+  <path style="fill:var(--garment-fill)" d="M44 24 28 31 14 48 28 62 38 52 38 104 82 104 82 52 92 62 106 48 92 31 76 24 60 38Z"/>
+  <g style="fill:none;stroke:var(--garment-line);stroke-width:2;stroke-linejoin:round;stroke-linecap:round">
+    <path d="M44 24 28 31 14 48 28 62 38 52 38 104 82 104 82 52 92 62 106 48 92 31 76 24 60 38Z"/>
+    <path d="M44 24 50 34 60 38 70 34 76 24"/>
+    <path d="M60 38v66"/>
+  </g>
+</symbol>
+<symbol id="sh-hoodie" viewBox="0 0 120 120">
+  <path style="fill:var(--garment-fill)" d="M42 30 26 36 14 50 20 96 34 96 34 104 86 104 86 96 100 96 106 50 94 36 78 30Z"/>
+  <g style="fill:none;stroke:var(--garment-line);stroke-width:2;stroke-linejoin:round;stroke-linecap:round">
+    <path d="M42 30 26 36 14 50 20 96 34 96 34 104 86 104 86 96 100 96 106 50 94 36 78 30Z"/>
+    <path d="M42 30C46 44 52 50 60 50 68 50 74 44 78 30"/>
+    <path d="M42 30C48 19 72 19 78 30"/>
+    <path d="M54 48v12"/><path d="M66 48v12"/>
+    <path d="M44 76v12h32V76"/>
+    <path d="M20 88h14"/><path d="M86 88h14"/>
+  </g>
+</symbol>
+<symbol id="sh-tank" viewBox="0 0 120 120">
+  <path style="fill:var(--garment-fill)" d="M42 22 36 26 34 101 86 101 84 26 78 22 74 25C74 39 68 45 60 45 52 45 46 39 46 25Z"/>
+  <g style="fill:none;stroke:var(--garment-line);stroke-width:2;stroke-linejoin:round;stroke-linecap:round">
+    <path d="M42 22 36 26 34 101 86 101 84 26 78 22 74 25C74 39 68 45 60 45 52 45 46 39 46 25Z"/>
+    <path d="M34 95h52"/>
+  </g>
+</symbol>
+
+<!-- ===== BOTTOM ===== -->
+<symbol id="sh-jeans-straight" viewBox="0 0 120 120">
+  <path style="fill:var(--garment-fill)" d="M36 20h48l2 40-4 48H64L60 66 56 108H38L34 60Z"/>
+  <g style="fill:none;stroke:var(--garment-line);stroke-width:2;stroke-linejoin:round;stroke-linecap:round">
+    <path d="M36 20h48l2 40-4 48H64L60 66 56 108H38L34 60Z"/>
+    <path d="M36 30h48"/><path d="M60 30v14"/>
+    <path d="M40 33 48 41"/><path d="M80 33 72 41"/>
+  </g>
+</symbol>
+<symbol id="sh-chino" viewBox="0 0 120 120">
+  <path style="fill:var(--garment-fill)" d="M36 20h48l1 38-4 50H64L60 64 56 108H39l-4-50Z"/>
+  <g style="fill:none;stroke:var(--garment-line);stroke-width:2;stroke-linejoin:round;stroke-linecap:round">
+    <path d="M36 20h48l1 38-4 50H64L60 64 56 108H39l-4-50Z"/>
+    <path d="M36 29h48"/><path d="M60 29v13"/>
+    <path d="M50 33 48 104"/><path d="M70 33 72 104"/>
+  </g>
+</symbol>
+<symbol id="sh-wide" viewBox="0 0 120 120">
+  <path style="fill:var(--garment-fill)" d="M36 20h48l8 88H64L60 60 56 108H28Z"/>
+  <g style="fill:none;stroke:var(--garment-line);stroke-width:2;stroke-linejoin:round;stroke-linecap:round">
+    <path d="M36 20h48l8 88H64L60 60 56 108H28Z"/>
+    <path d="M36 29h48"/><path d="M48 33 42 106"/><path d="M72 33 78 106"/>
+  </g>
+</symbol>
+<symbol id="sh-jogger" viewBox="0 0 120 120">
+  <path style="fill:var(--garment-fill)" d="M36 20h48l2 38-6 42-16 4-4-40-4 40-16-4-6-42Z"/>
+  <g style="fill:none;stroke:var(--garment-line);stroke-width:2;stroke-linejoin:round;stroke-linecap:round">
+    <path d="M36 20h48l2 38-6 42-16 4-4-40-4 40-16-4-6-42Z"/>
+    <path d="M36 30h48"/>
+    <path d="M56 30 54 42"/><path d="M64 30 66 42"/>
+    <path d="M41 96 57 100"/><path d="M63 100 79 96"/>
+  </g>
+</symbol>
+<symbol id="sh-shorts" viewBox="0 0 120 120">
+  <path style="fill:var(--garment-fill)" d="M36 24h48l4 46H64l-4-22-4 22H32Z"/>
+  <g style="fill:none;stroke:var(--garment-line);stroke-width:2;stroke-linejoin:round;stroke-linecap:round">
+    <path d="M36 24h48l4 46H64l-4-22-4 22H32Z"/>
+    <path d="M36 33h48"/><path d="M60 33v12"/>
+    <path d="M33 62h23"/><path d="M64 62h23"/>
+  </g>
+</symbol>
+<symbol id="sh-skirt" viewBox="0 0 120 120">
+  <path style="fill:var(--garment-fill)" d="M40 22h40l12 80H28Z"/>
+  <g style="fill:none;stroke:var(--garment-line);stroke-width:2;stroke-linejoin:round;stroke-linecap:round">
+    <path d="M40 22h40l12 80H28Z"/>
+    <path d="M39 32h42"/>
+    <path d="M54 35 49 100"/><path d="M60 35v65"/><path d="M66 35 71 100"/>
+  </g>
+</symbol>
+
+<!-- ===== OUTER ===== -->
+<symbol id="sh-jacket" viewBox="0 0 120 120">
+  <path style="fill:var(--garment-fill)" d="M44 24 26 32 14 48 20 94 34 94 34 104 86 104 86 94 100 94 106 48 94 32 76 24Z"/>
+  <g style="fill:none;stroke:var(--garment-line);stroke-width:2;stroke-linejoin:round;stroke-linecap:round">
+    <path d="M44 24 26 32 14 48 20 94 34 94 34 104 86 104 86 94 100 94 106 48 94 32 76 24Z"/>
+    <path d="M44 24 54 38 60 34 66 38 76 24"/>
+    <path d="M60 34v70"/>
+    <path d="M40 76v10h12"/><path d="M80 76v10H68"/>
+    <path d="M20 86h14"/><path d="M86 86h14"/>
+  </g>
+</symbol>
+<symbol id="sh-blazer" viewBox="0 0 120 120">
+  <path style="fill:var(--garment-fill)" d="M44 24 26 32 14 48 20 94 34 94 34 104 86 104 86 94 100 94 106 48 94 32 76 24Z"/>
+  <g style="fill:none;stroke:var(--garment-line);stroke-width:2;stroke-linejoin:round;stroke-linecap:round">
+    <path d="M44 24 26 32 14 48 20 94 34 94 34 104 86 104 86 94 100 94 106 48 94 32 76 24Z"/>
+    <path d="M44 24 48 42 60 62 72 42 76 24"/>
+    <path d="M60 62v42"/>
+    <path d="M40 80h12"/><path d="M68 80h12"/>
+    <circle cx="62" cy="70" r="2"/>
+  </g>
+</symbol>
+<symbol id="sh-cardigan" viewBox="0 0 120 120">
+  <path style="fill:var(--garment-fill)" d="M44 24 26 32 14 48 20 94 34 94 34 104 86 104 86 94 100 94 106 48 94 32 76 24Z"/>
+  <g style="fill:none;stroke:var(--garment-line);stroke-width:2;stroke-linejoin:round;stroke-linecap:round">
+    <path d="M44 24 26 32 14 48 20 94 34 94 34 104 86 104 86 94 100 94 106 48 94 32 76 24Z"/>
+    <path d="M46 25 56 36"/><path d="M74 25 64 36"/>
+    <path d="M60 36v68"/>
+    <circle cx="60" cy="48" r="1.8"/><circle cx="60" cy="62" r="1.8"/><circle cx="60" cy="76" r="1.8"/>
+    <path d="M20 86h14"/><path d="M86 86h14"/>
+  </g>
+</symbol>
+
+<!-- ===== SHOES ===== -->
+<symbol id="sh-sneaker" viewBox="0 0 120 120">
+  <path style="fill:var(--garment-fill)" d="M16 90V78c0-9 7-15 18-17l18-4 12 7 20 4c12 2 18 6 18 12v10Z"/>
+  <g style="fill:none;stroke:var(--garment-line);stroke-width:2;stroke-linejoin:round;stroke-linecap:round">
+    <path d="M16 90V78c0-9 7-15 18-17l18-4 12 7 20 4c12 2 18 6 18 12v10Z"/>
+    <path d="M16 84h86"/>
+    <path d="M52 57 64 64"/><path d="M48 63 60 70"/><path d="M45 70 57 76"/>
+    <path d="M28 64c-4 6-5 12-4 19"/>
+  </g>
+</symbol>
+<symbol id="sh-boot" viewBox="0 0 120 120">
+  <path style="fill:var(--garment-fill)" d="M30 40h32l2 32c14 2 26 6 30 12v8H26V52Z"/>
+  <g style="fill:none;stroke:var(--garment-line);stroke-width:2;stroke-linejoin:round;stroke-linecap:round">
+    <path d="M30 40h32l2 32c14 2 26 6 30 12v8H26V52Z"/>
+    <path d="M26 84h68"/>
+    <path d="M30 48h32"/>
+    <path d="M38 56h16"/><path d="M38 64h18"/>
+  </g>
+</symbol>
+
+<!-- ===== ACCESSORY ===== -->
+<symbol id="sh-cap" viewBox="0 0 120 120">
+  <path style="fill:var(--garment-fill)" d="M28 74c0-24 14-38 32-38s32 14 32 38l14 4v6H28Z"/>
+  <g style="fill:none;stroke:var(--garment-line);stroke-width:2;stroke-linejoin:round;stroke-linecap:round">
+    <path d="M28 74c0-24 14-38 32-38s32 14 32 38l14 4v6H28Z"/>
+    <path d="M60 36v38"/><path d="M45 41 50 74"/><path d="M75 41 70 74"/>
+    <path d="M92 78 106 80"/>
+  </g>
+</symbol>
+<symbol id="sh-bag" viewBox="0 0 120 120">
+  <path style="fill:var(--garment-fill)" d="M32 50h56l8 54H24Z"/>
+  <g style="fill:none;stroke:var(--garment-line);stroke-width:2;stroke-linejoin:round;stroke-linecap:round">
+    <path d="M32 50h56l8 54H24Z"/>
+    <path d="M45 50c0-18 30-18 30 0"/>
+    <path d="M31 60h58"/>
+  </g>
+</symbol>
+<symbol id="sh-belt" viewBox="0 0 120 120">
+  <path style="fill:var(--garment-fill)" d="M14 52h72v18H14Z"/>
+  <g style="fill:none;stroke:var(--garment-line);stroke-width:2;stroke-linejoin:round;stroke-linecap:round">
+    <path d="M14 52h72v18H14Z"/>
+    <path d="M86 48h20v26H86Z"/>
+    <path d="M96 48v26"/>
+    <circle cx="30" cy="61" r="2"/><circle cx="42" cy="61" r="2"/><circle cx="54" cy="61" r="2"/>
+  </g>
+</symbol>
+</defs>
+</svg>
 
 <nav class="nav" aria-label="ส่วนต่างๆ ของหน้า">
   <ul class="nav__list">
@@ -656,6 +875,52 @@ function colorNameTH(hex){
   else if(c.s < 38) mod = "หม่น";
   return mod ? base + mod : base;
 }
+/* ============================================================
+   B2. คลังทรงเสื้อผ้า (ui doc §3.7)
+   registry เป็น "ข้อมูล" เพิ่มทรงใหม่ = เติมรายการ ไม่ต้องแก้คอมโพเนนต์
+   shapeId เป็นสัญญาถาวร: ห้ามเปลี่ยน/ลบหลังปล่อย เลิกใช้ให้ตั้ง deprecated
+   ============================================================ */
+var SHAPES = [
+  { id:"tee-crew",       name:"เสื้อยืดคอกลม",   category:"top" },
+  { id:"tee-v",          name:"เสื้อยืดคอวี",    category:"top" },
+  { id:"polo",           name:"เสื้อโปโล",       category:"top" },
+  { id:"shirt-long",     name:"เชิ้ตแขนยาว",     category:"top" },
+  { id:"shirt-short",    name:"เชิ้ตแขนสั้น",    category:"top" },
+  { id:"hoodie",         name:"เสื้อฮู้ด",       category:"top" },
+  { id:"tank",           name:"เสื้อกล้าม",      category:"top" },
+  { id:"jeans-straight", name:"ยีนส์ทรงตรง",     category:"bottom" },
+  { id:"chino",          name:"กางเกงชิโน",      category:"bottom" },
+  { id:"wide",           name:"ขายาวขากว้าง",    category:"bottom" },
+  { id:"jogger",         name:"จ็อกเกอร์",       category:"bottom" },
+  { id:"shorts",         name:"กางเกงขาสั้น",    category:"bottom" },
+  { id:"skirt",          name:"กระโปรง",         category:"bottom" },
+  { id:"jacket",         name:"แจ็กเก็ต",        category:"outer" },
+  { id:"blazer",         name:"เบลเซอร์",        category:"outer" },
+  { id:"cardigan",       name:"คาร์ดิแกน",       category:"outer" },
+  { id:"sneaker",        name:"สนีกเกอร์",       category:"shoes" },
+  { id:"boot",           name:"บูท",             category:"shoes" },
+  { id:"cap",            name:"หมวกแก๊ป",        category:"accessory" },
+  { id:"bag",            name:"กระเป๋า",         category:"accessory" },
+  { id:"belt",           name:"เข็มขัด",         category:"accessory" }
+];
+var SHAPE_BY_ID = {};
+SHAPES.forEach(function(s){ SHAPE_BY_ID[s.id] = s; });
+var DEFAULT_SHAPE = { top:"tee-crew", bottom:"jeans-straight", outer:"jacket", shoes:"sneaker", accessory:"cap" };
+function shapesFor(cat){
+  return SHAPES.filter(function(s){ return s.category === cat && !s.deprecated; });
+}
+/* fallback บังคับ (spec FR-0 AC5): ไม่รู้จัก -> ทรงเริ่มต้นของหมวด ห้ามช่องว่าง/พัง */
+function resolveShape(shapeId, category){
+  var s = SHAPE_BY_ID[shapeId];
+  if(s && s.category === category) return { shape:s, fellBack:false };
+  return { shape: SHAPE_BY_ID[DEFAULT_SHAPE[category]] || SHAPES[0], fellBack:true };
+}
+/* สีเส้นคิดจาก "ความสว่างของสีเสื้อ" ไม่ใช่ธีมของหน้า -> เสื้อขาวและเสื้อดำเห็นรายละเอียดเท่ากัน
+   threshold ค่าเดียว ไม่มี hysteresis: สีเดิมได้เส้นเดิมเสมอ (ui doc §3.7) */
+function garmentLine(hex){
+  return relLum(hex) >= 0.55 ? "rgba(0,0,0,.55)" : "rgba(255,255,255,.62)";
+}
+
 function classifyColor(hex){
   var c = hexToHsl(hex);
   var isNeutral = isNeutralHex(hex);
@@ -989,12 +1254,13 @@ function generateIdeaBatch(occasion, avoidKeys){
     var wantAccent = Math.random() < (0.55 + tone.accentBoost);
     var accent = ideaColor(accentHue, clamp(62 + Math.random()*22 + tone.s*20, 45, 92), clamp(46 + (Math.random()*16-8), 28, 66));
 
+    /* โหมดไอเดียใช้ "ทรงเริ่มต้นของหมวด" ย้อมสีที่แนะนำ (ui doc §3.7) */
     var items = {
-      top:    { id:"i-top-"+n,  name:colorNameTH(primary),   category:"top",    color:primary,   isIdea:true },
-      bottom: { id:"i-bot-"+n,  name:colorNameTH(secondary), category:"bottom", color:secondary, isIdea:true },
-      shoes:  { id:"i-sho-"+n,  name:colorNameTH(neutral),   category:"shoes",  color:neutral,   isIdea:true }
+      top:    { id:"i-top-"+n,  name:colorNameTH(primary),   category:"top",    shapeId:DEFAULT_SHAPE.top,    color:primary,   isIdea:true },
+      bottom: { id:"i-bot-"+n,  name:colorNameTH(secondary), category:"bottom", shapeId:DEFAULT_SHAPE.bottom, color:secondary, isIdea:true },
+      shoes:  { id:"i-sho-"+n,  name:colorNameTH(neutral),   category:"shoes",  shapeId:DEFAULT_SHAPE.shoes,  color:neutral,   isIdea:true }
     };
-    if(wantAccent) items.accessory = { id:"i-acc-"+n, name:colorNameTH(accent), category:"accessory", color:accent, isIdea:true };
+    if(wantAccent) items.accessory = { id:"i-acc-"+n, name:colorNameTH(accent), category:"accessory", shapeId:DEFAULT_SHAPE.accessory, color:accent, isIdea:true };
     var o = buildOutfit(items, "idea", occasion);
     if(o) pool.push(o);
   }
@@ -1045,16 +1311,16 @@ function saveStore(data){
    ============================================================ */
 function seedWardrobe(){
   return [
-    { id:"s1", name:"เสื้อเชิ้ตขาว",        category:"top",       color:"#FFFFFF", isExample:true },
-    { id:"s2", name:"เสื้อยืดกรมท่า",       category:"top",       color:"#2B3A67", isExample:true },
-    { id:"s3", name:"เสื้อไหมพรมครีม",      category:"top",       color:"#EFE6D2", isExample:true },
-    { id:"s4", name:"กางเกงชิโนเบจ",        category:"bottom",    color:"#C8B79B", isExample:true },
-    { id:"s5", name:"ยีนส์ฟอกอ่อน",         category:"bottom",    color:"#7A93B8", isExample:true },
-    { id:"s6", name:"กระโปรงดำ",            category:"bottom",    color:"#17161A", isExample:true },
-    { id:"s7", name:"แจ็กเก็ตยีนส์",        category:"outer",     color:"#4A5D8A", isExample:true },
-    { id:"s8", name:"สนีกเกอร์ขาว",         category:"shoes",     color:"#F2F0EB", isExample:true },
-    { id:"s9", name:"รองเท้าหนังน้ำตาล",    category:"shoes",     color:"#6B4A2F", isExample:true },
-    { id:"s10",name:"เข็มขัดหนังแดง",       category:"accessory", color:"#C0392B", isExample:true }
+    { id:"s1", name:"เสื้อเชิ้ตขาว",        category:"top",       shapeId:"shirt-long",     color:"#FFFFFF", isExample:true },
+    { id:"s2", name:"เสื้อยืดกรมท่า",       category:"top",       shapeId:"tee-crew",       color:"#2B3A67", isExample:true },
+    { id:"s3", name:"เสื้อไหมพรมครีม",      category:"top",       shapeId:"hoodie",         color:"#EFE6D2", isExample:true },
+    { id:"s4", name:"กางเกงชิโนเบจ",        category:"bottom",    shapeId:"chino",          color:"#C8B79B", isExample:true },
+    { id:"s5", name:"ยีนส์ฟอกอ่อน",         category:"bottom",    shapeId:"jeans-straight", color:"#7A93B8", isExample:true },
+    { id:"s6", name:"กระโปรงดำ",            category:"bottom",    shapeId:"skirt",          color:"#17161A", isExample:true },
+    { id:"s7", name:"แจ็กเก็ตยีนส์",        category:"outer",     shapeId:"jacket",         color:"#4A5D8A", isExample:true },
+    { id:"s8", name:"สนีกเกอร์ขาว",         category:"shoes",     shapeId:"sneaker",        color:"#F2F0EB", isExample:true },
+    { id:"s9", name:"รองเท้าหนังน้ำตาล",    category:"shoes",     shapeId:"boot",           color:"#6B4A2F", isExample:true },
+    { id:"s10",name:"เข็มขัดหนังแดง",       category:"accessory", shapeId:"belt",           color:"#C0392B", isExample:true }
   ];
 }
 </script>
@@ -1072,11 +1338,25 @@ function esc(s){
 function $(sel){ return document.querySelector(sel); }
 function uid(){ return "g" + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
 
+/* สีพรีเซ็ต: ทางเดียวที่ผู้ใช้ใส่สีแล้ว จึงต้องครอบคลุม neutral + อุ่น + เย็น */
+var PRESET_COLORS = ["#FFFFFF","#F2F0EB","#C8B79B","#8A8A8A","#4A4A4A","#17161A",
+                     "#2B3A67","#4A5D8A","#7A93B8","#3F6B4F","#6B4A2F","#C0392B"];
+
+/* ทรงเสื้อผ้าย้อมสี: ตั้ง custom property บน <svg> แล้ว <use> สืบทอดเข้า shadow tree
+   aria-hidden เสมอ เพราะทุกจุดที่เรียกมีข้อความชื่อทรง/ชื่อสีกำกับอยู่แล้ว (กันอ่านซ้ำ) */
+function shapeSVG(shapeId, hex, category){
+  var r = resolveShape(shapeId, category);
+  return '<svg class="shape" viewBox="0 0 120 120" aria-hidden="true" focusable="false" '+
+    'style="--garment-fill:'+hex+';--garment-line:'+garmentLine(hex)+'">'+
+    '<use href="#sh-'+r.shape.id+'"></use></svg>';
+}
+function shapeNameOf(shapeId, category){ return resolveShape(shapeId, category).shape.name; }
+
 var state = {
   mode:null,                         /* null = ยังไม่เคยเลือก -> ให้ความพร้อมของตู้ตัดสิน (spec §4.6) */
   occasion:"unspecified", theme:"system",
   wardrobe:[], batch:[], index:0, result:null,
-  autoSwitchedTo:null, quotaWarned:false, seenStorageNote:false,
+  autoSwitchedTo:null, quotaWarned:false, seenStorageNote:false, migrated:false,
   formOpen:false, editingId:null, formDraft:null, openMenuId:null
 };
 
@@ -1093,6 +1373,19 @@ function init(){
   }else{
     state.wardrobe = seedWardrobe();
   }
+  /* ---- migration: ผู้ใช้เวอร์ชันก่อนหน้ามี garment ที่ไม่มี shapeId และอาจมี photo ค้าง ----
+     ไม่เปลี่ยนเงียบ: ตั้งทรงเริ่มต้นของหมวดให้ แล้วขึ้น banner บอกครั้งเดียว (ux §7B)
+     เติมเฉพาะ "ไม่มีฟิลด์" เท่านั้น: shapeId ที่มีอยู่แล้วแต่ไม่รู้จัก/ผิดหมวด ห้ามเขียนทับ
+     (สัญญา shapeId ถาวร) ปล่อยให้ resolveShape() วาดทรงเริ่มต้น + ป้ายกำกับแทน */
+  var migrated = false;
+  state.wardrobe.forEach(function(g){
+    if("photo" in g){ delete g.photo; migrated = true; }
+    if(!g.shapeId){
+      g.shapeId = DEFAULT_SHAPE[g.category] || SHAPES[0].id;
+      migrated = true;
+    }
+  });
+  state.migrated = migrated;
   applyTheme();
   /* ค่าเริ่มต้นของโหมดตามความพร้อมตู้ (spec §4.6) ถ้าไม่เคยเลือกไว้ */
   if(!state.mode) state.mode = wardrobeReady() ? "wardrobe" : "idea";
@@ -1102,6 +1395,7 @@ function init(){
   renderBanners();
   renderMode();
   observeSections();
+  if(migrated) persist();   /* เขียนผลการย้ายข้อมูลกลับลงเครื่องครั้งเดียว */
 }
 function wardrobeReady(){
   var g = groupByCategory(state.wardrobe);
@@ -1172,23 +1466,25 @@ function tileHTML(item, cat){
       '<span class="tile__color">ไม่ได้ใส่ในชุดนี้</span></span></li>';
   }
   var hex = normHex(item.color), name = colorNameTH(hex);
-  var inner = item.photo
-    ? '<img src="'+esc(item.photo)+'" alt="" loading="lazy">'
-    : '<span style="display:block;width:100%;height:100%;background:'+hex+'"></span>';
-  return '<li class="tile"><span class="tile__box">'+inner+'</span>'+
+  /* โหมดไอเดียไม่มีชื่อชิ้นจริง จึงแสดง "ชื่อทรง" แทน
+     ต้องมีข้อความเสมอ ไม่งั้นสื่อด้วยรูปทรง/สีอย่างเดียว (ux §9) */
+  var label = item.isIdea ? shapeNameOf(item.shapeId, cat) : item.name;
+  return '<li class="tile"><span class="tile__box">'+shapeSVG(item.shapeId, hex, cat)+'</span>'+
     '<span class="tile__label">'+
       '<span class="tile__cat">'+esc(CATEGORY_TH[cat])+'</span>'+
-      (item.isIdea ? '' : '<span class="tile__name" title="'+esc(item.name)+'">'+esc(item.name)+'</span>')+
+      '<span class="tile__name" title="'+esc(label)+'">'+esc(label)+'</span>'+
       '<span class="tile__color">'+esc(name)+' · <span class="tnum">'+esc(hex)+'</span></span>'+
     '</span></li>';
 }
 function pbarHTML(breakdown, cardId){
   var segs = breakdown.map(function(b,i){
     var label = b.name + " " + b.pct + "% (" + ROLE_TH[b.role || "neutral"] + ")";
-    return '<button type="button" class="pbar__seg" data-card="'+cardId+'" data-idx="'+i+'" '+
+    /* เป็น span ไม่ใช่ button: แทร็กทั้งแถบคือ role="img" หนึ่งภาพ ถ้าลูกโฟกัสได้
+       ผู้ใช้คีย์บอร์ดจะ tab เข้าไปในสิ่งที่ AT บอกว่าเป็นภาพ และช่องสูง 12px
+       ก็เล็กกว่าเกณฑ์ touch target ค่าทุกตัวอ่านได้จาก legend ที่เป็นข้อความอยู่แล้ว */
+    return '<span class="pbar__seg" data-card="'+cardId+'" data-idx="'+i+'" '+
       'style="flex:'+b.pct+' 1 0;background:'+b.hex+'" '+
-      'title="'+esc(b.name+" · "+b.hex+" · "+ROLE_TH[b.role||"neutral"]+" · "+b.pct+"%")+'" '+
-      'aria-label="'+esc(label)+'"></button>';
+      'title="'+esc(b.name+" · "+b.hex+" · "+ROLE_TH[b.role||"neutral"]+" · "+b.pct+"%")+'"></span>';
   }).join("");
   /* direct label เฉพาะ segment >= 12% ที่เหลืออ่านจาก legend (ui doc §3.4) */
   var labs = breakdown.map(function(b){
@@ -1277,9 +1573,8 @@ function renderWardrobe(){
   }
   slot.innerHTML = '<div class="grid">' + state.wardrobe.map(function(it){
     var hex = normHex(it.color);
-    var box = it.photo
-      ? '<img src="'+esc(it.photo)+'" alt="" loading="lazy">'
-      : '<span style="display:block;width:100%;height:100%;background:'+hex+'"></span>';
+    var rs = resolveShape(it.shapeId, it.category);
+    var box = shapeSVG(it.shapeId, hex, it.category);
     return '<article class="gchip">'+
       '<div class="gchip__menu">'+
         '<button class="gchip__more" data-more="'+esc(it.id)+'" aria-haspopup="true" aria-expanded="'+
@@ -1293,7 +1588,8 @@ function renderWardrobe(){
       '</div>'+
       '<div class="gchip__box">'+box+'</div>'+
       '<h3 class="gchip__name" title="'+esc(it.name)+'">'+esc(it.name)+'</h3>'+
-      '<p class="gchip__meta">'+esc(CATEGORY_TH[it.category] || it.category)+
+      '<p class="gchip__meta">'+esc(CATEGORY_TH[it.category] || it.category)+' · '+esc(rs.shape.name)+
+        (rs.fellBack ? ' <span class="badge">ทรงเริ่มต้น</span>' : '')+
         (it.isExample ? ' · <span class="badge">ตัวอย่าง</span>' : '')+'</p>'+
       '<p class="gchip__color"><span class="swatch swatch--sm" style="background:'+hex+'"></span>'+
         esc(colorNameTH(hex))+' · <span class="tnum">'+esc(hex)+'</span></p>'+
@@ -1307,10 +1603,10 @@ function openForm(id){
   state.editingId = id || null;
   state.formOpen = true;
   state.formDraft = g
-    ? { name:g.name, category:g.category, color:normHex(g.color), photo:g.photo || null, autoFilled:false }
-    : { name:"", category:"top", color:"#4A5D8A", photo:null, autoFilled:false };
+    ? { name:g.name, category:g.category, shapeId:resolveShape(g.shapeId, g.category).shape.id, color:normHex(g.color) }
+    : { name:"", category:"top", shapeId:DEFAULT_SHAPE.top, color:"#4A5D8A" };
   renderForm();
-  setTimeout(function(){ var el = $("#fName"); if(el) el.focus(); }, 30);
+  setTimeout(function(){ var el = document.querySelector("#gForm [data-cat]"); if(el) el.focus(); }, 30);
 }
 function closeForm(){ state.formOpen = false; state.editingId = null; state.formDraft = null; renderForm(); }
 function renderForm(){
@@ -1321,36 +1617,47 @@ function renderForm(){
     return '<button type="button" class="chip" data-cat="'+c+'" aria-pressed="'+(d.category===c)+'">'+
       esc(CATEGORY_TH[c])+'</button>';
   }).join("");
-  var drop = d.photo
-    ? '<div class="drop is-filled" id="drop"><img src="'+esc(d.photo)+'" alt="ตัวอย่างรูปที่เลือก">'+
-        '<span class="drop__over"><button type="button" class="btn btn--ghost" data-photo="change">เปลี่ยนรูป</button>'+
-        '<button type="button" class="btn btn--ghost" data-photo="remove">ลบรูป</button></span></div>'
-    : '<div class="drop" id="drop"><span aria-hidden="true">🖼</span><span>ลากรูปมาวาง หรือเลือกไฟล์</span>'+
-        '<button type="button" class="btn btn--secondary" data-photo="pick">เลือกไฟล์</button></div>';
+  /* ลำดับ หมวด -> ทรง -> สี -> ชื่อ : หมวดต้องมาก่อนเพราะเป็นตัวกรองรายการทรง */
+  var shapes = shapesFor(d.category).map(function(s){
+    return '<button type="button" class="shapepick__opt" role="radio" data-shape="'+s.id+'" '+
+      'aria-checked="'+(d.shapeId === s.id)+'">'+
+      '<span class="shapepick__box">'+shapeSVG(s.id, d.color, d.category)+'</span>'+
+      '<span class="shapepick__name">'+esc(s.name)+'</span></button>';
+  }).join("");
+  var presets = PRESET_COLORS.map(function(p){
+    return '<button type="button" class="preset" data-preset="'+p+'" aria-pressed="'+(d.color === p)+'" '+
+      'style="background:'+p+'" aria-label="'+esc(colorNameTH(p)+" "+p)+'"></button>';
+  }).join("");
 
   slot.innerHTML = '<form class="form" id="gForm" novalidate>'+
     '<h3 class="section__title" style="font-size:var(--fs-h2);margin-bottom:var(--sp-4)">'+
       (state.editingId ? "แก้ไขเสื้อผ้า" : "เพิ่มเสื้อผ้า")+'</h3>'+
-    '<div class="form__grid">'+
-      '<div>'+drop+
-        '<input type="file" id="fFile" accept="image/*" class="visually-hidden">'+
-        '<p class="field__help" id="fImgHelp"></p>'+
+
+    '<div class="field"><span class="field__label">1 · หมวด</span>'+
+      '<div class="chips">'+cats+'</div></div>'+
+
+    '<div class="field"><span class="field__label" id="fShapeLbl">2 · ทรง</span>'+
+      '<div class="shapepick" role="radiogroup" aria-labelledby="fShapeLbl">'+shapes+'</div></div>'+
+
+    '<div class="field"><label class="field__label" for="fHex">3 · สี</label>'+
+      '<div class="previewrow">'+
+        '<span class="previewrow__box" id="fPreview">'+shapeSVG(d.shapeId, d.color, d.category)+'</span>'+
+        '<span class="previewrow__txt">ตัวอย่างที่จะบันทึก: <b id="fPrevName">'+esc(shapeNameOf(d.shapeId, d.category))+'</b><br>'+
+          '<span id="fPrevColor">'+esc(colorNameTH(d.color))+' · <span class="tnum">'+esc(d.color)+'</span></span></span>'+
       '</div>'+
-      '<div>'+
-        '<div class="field"><label class="field__label" for="fName">ชื่อชิ้นนี้</label>'+
-          '<input class="input" id="fName" value="'+esc(d.name)+'" placeholder="เช่น เสื้อเชิ้ตลินินสีครีม" maxlength="80"></div>'+
-        '<div class="field"><span class="field__label">หมวด</span><div class="chips">'+cats+'</div></div>'+
-        '<div class="field"><label class="field__label" for="fHex">สี</label>'+
-          '<div class="hexrow">'+
-            '<span class="swatch swatch--md" id="fSwatch" style="background:'+d.color+'"></span>'+
-            '<input class="input tnum" id="fHex" value="'+esc(d.color)+'" maxlength="7" spellcheck="false">'+
-            '<input type="color" id="fPick" value="'+d.color+'" aria-label="เลือกสีจากจานสี">'+
-          '</div>'+
-          '<p class="field__help" id="fHexHelp">'+
-            (d.autoFilled ? "เดาสีจากรูปให้แล้ว แก้ค่าได้" : "ใส่รหัสสีเช่น #4A5D8A")+'</p>'+
-        '</div>'+
+      '<div class="presets">'+presets+'</div>'+
+      '<div class="hexrow">'+
+        '<span class="swatch swatch--md" id="fSwatch" style="background:'+d.color+'"></span>'+
+        '<input class="input tnum" id="fHex" value="'+esc(d.color)+'" maxlength="7" spellcheck="false">'+
+        '<input type="color" id="fPick" value="'+d.color+'" aria-label="เลือกสีจากจานสี">'+
       '</div>'+
+      '<p class="field__help" id="fHexHelp">ใส่รหัสสีเช่น #4A5D8A</p>'+
     '</div>'+
+
+    '<div class="field"><label class="field__label" for="fName">4 · ชื่อชิ้นนี้ (ไม่บังคับ)</label>'+
+      '<input class="input" id="fName" value="'+esc(d.name)+'" placeholder="เช่น เสื้อเชิ้ตลินินสีครีม" maxlength="80">'+
+      '<p class="field__help">เว้นว่างได้ ระบบจะตั้งชื่อจากสีและทรงให้</p></div>'+
+
     '<div class="form__actions">'+
       '<button type="submit" class="btn btn--primary">'+(state.editingId ? "บันทึกการแก้ไข" : "เพิ่มเข้าตู้")+'</button>'+
       '<button type="button" class="btn btn--ghost" data-cancel="1">ยกเลิก</button>'+
@@ -1374,9 +1681,15 @@ function renderBanners(){
       '<span class="banner__body">บันทึกไว้ในเครื่องนี้เท่านั้น ไม่ได้ส่งขึ้นเซิร์ฟเวอร์ และเปิดจากเครื่องอื่นจะไม่เห็น</span>'+
       '<button class="btn btn--ghost" data-notedone="1">เข้าใจแล้ว</button></div>';
   }
+  if(state.migrated){
+    out += '<div class="banner"><span class="banner__ico" aria-hidden="true">ⓘ</span>'+
+      '<span class="banner__body">ตอนนี้เลือก<b>ทรงเสื้อผ้า</b>จากคลังแทนการอัปโหลดรูปแล้ว '+
+      'เสื้อผ้าเดิมของคุณถูกตั้งเป็นทรงเริ่มต้นของหมวดไว้ให้ เปลี่ยนได้ที่ปุ่มแก้ไข</span>'+
+      '<button class="btn btn--ghost" data-migdone="1">เข้าใจแล้ว</button></div>';
+  }
   if(state.quotaWarned){
     out += '<div class="banner banner--warning"><span class="banner__ico" aria-hidden="true">⚠</span>'+
-      '<span class="banner__body">พื้นที่เก็บข้อมูลเต็ม บันทึกชิ้นนี้แบบไม่มีรูปให้แล้ว (สีและหมวดยังอยู่ครบ) ลองลบรูปของชิ้นเก่าเพื่อคืนพื้นที่</span></div>';
+      '<span class="banner__body">พื้นที่เก็บข้อมูลของเบราว์เซอร์เต็ม บันทึกไม่สำเร็จ ลองลบเสื้อผ้าที่ไม่ใช้แล้วออกบ้าง</span></div>';
   }
   $("#storageBannerSlot").innerHTML = out;
 }
@@ -1392,37 +1705,6 @@ function applyTheme(){
 
 <script>
 "use strict";
-/* ---------- รูปภาพ: ย่อเป็น data URL + ดึงสีจากโซนกลางภาพ (spec FR-0 AC2) ---------- */
-var MAX_IMG = 320;
-function processImage(file, cb){
-  if(!file || !/^image\//.test(file.type)) return cb({ error:"อ่านรูปไม่สำเร็จ ลองไฟล์อื่น" });
-  var fr = new FileReader();
-  fr.onerror = function(){ cb({ error:"อ่านรูปไม่สำเร็จ ลองไฟล์อื่น" }); };
-  fr.onload = function(){
-    var img = new Image();
-    img.onerror = function(){ cb({ error:"อ่านรูปไม่สำเร็จ ลองไฟล์อื่น" }); };
-    img.onload = function(){
-      try{
-        var sc = Math.min(1, MAX_IMG / Math.max(img.width, img.height));
-        var w = Math.max(1, Math.round(img.width*sc)), h = Math.max(1, Math.round(img.height*sc));
-        var cv = document.createElement("canvas"); cv.width = w; cv.height = h;
-        var cx = cv.getContext("2d", { willReadFrequently:true });
-        cx.drawImage(img, 0, 0, w, h);
-        /* เฉลี่ยโซนกลางภาพ 50%. รูปเป็นตัวช่วย ไม่ใช่ตัวตัดสิน ผู้ใช้แก้ hex ได้เสมอ */
-        var x0 = Math.floor(w*0.25), y0 = Math.floor(h*0.25);
-        var cw = Math.max(1, Math.floor(w*0.5)), ch = Math.max(1, Math.floor(h*0.5));
-        var d = cx.getImageData(x0, y0, cw, ch).data;
-        var r=0, g=0, b=0, n=0;
-        for(var i=0; i<d.length; i+=4){ if(d[i+3] < 200) continue; r+=d[i]; g+=d[i+1]; b+=d[i+2]; n++; }
-        var hex = n ? rgbToHex(r/n, g/n, b/n) : null;
-        cb({ dataUrl: cv.toDataURL("image/jpeg", 0.72), hex: hex });
-      }catch(err){ cb({ error:"อ่านรูปไม่สำเร็จ ลองไฟล์อื่น" }); }
-    };
-    img.src = fr.result;
-  };
-  fr.readAsDataURL(file);
-}
-
 /* ---------- carousel: อัปเดตในที่ ไม่ re-render (โฟกัสคีย์บอร์ดจะได้ไม่หลุด) ---------- */
 function updateCarousel(){
   var track = $("#track"); if(!track) return;
@@ -1459,6 +1741,7 @@ function autoSwitchIfNeeded(){
 /* ---------- CRUD ---------- */
 function saveGarment(){
   var d = state.formDraft;
+  var wasEdit = !!state.editingId;   /* closeForm() ล้าง editingId ทิ้ง ต้องจำไว้ก่อนใช้ในข้อความ */
   var hexEl = $("#fHex"), nameEl = $("#fName");
   var hex = hexEl ? hexEl.value : d.color;
   if(!isValidHex(hex)){
@@ -1467,31 +1750,23 @@ function saveGarment(){
     hexEl.focus(); return;
   }
   hex = normHex(hex);
-  var name = (nameEl.value || "").trim() || (colorNameTH(hex) + CATEGORY_TH[d.category]);
+  var shapeId = resolveShape(d.shapeId, d.category).shape.id;
+  var name = (nameEl.value || "").trim() || (shapeNameOf(shapeId, d.category) + "สี" + colorNameTH(hex));
 
   if(state.editingId){
     var g = state.wardrobe.filter(function(x){ return x.id === state.editingId; })[0];
     if(g){
-      g.name = name; g.category = d.category; g.color = hex;
-      g.photo = d.photo;                 /* AC4: ไม่เลือกรูปใหม่ = d.photo ยังเป็นรูปเดิม */
+      g.name = name; g.category = d.category; g.shapeId = shapeId; g.color = hex;
       delete g.isExample;
     }
   }else{
-    state.wardrobe.push({ id:uid(), name:name, category:d.category, color:hex, photo:d.photo || undefined });
+    state.wardrobe.push({ id:uid(), name:name, category:d.category, shapeId:shapeId, color:hex });
   }
   var res = persist();
-  if(!res.ok && res.quota){
-    /* spec §7C: quota เต็ม -> เตือนแล้วเซฟชิ้นนั้นแบบไม่มีรูป */
-    var last = state.editingId
-      ? state.wardrobe.filter(function(x){ return x.id === state.editingId; })[0]
-      : state.wardrobe[state.wardrobe.length-1];
-    if(last) delete last.photo;
-    state.quotaWarned = true;
-    persist();
-  }
+  if(!res.ok && res.quota){ state.quotaWarned = true; }
   closeForm(); renderWardrobe(); renderBanners();
   if(!autoSwitchIfNeeded()) regenerate(true);
-  say("#wardFeedback", state.editingId ? "บันทึกการแก้ไขแล้ว" : "เพิ่ม " + name + " เข้าตู้แล้ว");
+  say("#wardFeedback", wasEdit ? "บันทึกการแก้ไข " + name + " แล้ว" : "เพิ่ม " + name + " เข้าตู้แล้ว");
 }
 function deleteGarment(id){
   var g = state.wardrobe.filter(function(x){ return x.id === id; })[0];
@@ -1514,8 +1789,8 @@ function deleteGarment(id){
 /* ---------- events ---------- */
 document.addEventListener("click", function(e){
   var t = e.target.closest("[data-jump],[data-mode],[data-occ],[data-nav],[data-gen],[data-setmode],"+
-    "[data-add],[data-edit],[data-del],[data-more],[data-cat],[data-photo],[data-cancel],"+
-    "[data-clearsample],[data-notedone],.pbar__seg");
+    "[data-add],[data-edit],[data-del],[data-more],[data-cat],[data-shape],[data-preset],[data-cancel],"+
+    "[data-clearsample],[data-notedone],[data-migdone],.pbar__seg");
   /* คลิกที่อื่น = ปิดเมนูของชิ้นเสื้อผ้า */
   if(state.openMenuId && (!t || (!t.dataset.more && !t.dataset.edit && !t.dataset.del))){
     state.openMenuId = null; renderWardrobe();
@@ -1555,17 +1830,32 @@ document.addEventListener("click", function(e){
     say("#wardFeedback", "ล้างชุดตัวอย่างแล้ว"); return;
   }
   if(t.dataset.cat){
-    state.formDraft.category = t.dataset.cat;
-    document.querySelectorAll("[data-cat]").forEach(function(b){
-      b.setAttribute("aria-pressed", String(b.dataset.cat === t.dataset.cat));
-    });
+    /* เปลี่ยนหมวด = รายการทรงต้องเปลี่ยนตาม จึง re-render ไม่ใช่แค่สลับ aria-pressed
+       และถ้าทรงที่เลือกอยู่ไม่อยู่ในหมวดใหม่ ต้องรีเซ็ตเป็นทรงเริ่มต้นของหมวดนั้น */
+    var nc = t.dataset.cat;
+    state.formDraft.category = nc;
+    var cur = SHAPE_BY_ID[state.formDraft.shapeId];
+    if(!cur || cur.category !== nc) state.formDraft.shapeId = DEFAULT_SHAPE[nc];
+    renderForm();
+    var backCat = document.querySelector('#gForm [data-cat="'+nc+'"]');
+    if(backCat) backCat.focus();
     return;
   }
-  if(t.dataset.photo){
-    if(t.dataset.photo === "remove"){ state.formDraft.photo = null; renderForm(); }
-    else $("#fFile").click();
+  if(t.dataset.shape){
+    state.formDraft.shapeId = t.dataset.shape;
+    renderForm();
+    var backShape = document.querySelector('#gForm [data-shape="'+t.dataset.shape+'"]');
+    if(backShape) backShape.focus();
     return;
   }
+  if(t.dataset.preset){
+    state.formDraft.color = t.dataset.preset;
+    renderForm();
+    var backPre = document.querySelector('#gForm [data-preset="'+t.dataset.preset+'"]');
+    if(backPre) backPre.focus();
+    return;
+  }
+  if(t.dataset.migdone){ state.migrated = false; renderBanners(); return; }
   if(t.classList.contains("pbar__seg")){
     /* จอสัมผัสไม่มี hover: แตะ segment แล้วไฮไลต์รายการที่ตรงกันใน legend (plan §0.4) */
     var key = t.dataset.card + "-" + t.dataset.idx;
@@ -1591,29 +1881,20 @@ document.addEventListener("input", function(e){
       $("#fHex").classList.remove("input--invalid");
       var hh = $("#fHexHelp");
       if(hh.classList.contains("field__help--err")){ hh.className = "field__help"; hh.textContent = "ใส่รหัสสีเช่น #4A5D8A"; }
+      /* ย้อมพรีวิวทุกทรงในฟอร์มแบบในที่ ไม่ re-render เพราะจะทำให้โฟกัสช่องพิมพ์หลุด */
+      var ln = garmentLine(hex);
+      document.querySelectorAll("#gForm .shape").forEach(function(sv){
+        sv.style.setProperty("--garment-fill", hex);
+        sv.style.setProperty("--garment-line", ln);
+      });
+      document.querySelectorAll("#gForm [data-preset]").forEach(function(b){
+        b.setAttribute("aria-pressed", String(b.dataset.preset === hex));
+      });
+      var pc = $("#fPrevColor");
+      if(pc) pc.innerHTML = esc(colorNameTH(hex)) + ' · <span class="tnum">' + esc(hex) + '</span>';
     }
   }
   if(e.target.id === "fName") state.formDraft.name = e.target.value;
-}, false);
-
-document.addEventListener("change", function(e){
-  if(e.target.id !== "fFile") return;
-  var file = e.target.files && e.target.files[0];
-  if(!file) return;
-  var help = $("#fImgHelp"), drop = $("#drop");
-  help.className = "field__help"; help.textContent = "กำลังอ่านสีจากรูป…";
-  if(drop) drop.classList.add("is-loading");
-  processImage(file, function(r){
-    if(r.error){
-      help.className = "field__help field__help--err"; help.textContent = r.error;
-      if(drop) drop.classList.remove("is-loading");
-      return;                             /* ฟอร์มยังใช้ต่อได้ กรอก hex เองได้ (spec §7C) */
-    }
-    state.formDraft.photo = r.dataUrl;
-    if(r.hex){ state.formDraft.color = r.hex; state.formDraft.autoFilled = true; }
-    renderForm();
-    var h2 = $("#fImgHelp"); if(h2) h2.textContent = r.hex ? "เดาสีจากรูปให้แล้ว แก้ค่าได้" : "";
-  });
 }, false);
 
 /* คีย์บอร์ด: ลูกศรซ้าย-ขวาเมื่อโฟกัสอยู่ในแทร็ก */
@@ -1637,26 +1918,6 @@ document.addEventListener("touchend", function(e){
   var dx = e.changedTouches[0].clientX - tx; tx = null;
   if(Math.abs(dx) > 45) goTo(dx < 0 ? 1 : -1);
 }, { passive:true });
-
-/* drag & drop รูป */
-document.addEventListener("dragover", function(e){
-  var d = e.target.closest && e.target.closest("#drop");
-  if(d){ e.preventDefault(); d.classList.add("is-over"); }
-}, false);
-document.addEventListener("dragleave", function(e){
-  var d = e.target.closest && e.target.closest("#drop");
-  if(d) d.classList.remove("is-over");
-}, false);
-document.addEventListener("drop", function(e){
-  var d = e.target.closest && e.target.closest("#drop");
-  if(!d) return;
-  e.preventDefault(); d.classList.remove("is-over");
-  var f = e.dataTransfer.files && e.dataTransfer.files[0];
-  if(!f) return;
-  var input = $("#fFile");
-  var dt = new DataTransfer(); dt.items.add(f); input.files = dt.files;
-  input.dispatchEvent(new Event("change", { bubbles:true }));
-}, false);
 
 $("#heroGen").addEventListener("click", function(){
   document.getElementById("sec-suggest").scrollIntoView({ behavior:"smooth", block:"start" });
@@ -1686,3 +1947,5 @@ function observeSections(){
 
 init();
 </script>
+
+</body></html>
