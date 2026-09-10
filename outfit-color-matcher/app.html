@@ -1,0 +1,1688 @@
+<title>Outfit Color Matcher</title>
+<style>
+/* ============================================================
+   1. TOKENS  (ui doc §1.1-1.3 + plan §0.1 accent split)
+   ============================================================ */
+:root{
+  --bg:#FBFAF7; --surface:#FFFFFF; --surface-sunken:#F4F2EC;
+  --ink:#17161A; --ink-muted:#6E6B66; --line:#ECE9E2;
+
+  /* accent = "การกระทำ" เท่านั้น ห้ามเป็นสีของข้อมูล (ui doc §0)
+     แยกสองโทเคน เพราะ #E23A4E ผ่านแค่เกณฑ์ 3:1 ขององค์ประกอบ ไม่ผ่าน 4.5:1 ของตัวอักษร */
+  --accent:#E23A4E;              /* เฉพาะที่ไม่ใช่ตัวอักษร: ขอบ, focus ring, ขีดใต้เมนู */
+  --accent-solid:#C62F41;        /* ทุกที่ที่มีตัวอักษรเกี่ยว: พื้นปุ่ม (5.41:1) และ eyebrow บนพื้น (4.78:1) */
+  --accent-solid-hover:#A82636;
+  --accent-ink:#FFFFFF;
+
+  --data-ring:rgba(0,0,0,.14);
+  --focus:var(--accent);
+  --danger:#B3261E;
+
+  --shadow-card:0 1px 2px rgba(20,19,22,.06);
+  --shadow-raised:0 8px 28px -12px rgba(20,19,22,.28);
+
+  --fs-display:clamp(30px,6vw,46px);
+  --fs-h1:26px; --fs-h2:19px; --fs-h3:16px;
+  --fs-body:15px; --fs-sm:13px; --fs-xs:11px;
+
+  --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px;
+  --sp-5:24px; --sp-6:32px; --sp-7:48px; --sp-8:64px;
+
+  --r-sm:8px; --r-md:12px; --r-lg:16px; --r-pill:999px;
+
+  --dur-fast:150ms; --dur-pan:300ms; --ease:cubic-bezier(.2,0,0,1);
+  --nav-h:56px;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#141316; --surface:#1C1B1F; --surface-sunken:#232228;
+    --ink:#F4F1EA; --ink-muted:#A7A29A; --line:#2B2A2E;
+    --accent:#F1596B; --accent-solid:#F1596B; --accent-solid-hover:#FF6E7E;
+    --accent-ink:#17161A;                     /* on #F1596B = 5.47:1 */
+    --data-ring:rgba(255,255,255,.20);
+    --danger:#F2B8B5;
+    --shadow-card:0 1px 2px rgba(0,0,0,.30);
+    --shadow-raised:0 8px 28px -12px rgba(0,0,0,.55);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#141316; --surface:#1C1B1F; --surface-sunken:#232228;
+  --ink:#F4F1EA; --ink-muted:#A7A29A; --line:#2B2A2E;
+  --accent:#F1596B; --accent-solid:#F1596B; --accent-solid-hover:#FF6E7E;
+  --accent-ink:#17161A;
+  --data-ring:rgba(255,255,255,.20);
+  --danger:#F2B8B5;
+  --shadow-card:0 1px 2px rgba(0,0,0,.30);
+  --shadow-raised:0 8px 28px -12px rgba(0,0,0,.55);
+}
+
+/* ============================================================
+   2. RESET + BASE
+   ============================================================ */
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font:400 var(--fs-body)/1.6 Inter,"Helvetica Neue",system-ui,"Noto Sans Thai",sans-serif;
+  overflow-x:hidden;
+}
+h1,h2,h3,p,ul,figure{margin:0}
+ul{padding:0;list-style:none}
+button,input,select{font:inherit;color:inherit}
+button{background:none;border:0;cursor:pointer}
+img{max-width:100%;display:block}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px;border-radius:2px}
+:focus:not(:focus-visible){outline:none}
+.visually-hidden{
+  position:absolute;width:1px;height:1px;margin:-1px;padding:0;
+  overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0
+}
+.tnum{font-variant-numeric:tabular-nums;text-transform:uppercase}
+
+/* ============================================================
+   3. LAYOUT + STICKYNAV + HERO   (plan §0.2)
+   ============================================================ */
+.container{max-width:1040px;margin:0 auto;padding:0 var(--sp-4)}
+.section{padding-block:var(--sp-7);border-top:1px solid var(--line)}
+.section:first-of-type{border-top:0}
+.section__head{
+  display:flex;align-items:baseline;gap:var(--sp-3);
+  flex-wrap:wrap;margin-bottom:var(--sp-5)
+}
+.section__title{font-size:var(--fs-h1);font-weight:700;letter-spacing:-.01em}
+.section__count{font-size:var(--fs-sm);color:var(--ink-muted)}
+.section__head .spacer{flex:1 1 auto;min-width:0}
+.eyebrow{
+  font-size:var(--fs-xs);font-weight:700;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--accent-solid)   /* accent เป็นตัวอักษรต้องผ่าน 4.5:1 */
+}
+
+/* StickyNav: sm = แท็บล่างติดจอ · md/lg = แถบบน */
+.nav{
+  position:fixed;inset:auto 0 0 0;z-index:30;height:var(--nav-h);
+  background:var(--bg);border-top:1px solid var(--line);
+  padding-bottom:env(safe-area-inset-bottom)
+}
+.nav__list{display:flex;height:var(--nav-h);align-items:stretch}
+.nav__btn{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:2px;font-size:var(--fs-xs);font-weight:700;color:var(--ink-muted);
+  border-top:2px solid transparent;min-height:44px
+}
+.nav__btn[aria-current="true"]{color:var(--ink);border-top-color:var(--accent)}
+.nav__icon{font-size:16px;line-height:1}
+body{padding-bottom:calc(var(--nav-h) + env(safe-area-inset-bottom))}
+
+.hero{padding-block:var(--sp-6) var(--sp-5)}
+.hero__title{
+  font-size:var(--fs-display);font-weight:800;line-height:1.05;
+  letter-spacing:-.02em;margin-block:var(--sp-2)
+}
+.hero__lede{color:var(--ink-muted);max-width:52ch;margin-bottom:var(--sp-5)}
+.hero__actions{display:flex;gap:var(--sp-3);flex-wrap:wrap;align-items:center}
+
+/* ============================================================
+   4. COMPONENTS
+   ============================================================ */
+
+/* --- 4.1 ปุ่ม (ui doc §3.1) --- */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:var(--sp-2);
+  min-height:44px;padding:12px 20px;border-radius:var(--r-md);
+  font-size:var(--fs-body);font-weight:600;white-space:nowrap;
+  transition:background var(--dur-fast) var(--ease),transform var(--dur-fast) var(--ease)
+}
+.btn:active{transform:scale(.98)}
+.btn[disabled],.btn[aria-disabled="true"]{opacity:.45;pointer-events:none}
+.btn--primary{background:var(--accent-solid);color:var(--accent-ink)}
+.btn--primary:hover{background:var(--accent-solid-hover)}
+.btn--secondary{border:1px solid var(--line);color:var(--ink)}
+.btn--secondary:hover{background:var(--surface-sunken)}
+.btn--ghost{color:var(--ink-muted);padding-inline:var(--sp-3)}
+.btn--ghost:hover{color:var(--ink)}
+.btn--danger{background:var(--danger);color:var(--bg)}
+.btn--block{width:100%}
+.btn--loading{pointer-events:none}
+.btn__spin{
+  width:16px;height:16px;border-radius:50%;
+  border:2px solid currentColor;border-top-color:transparent;
+  animation:spin .7s linear infinite
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.iconbtn{
+  width:44px;height:44px;display:inline-flex;align-items:center;justify-content:center;
+  border:1px solid var(--line);border-radius:var(--r-sm);color:var(--ink);
+  font-size:18px;line-height:1;transition:background var(--dur-fast) var(--ease)
+}
+.iconbtn:hover{background:var(--surface-sunken)}
+.iconbtn[disabled]{opacity:.4;pointer-events:none}
+
+/* --- 4.2 ตัวเลือก (ui doc §3.2) --- */
+.modetoggle{
+  display:inline-flex;padding:3px;gap:2px;background:var(--surface);
+  border:1px solid var(--line);border-radius:var(--r-pill)
+}
+.modetoggle__opt{
+  position:relative;
+  min-height:38px;padding:8px 16px;border-radius:var(--r-pill);
+  font-size:var(--fs-sm);font-weight:600;color:var(--ink-muted);
+  transition:background var(--dur-fast) var(--ease)
+}
+.modetoggle__opt[aria-checked="true"]{background:var(--accent-solid);color:var(--accent-ink)}
+
+.chips{
+  display:flex;gap:var(--sp-2);overflow-x:auto;scrollbar-width:none;
+  padding-block:var(--sp-1);-webkit-overflow-scrolling:touch
+}
+.chips::-webkit-scrollbar{display:none}
+.chip{
+  position:relative;
+  flex:0 0 auto;min-height:36px;padding:8px 14px;border-radius:var(--r-pill);
+  border:1px solid var(--line);font-size:var(--fs-sm);color:var(--ink);
+  white-space:nowrap;transition:background var(--dur-fast) var(--ease)
+}
+.chip:hover{background:var(--surface-sunken)}
+/* selected ใช้ --ink ไม่ใช่ accent: สงวนแดงให้ CTA (PROJECT_STATE §4.6) */
+.chip[aria-checked="true"],.chip[aria-pressed="true"]{
+  background:var(--ink);color:var(--bg);border-color:var(--ink)
+}
+
+/* --- 4.3 การ์ดชุด (ui doc §3.3) --- */
+/* ต้องมี wrapper: padding เป็น % อ้างอิงความกว้างของกล่องแม่ ไม่ใช่ max-width ของตัวเอง
+   ถ้าใส่ max-width ที่ตัว .carousel เอง padding จะคิดจากความกว้างเต็มแล้ว peek เพี้ยน */
+.carousel-wrap{
+  /* sm: เต็มขอบจอ ให้ได้ peek 7vw ตาม ui doc §5 (การ์ด 86vw + 7vw สองข้าง = 100vw) */
+  margin-inline:calc(-1 * var(--sp-4))
+}
+.carousel{
+  position:relative;overflow:hidden;
+  padding-inline:calc((100% - var(--card-w))/2)
+}
+.carousel__track{
+  display:flex;gap:var(--sp-3);
+  transition:transform var(--dur-pan) var(--ease);
+  transform:translateX(calc(-1 * var(--i,0) * (var(--card-w) + var(--sp-3))))
+}
+.card{
+  flex:0 0 var(--card-w);width:var(--card-w);
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);
+  padding:var(--sp-5);box-shadow:var(--shadow-card);
+  transition:transform var(--dur-pan) var(--ease),opacity var(--dur-pan) var(--ease);
+  --pb-bg:var(--surface)
+}
+.card--focused{box-shadow:var(--shadow-raised)}
+.card--adjacent{transform:scale(.92);opacity:.4}
+.card__head{display:flex;align-items:center;gap:var(--sp-2);margin-bottom:var(--sp-4)}
+.card__rule{font-size:var(--fs-xs);font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent-solid)}
+.card__foot{display:flex;justify-content:flex-end;margin-top:var(--sp-4)}
+
+.tiles{display:flex;flex-direction:column;gap:var(--sp-3)}
+/* sm: tile 72px + ป้ายข้าง (plan §0.3 ยึดตาม ui doc §5) */
+.tile{display:flex;align-items:center;gap:var(--sp-3)}
+.tile__box{
+  flex:0 0 72px;width:72px;aspect-ratio:1;border-radius:var(--r-sm);
+  border:1px solid var(--data-ring);   /* วงแหวนกันกลืน บังคับ (ui doc §0 ข้อ 2) */
+  overflow:hidden;position:relative;background:var(--surface-sunken)
+}
+.tile__box img{width:100%;height:100%;object-fit:cover}
+.tile__label{min-width:0;flex:1;overflow:hidden}
+.tile__cat,.tile__name,.tile__color{display:block;overflow:hidden}
+.tile__cat{font-size:var(--fs-xs);color:var(--ink-muted);text-transform:uppercase;letter-spacing:.06em;
+  white-space:nowrap;text-overflow:ellipsis}
+.tile__name{font-size:var(--fs-sm);color:var(--ink);white-space:nowrap;text-overflow:ellipsis}
+/* บรรทัดสีต้องอ่านครบเสมอ ห้ามตัด: ยอมขึ้นบรรทัดใหม่ดีกว่าเสียข้อมูล a11y */
+.tile__color{font-size:var(--fs-xs);color:var(--ink-muted);overflow-wrap:anywhere}
+.tile--empty .tile__box{border-style:dashed;display:flex;align-items:center;justify-content:center;color:var(--ink-muted);font-size:var(--fs-sm)}
+
+/* --- 4.4 สีเป็นข้อมูล (ui doc §3.4) --- */
+.swatch{
+  display:inline-block;flex:0 0 auto;border-radius:var(--r-sm);
+  border:1px solid var(--data-ring);vertical-align:middle
+}
+.swatch--sm{width:16px;height:16px}
+.swatch--md{width:24px;height:24px}
+.swatch--lg{width:40px;height:40px}
+
+.pbar{margin-top:var(--sp-4)}
+.pbar__track{display:flex;gap:2px;height:12px}   /* ช่องว่าง 2px โปร่ง เห็นพื้น --pb-bg */
+.pbar__seg{
+  min-width:6px;height:12px;padding:0;
+  box-shadow:inset 0 0 0 1px var(--data-ring);
+  transition:filter var(--dur-fast) var(--ease)
+}
+.pbar__seg:first-child{border-radius:var(--r-sm) 0 0 var(--r-sm)}
+.pbar__seg:last-child{border-radius:0 var(--r-sm) var(--r-sm) 0}
+.pbar__seg:only-child{border-radius:var(--r-sm)}
+.pbar__seg:hover{filter:brightness(1.06)}
+.pbar__labels{display:flex;gap:2px;margin-top:var(--sp-1)}
+.pbar__lab{
+  font-size:var(--fs-xs);color:var(--ink-muted);overflow:hidden;
+  white-space:nowrap;text-overflow:ellipsis
+}
+.pbar__legend{
+  display:flex;flex-wrap:wrap;gap:var(--sp-2) var(--sp-4);margin-top:var(--sp-3)
+}
+.pbar__item{
+  display:flex;align-items:center;gap:var(--sp-2);
+  font-size:var(--fs-sm);color:var(--ink-muted);border-radius:var(--r-sm)
+}
+.pbar__item.is-active{background:var(--surface-sunken);box-shadow:0 0 0 4px var(--surface-sunken)}
+.pbar__item b{color:var(--ink);font-weight:600}
+.pbar__role{font-size:var(--fs-xs);color:var(--ink-muted)}
+
+.advice{margin-top:var(--sp-4);display:flex;flex-direction:column;gap:var(--sp-2)}
+.advice li{
+  font-size:var(--fs-body);color:var(--ink-muted);
+  padding-left:var(--sp-4);position:relative
+}
+.advice li::before{content:"";position:absolute;left:0;top:.62em;width:5px;height:5px;border-radius:50%;background:var(--ink-muted)}
+.advice b{color:var(--ink);font-weight:600}   /* คำสำคัญเน้นด้วยน้ำหนัก ไม่ระบายสี */
+
+/* --- 4.5 ตู้เสื้อผ้า (ui doc §3.5) --- */
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:var(--sp-4)}
+.gchip{
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);
+  padding:var(--sp-3);position:relative;transition:box-shadow var(--dur-fast) var(--ease)
+}
+.gchip:hover{box-shadow:var(--shadow-card)}
+.gchip__box{
+  aspect-ratio:1;border-radius:var(--r-sm);border:1px solid var(--data-ring);
+  overflow:hidden;margin-bottom:var(--sp-3);background:var(--surface-sunken)
+}
+.gchip__box img{width:100%;height:100%;object-fit:cover}
+.gchip__name{
+  font-size:var(--fs-sm);font-weight:600;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden
+}
+.gchip__meta{font-size:var(--fs-xs);color:var(--ink-muted);margin-top:2px}
+.gchip__color{display:flex;align-items:center;gap:var(--sp-2);margin-top:var(--sp-2);font-size:var(--fs-sm);color:var(--ink-muted)}
+.gchip__menu{position:absolute;top:var(--sp-2);right:var(--sp-2)}
+.gchip__more{
+  width:44px;height:44px;display:flex;align-items:center;justify-content:center;
+  border-radius:var(--r-sm);background:var(--surface);border:1px solid var(--line);
+  font-size:16px;line-height:1
+}
+.gchip__more:hover{background:var(--surface-sunken)}
+.gchip__pop{
+  position:absolute;top:calc(100% + 4px);right:0;z-index:5;min-width:132px;
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);
+  box-shadow:var(--shadow-raised);overflow:hidden
+}
+.gchip__pop button{
+  display:flex;align-items:center;gap:var(--sp-2);width:100%;min-height:44px;
+  padding:0 var(--sp-3);font-size:var(--fs-sm);text-align:left;white-space:nowrap
+}
+.gchip__pop button:hover{background:var(--surface-sunken)}
+.gchip__pop button[data-del]{color:var(--danger)}
+/* พื้นที่แตะ 44px โดยไม่ทำให้ตัวคอนโทรลบวมทางสายตา (ui doc §6)
+   ขยายแนวตั้งเท่านั้น กันพื้นที่แตะของปุ่มข้างกันทับกันเอง */
+.chip::after,.modetoggle__opt::after{
+  content:"";position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);height:44px
+}
+
+.form{
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);
+  padding:var(--sp-5);margin-bottom:var(--sp-5)
+}
+.field{margin-bottom:var(--sp-4)}
+.field__label{display:block;font-size:var(--fs-sm);font-weight:600;margin-bottom:var(--sp-2)}
+.field__help{font-size:var(--fs-xs);color:var(--ink-muted);margin-top:var(--sp-2)}
+.field__help--err{color:var(--danger)}
+.input{
+  width:100%;min-height:44px;padding:10px 12px;border-radius:var(--r-md);
+  border:1px solid var(--line);background:var(--bg);color:var(--ink)
+}
+.input--invalid{border-color:var(--danger)}
+.hexrow{display:flex;align-items:center;gap:var(--sp-2)}
+.hexrow .input{flex:1;min-width:0}
+.hexrow input[type=color]{
+  width:44px;height:44px;padding:2px;border:1px solid var(--line);
+  border-radius:var(--r-sm);background:var(--bg);cursor:pointer
+}
+.drop{
+  aspect-ratio:1;max-width:220px;border:1.5px dashed var(--line);border-radius:var(--r-md);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--sp-2);
+  color:var(--ink-muted);font-size:var(--fs-sm);text-align:center;padding:var(--sp-3);
+  position:relative;overflow:hidden;width:100%
+}
+.drop.is-over{border-color:var(--accent);border-style:solid}
+.drop img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.drop__over{position:absolute;inset:auto 0 0 0;display:flex;gap:var(--sp-2);padding:var(--sp-2);background:var(--surface);border-top:1px solid var(--line)}
+.form__actions{display:flex;gap:var(--sp-3);flex-wrap:wrap}
+
+/* --- 4.6 การสื่อสาร (ui doc §3.6) --- */
+.banner{
+  display:flex;align-items:flex-start;gap:var(--sp-3);padding:var(--sp-3) var(--sp-4);
+  border-radius:var(--r-md);background:var(--surface-sunken);border:1px solid transparent;
+  font-size:var(--fs-sm);margin-bottom:var(--sp-4)
+}
+.banner--warning{background:transparent;border-color:var(--accent)}
+.banner--error{background:transparent;border-color:var(--danger)}
+.banner__body{flex:1;min-width:0}
+.banner__ico{flex:0 0 auto;line-height:1.5}
+.badge{
+  display:inline-block;padding:2px 8px;border-radius:var(--r-pill);
+  background:var(--surface-sunken);border:1px solid var(--line);
+  font-size:var(--fs-xs);font-weight:700;letter-spacing:.06em;color:var(--ink-muted)
+}
+.notice{
+  display:flex;align-items:flex-start;gap:var(--sp-2);
+  font-size:var(--fs-sm);color:var(--ink-muted);margin-top:var(--sp-3);max-width:60ch
+}
+.empty{
+  text-align:center;padding:var(--sp-7) var(--sp-4);
+  border:1px dashed var(--line);border-radius:var(--r-lg);background:var(--surface)
+}
+.empty__title{font-size:var(--fs-h2);font-weight:700;margin-bottom:var(--sp-2)}
+.empty__body{color:var(--ink-muted);max-width:44ch;margin:0 auto var(--sp-5)}
+.empty__actions{display:flex;gap:var(--sp-3);justify-content:center;flex-wrap:wrap}
+.feedback{font-size:var(--fs-sm);color:var(--ink-muted);min-height:1.5em;text-align:center}
+
+.dialog{border:0;padding:0;background:transparent;max-width:min(420px,92vw)}
+.dialog::backdrop{background:rgba(20,19,22,.5)}
+.dialog__box{background:var(--surface);border-radius:var(--r-lg);padding:var(--sp-5);border:1px solid var(--line)}
+.dialog__title{font-size:var(--fs-h2);font-weight:700;margin-bottom:var(--sp-2)}
+.dialog__body{color:var(--ink-muted);margin-bottom:var(--sp-5)}
+.dialog__actions{display:flex;gap:var(--sp-3);justify-content:flex-end;flex-wrap:wrap}
+
+/* --- 4.7 แถวควบคุม carousel --- */
+.navrow{
+  display:flex;align-items:center;gap:var(--sp-3);
+  justify-content:center;margin-top:var(--sp-5);flex-wrap:wrap
+}
+.navrow__pos{font-size:var(--fs-sm);color:var(--ink-muted);min-width:12ch;text-align:center}
+.panel__top{
+  display:flex;flex-direction:column;align-items:center;gap:var(--sp-3);margin-bottom:var(--sp-5)
+}
+
+/* ============================================================
+   5. RESPONSIVE (ui doc §5)
+   ============================================================ */
+:root{--card-w:86vw;--peek:7vw}
+@media (min-width:640px){
+  :root{--card-w:440px;--peek:40px;--nav-h:56px}
+  .container{padding:0 var(--sp-5)}
+  .grid{grid-template-columns:repeat(3,1fr)}
+  /* md/lg: StickyNav กลับไปอยู่บน */
+  .nav{inset:0 0 auto 0;border-top:0;border-bottom:1px solid var(--line)}
+  .nav__btn{flex:0 0 auto;flex-direction:row;gap:var(--sp-2);padding-inline:var(--sp-4);font-size:var(--fs-sm);border-top:0;border-bottom:2px solid transparent}
+  .nav__btn[aria-current="true"]{border-bottom-color:var(--accent)}
+  .nav__list{max-width:1040px;margin:0 auto;padding-inline:var(--sp-5)}
+  body{padding-bottom:0;padding-top:var(--nav-h)}
+  /* md/lg: ป้ายอยู่ใต้ tile (plan §0.3) */
+  .tiles{flex-direction:row;flex-wrap:wrap;gap:var(--sp-4)}
+  .tile{flex-direction:column;align-items:stretch;gap:var(--sp-2);flex:0 0 96px}
+  .tile__box{flex:none;width:96px}
+
+  .carousel-wrap{
+    margin-inline:auto;
+    max-width:min(100%, calc(var(--card-w) + 2 * (var(--peek) + var(--sp-3))))
+  }
+  .drop{max-width:200px}
+  .form__grid{display:grid;grid-template-columns:200px 1fr;gap:var(--sp-5);align-items:start}
+}
+@media (min-width:1024px){
+  :root{--card-w:480px;--peek:72px}
+  .grid{grid-template-columns:repeat(4,1fr)}
+  .tile,.tile__box{flex-basis:104px;width:104px}
+}
+
+/* ============================================================
+   6. REDUCED MOTION (ui doc §6)
+   ============================================================ */
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    animation-duration:.001ms!important;animation-iteration-count:1!important;
+    transition-duration:.001ms!important;scroll-behavior:auto!important
+  }
+  .card--adjacent{transform:none;opacity:.4}
+}
+</style>
+
+<nav class="nav" aria-label="ส่วนต่างๆ ของหน้า">
+  <ul class="nav__list">
+    <li style="display:contents"><button class="nav__btn" data-jump="sec-suggest" aria-current="true"><span class="nav__icon" aria-hidden="true">✨</span>แนะนำ</button></li>
+    <li style="display:contents"><button class="nav__btn" data-jump="sec-wardrobe"><span class="nav__icon" aria-hidden="true">👕</span>ตู้เสื้อผ้า</button></li>
+    <li style="display:contents"><button class="nav__btn" id="themeBtn"><span class="nav__icon" aria-hidden="true">◐</span><span id="themeLabel">ธีม</span></button></li>
+  </ul>
+</nav>
+
+<main class="container">
+
+  <header class="hero">
+    <p class="eyebrow">Outfit Color Matcher</p>
+    <h1 class="hero__title">วันนี้แต่งอะไรดี?</h1>
+    <p class="hero__lede">
+      บอกโอกาส แล้วให้เว็บเสนอชุดที่สีเข้ากันให้ทันที พร้อมสัดส่วนสีและคำแนะนำอิงทฤษฎีสี
+      ไม่มีคะแนน ไม่ตัดสินการแต่งตัว
+    </p>
+    <div class="hero__actions">
+      <button class="btn btn--primary" id="heroGen">วันนี้แต่งอะไรดี?</button>
+      <button class="btn btn--ghost" data-jump="sec-wardrobe">ดูตู้เสื้อผ้าของฉัน</button>
+    </div>
+  </header>
+
+  <!-- ============ SECTION A · แผงแนะนำ ============ -->
+  <section class="section" id="sec-suggest" aria-labelledby="sugTitle">
+    <div class="section__head">
+      <h2 class="section__title" id="sugTitle">ชุดที่แนะนำ</h2>
+    </div>
+
+    <div id="sampleBannerSlot"></div>
+
+    <div class="panel__top">
+      <div class="modetoggle" role="radiogroup" aria-label="แหล่งของสีที่ใช้แนะนำ">
+        <button class="modetoggle__opt" role="radio" data-mode="idea" aria-checked="true">สีที่เราแนะนำ</button>
+        <button class="modetoggle__opt" role="radio" data-mode="wardrobe" aria-checked="false">จากตู้ของฉัน</button>
+      </div>
+      <div id="autoNoticeSlot"></div>
+    </div>
+
+    <div role="radiogroup" aria-label="โอกาส" class="chips" id="occasionChips"></div>
+
+    <div id="resultsSlot" style="margin-top:var(--sp-5)"></div>
+
+    <p class="feedback" id="liveFeedback" aria-live="polite"></p>
+  </section>
+
+  <!-- ============ SECTION B · ตู้เสื้อผ้า ============ -->
+  <section class="section" id="sec-wardrobe" aria-labelledby="wardTitle">
+    <div class="section__head">
+      <h2 class="section__title" id="wardTitle">ตู้เสื้อผ้าของฉัน</h2>
+      <span class="section__count" id="wardCount"></span>
+      <span class="spacer"></span>
+      <button class="btn btn--secondary" id="addBtn">+ เพิ่มเสื้อผ้า</button>
+    </div>
+
+    <div id="storageBannerSlot"></div>
+    <div id="formSlot"></div>
+    <div id="wardrobeSlot"></div>
+    <p class="feedback" id="wardFeedback" aria-live="polite"></p>
+  </section>
+
+  <footer class="section" style="padding-block:var(--sp-6)">
+    <p style="font-size:var(--fs-sm);color:var(--ink-muted)">
+      ข้อมูลทั้งหมดถูกบันทึกไว้ในเครื่องนี้เท่านั้น ไม่ถูกส่งออกไปที่ใด
+      · เฟส 1: ตู้เสื้อผ้า + แนะนำชุด (บันทึกชุดโปรดและสลับทีละชิ้นจะมาในเฟสถัดไป)
+    </p>
+  </footer>
+</main>
+
+<dialog class="dialog" id="confirmDlg">
+  <form method="dialog" class="dialog__box">
+    <h2 class="dialog__title" id="dlgTitle">ยืนยัน</h2>
+    <p class="dialog__body" id="dlgBody"></p>
+    <div class="dialog__actions">
+      <button class="btn btn--secondary" value="cancel">ยกเลิก</button>
+      <button class="btn btn--danger" value="ok" id="dlgOk">ลบ</button>
+    </div>
+  </form>
+</dialog>
+
+<script>
+"use strict";
+/* ============================================================
+   A. CONSTANTS  (spec §9 + plan §0.6: ค่าที่ตั้งไว้ให้จูนจากผลจริง)
+   ============================================================ */
+var NEUTRAL_MAX_S      = 20;      /* S ต่ำกว่านี้ = neutral (spec §4.1) */
+var NEUTRAL_L_EXTREME  = [8, 92]; /* L สุดขั้ว = neutral (ดำ/ขาว) */
+var VIVID_MIN_S        = 55;      /* อิ่มพอจะเป็น accent */
+/* HSL saturation หลอกตาในสีอ่อน: ครีม #EFE6D2 ได้ S=47% ทั้งที่ตาอ่านเป็นสีกลาง
+   จึงถ่วงด้วย "ระยะห่าง R-G-B จริง" ด้วย ค่านี้จูนจากสีในตู้ตัวอย่าง */
+var NEUTRAL_SPREAD_MAX = 32;
+var IDEA_S_RANGE       = [35, 75];
+var IDEA_L_RANGE       = [30, 70];
+var COMBO_CAP          = 400;     /* spec §7C large wardrobe */
+var BATCH_MIN = 3, BATCH_MAX = 4;
+
+/* น้ำหนักพื้นที่ตามหมวด (spec §4.4): บน+ล่าง 60 · นอก 30 · รองเท้า+แอกเซส 10 */
+var CATEGORY_WEIGHT = { top:30, bottom:30, outer:30, shoes:7, accessory:3 };
+var CATEGORY_TH = { top:"เสื้อ", bottom:"กางเกง/กระโปรง", outer:"เสื้อนอก", shoes:"รองเท้า", accessory:"แอกเซสซอรี" };
+var CATEGORY_ORDER = ["top","bottom","shoes","outer","accessory"];
+
+var RULE_TH = {
+  monochrome:"Monochrome", analogous:"Analogous", complementary:"Complementary",
+  triadic:"Triadic", "neutral-accent":"Neutral + Accent", neutral:"All Neutral"
+};
+var ROLE_TH = { primary:"สีหลัก", secondary:"สีรอง", neutral:"สีกลาง", accent:"สีเน้น" };
+
+var OCCASIONS = [
+  { id:"unspecified", label:"ไม่ระบุ" }, { id:"everyday", label:"ทั่วไป" },
+  { id:"university", label:"มหาลัย" },   { id:"work", label:"ทำงาน" },
+  { id:"cafe", label:"คาเฟ่" },          { id:"dinner", label:"มื้อค่ำ" },
+  { id:"party", label:"ปาร์ตี้" }
+];
+/* โอกาสมีผลต่อ "การเอนโทนสี" เท่านั้น ไม่แสร้งรู้ความเป็นทางการของเสื้อผ้า (spec FR-1 AC5) */
+var OCCASION_TONE = {
+  unspecified:{ s:0,   l:0,   accentBoost:0   },
+  everyday:   { s:0,   l:0,   accentBoost:0   },
+  university: { s:.08, l:.05, accentBoost:.10 },
+  work:       { s:-.18,l:-.12,accentBoost:-.20 },
+  cafe:       { s:.05, l:.05, accentBoost:.05 },
+  dinner:     { s:-.10,l:-.20,accentBoost:-.05 },
+  party:      { s:.22, l:0,   accentBoost:.30 }
+};
+
+/* ============================================================
+   B. COLOR UTILS
+   ============================================================ */
+function clamp(v,a,b){ return Math.min(b,Math.max(a,v)); }
+function hexToRgb(hex){
+  var h = String(hex).replace("#","").trim();
+  if(h.length===3) h = h[0]+h[0]+h[1]+h[1]+h[2]+h[2];
+  var n = parseInt(h,16);
+  return { r:(n>>16)&255, g:(n>>8)&255, b:n&255 };
+}
+function rgbToHex(r,g,b){
+  return "#"+[r,g,b].map(function(v){
+    return clamp(Math.round(v),0,255).toString(16).padStart(2,"0");
+  }).join("").toUpperCase();
+}
+function isValidHex(s){ return /^#?([0-9a-f]{3}|[0-9a-f]{6})$/i.test(String(s).trim()); }
+function normHex(s){
+  var h = String(s).trim(); if(h[0]!=="#") h = "#"+h;
+  if(h.length===4) h = "#"+h[1]+h[1]+h[2]+h[2]+h[3]+h[3];
+  return h.toUpperCase();
+}
+function hexToHsl(hex){
+  var c = hexToRgb(hex), r=c.r/255, g=c.g/255, b=c.b/255;
+  var max=Math.max(r,g,b), min=Math.min(r,g,b), d=max-min;
+  var h=0, s=0, l=(max+min)/2;
+  if(d){
+    s = d / (1 - Math.abs(2*l - 1));
+    if(max===r)      h = 60*(((g-b)/d)%6);
+    else if(max===g) h = 60*(((b-r)/d)+2);
+    else             h = 60*(((r-g)/d)+4);
+  }
+  if(h<0) h+=360;
+  return { h:h, s:s*100, l:l*100 };
+}
+function hslToHex(h,s,l){
+  h=((h%360)+360)%360; s=clamp(s,0,100)/100; l=clamp(l,0,100)/100;
+  var c=(1-Math.abs(2*l-1))*s, x=c*(1-Math.abs((h/60)%2-1)), m=l-c/2, r,g,b;
+  if(h<60){r=c;g=x;b=0} else if(h<120){r=x;g=c;b=0} else if(h<180){r=0;g=c;b=x}
+  else if(h<240){r=0;g=x;b=c} else if(h<300){r=x;g=0;b=c} else {r=c;g=0;b=x}
+  return rgbToHex((r+m)*255,(g+m)*255,(b+m)*255);
+}
+/* WCAG relative luminance + contrast: ใช้ทั้งใน engine และในเช็ก a11y ตัวเอง */
+function relLum(hex){
+  var c=hexToRgb(hex);
+  var a=[c.r,c.g,c.b].map(function(v){
+    v/=255; return v<=0.03928 ? v/12.92 : Math.pow((v+0.055)/1.055, 2.4);
+  });
+  return 0.2126*a[0] + 0.7152*a[1] + 0.0722*a[2];
+}
+function contrastRatio(h1,h2){
+  var a=relLum(h1), b=relLum(h2), hi=Math.max(a,b), lo=Math.min(a,b);
+  return (hi+0.05)/(lo+0.05);
+}
+function hueDist(a,b){ var d=Math.abs(a-b)%360; return d>180 ? 360-d : d; }
+
+/* ชื่อสีภาษาไทย: จำเป็นตาม "ไม่สื่อด้วยสีอย่างเดียว" (ux §9) */
+var HUE_NAMES = [
+  [15,"แดง"],[33,"ส้ม"],[45,"เหลืองส้ม"],[65,"เหลือง"],[85,"เขียวอมเหลือง"],
+  [150,"เขียว"],[180,"เขียวอมฟ้า"],[200,"ฟ้า"],[235,"น้ำเงิน"],[260,"น้ำเงินม่วง"],
+  [290,"ม่วง"],[330,"ชมพู"],[360,"แดง"]
+];
+function rgbSpread(hex){
+  var c = hexToRgb(hex);
+  return Math.max(c.r,c.g,c.b) - Math.min(c.r,c.g,c.b);
+}
+function isNeutralHex(hex){
+  var c = hexToHsl(hex);
+  return c.s < NEUTRAL_MAX_S
+      || rgbSpread(hex) <= NEUTRAL_SPREAD_MAX
+      || c.l <= NEUTRAL_L_EXTREME[0] || c.l >= NEUTRAL_L_EXTREME[1];
+}
+function colorNameTH(hex){
+  var c = hexToHsl(hex);
+  if(c.l >= 92) return "ขาว";
+  if(c.l <= 12) return "ดำ";
+  if(isNeutralHex(hex)){
+    if(c.s >= 10 && c.h >= 20 && c.h <= 60) return c.l > 78 ? "ครีม" : (c.l > 45 ? "เบจ" : "น้ำตาลเทา");
+    return c.l > 72 ? "เทาอ่อน" : (c.l < 32 ? "เทาเข้ม" : "เทา");
+  }
+  var base = "สี";
+  for(var i=0;i<HUE_NAMES.length;i++){ if(c.h <= HUE_NAMES[i][0]){ base = HUE_NAMES[i][1]; break; } }
+  /* ชื่อเฉพาะที่คนไทยเรียกติดปาก */
+  if(base==="น้ำเงิน" && c.l < 34) return "กรมท่า";
+  /* โทนอุ่นอิ่มต่ำในย่านสว่างกลาง คนไทยเรียก "เบจ" ไม่ใช่ "เหลืองส้มหม่น" */
+  if(c.h >= 18 && c.h <= 52 && c.s < 42 && c.l >= 50 && c.l <= 88) return "เบจ";
+  if((base==="ส้ม"||base==="เหลืองส้ม") && c.l < 40) return "น้ำตาล";
+  if(base==="แดง" && c.l < 32) return "แดงเลือดหมู";
+  var mod = "";
+  if(c.l >= 76) mod = "อ่อน"; else if(c.l <= 30) mod = "เข้ม";
+  else if(c.s < 38) mod = "หม่น";
+  return mod ? base + mod : base;
+}
+function classifyColor(hex){
+  var c = hexToHsl(hex);
+  var isNeutral = isNeutralHex(hex);
+  var temp = "mixed";
+  if(!isNeutral){
+    if(c.h < 90 || c.h >= 285) temp = "warm";
+    else if(c.h >= 90 && c.h < 285) temp = "cool";
+  }
+  return { h:c.h, s:c.s, l:c.l, isNeutral:isNeutral, temp:temp,
+           isVivid:(!isNeutral && c.s >= VIVID_MIN_S && rgbSpread(hex) > 60) };
+}
+</script>
+
+<script>
+"use strict";
+/* ============================================================
+   C. ENGINE  (spec §4.1-4.7). คะแนนคำนวณเงียบ ห้ามโผล่ใน DOM
+   ============================================================ */
+
+/* --- 4.2 harmony rule: เลือก rule ที่ "ชัดที่สุด" = ใกล้ค่ากลางของ rule นั้นสุด --- */
+var RULE_SPECS = [
+  { id:"monochrome",    center:0,   half:12 },
+  { id:"analogous",     center:30,  half:15 },
+  { id:"triadic",       center:120, half:20 },
+  { id:"complementary", center:180, half:30 }
+];
+function detectHarmony(colors){
+  var cls = colors.map(classifyColor);
+  var nn  = cls.filter(function(c){ return !c.isNeutral; });
+  var hasNeutral = cls.length > nn.length;
+
+  if(nn.length === 0) return { rule:"neutral", clarity:0.55 };
+  if(nn.length === 1) return hasNeutral
+    ? { rule:"neutral-accent", clarity:0.85 }
+    : { rule:"monochrome",     clarity:0.90 };
+
+  var dists = [];
+  for(var i=0;i<nn.length;i++) for(var j=i+1;j<nn.length;j++) dists.push(hueDist(nn[i].h, nn[j].h));
+  var maxD = Math.max.apply(null,dists), minD = Math.min.apply(null,dists);
+  var mean = dists.reduce(function(a,b){return a+b;},0) / dists.length;
+
+  /* neutral+accent: สี non-neutral เกาะกลุ่มกันแน่น + มี vivid เดียวโดดออกมา บนพื้น neutral */
+  var vivids = nn.filter(function(c){ return c.isVivid; });
+  if(hasNeutral && vivids.length === 1 && nn.length === 2 && maxD > 45){
+    return { rule:"neutral-accent", clarity:0.80 };
+  }
+
+  var best = null;
+  RULE_SPECS.forEach(function(r){
+    var inRange = (r.id === "monochrome")    ? (maxD <= r.half)
+                : (r.id === "complementary") ? (maxD >= r.center - r.half && nn.length === 2)
+                : (minD >= r.center - r.half && maxD <= r.center + r.half);
+    var ref = (r.id === "monochrome" || r.id === "complementary") ? maxD : mean;
+    var off = Math.abs(ref - r.center) / r.half;                    /* 0 = ตรงกลาง rule เป๊ะ */
+    var clarity = inRange ? (1 - 0.45 * clamp(off,0,1)) : (0.34 - 0.10 * clamp(off - 1, 0, 2));
+    if(!best || clarity > best.clarity) best = { rule:r.id, clarity:clarity };
+  });
+  return best;
+}
+
+/* --- 4.4 สัดส่วนสีของลุค: น้ำหนักตามหมวด แล้ว normalize เป็น 100 --- */
+function computeProportion(entries){
+  var total = entries.reduce(function(s,e){ return s + (CATEGORY_WEIGHT[e.category] || 0); }, 0);
+  if(!total) return [];
+  var merged = {};
+  entries.forEach(function(e){
+    var k = normHex(e.hex);
+    merged[k] = (merged[k] || 0) + (CATEGORY_WEIGHT[e.category] || 0) / total * 100;
+  });
+  var rows = Object.keys(merged).map(function(k){ return { hex:k, raw:merged[k] }; })
+                   .sort(function(a,b){ return b.raw - a.raw; });
+  /* largest remainder: ให้ % รวมได้ 100 พอดี ไม่ใช่ 99 หรือ 101 */
+  var floors = rows.map(function(r){ return Math.floor(r.raw); });
+  var rest = 100 - floors.reduce(function(a,b){ return a+b; }, 0);
+  rows.map(function(r,i){ return { i:i, frac:r.raw - floors[i] }; })
+      .sort(function(a,b){ return b.frac - a.frac; })
+      .slice(0, rest)
+      .forEach(function(x){ floors[x.i] += 1; });
+  return rows.map(function(r,i){ return { hex:r.hex, pct:floors[i] }; });
+}
+
+/* --- 4.7 Color Role: ถามว่า "สีนี้ควรทำหน้าที่อะไรในลุค" --- */
+function assignRoles(breakdown, entries){
+  var byHex = {};
+  entries.forEach(function(e){
+    var k = normHex(e.hex);
+    if(!byHex[k]) byHex[k] = { cats:[], w:0 };
+    byHex[k].cats.push(e.category);
+    byHex[k].w += CATEGORY_WEIGHT[e.category] || 0;
+  });
+  var rows = breakdown.map(function(b){
+    var c = classifyColor(b.hex), info = byHex[b.hex] || { cats:[], w:0 };
+    return { hex:b.hex, pct:b.pct, cls:c, cats:info.cats, role:null };
+  });
+
+  rows.filter(function(r){ return r.cls.isNeutral; }).forEach(function(r){ r.role = "neutral"; });
+  var nn = rows.filter(function(r){ return !r.cls.isNeutral; });
+
+  /* Accent = สีสด บนพื้นที่เล็ก (รองเท้า/แอกเซส) และมีได้อย่างมาก 1 */
+  var accentPool = nn.filter(function(r){
+    return r.cls.isVivid && r.cats.some(function(c){ return c === "shoes" || c === "accessory"; });
+  });
+  if(!accentPool.length && nn.length >= 3){
+    accentPool = nn.filter(function(r){ return r.cls.isVivid; })
+                   .sort(function(a,b){ return a.pct - b.pct; }).slice(0,1);
+  }
+  if(accentPool.length){
+    accentPool.sort(function(a,b){ return b.cls.s - a.cls.s; })[0].role = "accent";
+  }
+
+  var rest = nn.filter(function(r){ return !r.role; }).sort(function(a,b){ return b.pct - a.pct; });
+  if(rest.length){
+    rest[0].role = "primary";
+    rest.slice(1).forEach(function(r){ r.role = "secondary"; });
+  } else {
+    /* ลุค neutral ล้วน: ยังต้องมี Primary 1 ตัวคุมโทน (§4.7) */
+    var top = rows.slice().sort(function(a,b){ return b.pct - a.pct; })[0];
+    if(top) top.role = "primary";
+  }
+  return rows;
+}
+
+/* --- 4.3 คะแนนเงียบเบื้องหลัง: ใช้คัด/เรียงเท่านั้น ห้ามแสดงต่อผู้ใช้ --- */
+function scoreOutfit(roleRows, harmony, occasion){
+  var primary   = roleRows.find(function(r){ return r.role === "primary"; });
+  var secondary = roleRows.find(function(r){ return r.role === "secondary"; });
+  var accent    = roleRows.find(function(r){ return r.role === "accent"; });
+  var neutralShare = roleRows.filter(function(r){ return r.role === "neutral"; })
+                             .reduce(function(s,r){ return s + r.pct; }, 0);
+
+  /* contrast: ต่างค่าสว่างในช่วงที่อ่านง่าย ไม่จมกันจนกลืน ไม่ตัดกันจนแสบ */
+  var contrastTerm = 0.5;
+  var pair = secondary || roleRows.filter(function(r){ return r !== primary; })
+                                  .sort(function(a,b){ return b.pct - a.pct; })[0];
+  if(primary && pair){
+    var dl = Math.abs(primary.cls.l - pair.cls.l);
+    contrastTerm = dl < 10 ? dl/10*0.5 : dl <= 55 ? 1 : clamp(1 - (dl-55)/40, 0.25, 1);
+  }
+  /* สัดส่วนสีกลาง: มี neutral คุมโทนช่วยให้ลุคนิ่ง */
+  var neutralTerm = neutralShare === 0 ? 0.25
+    : neutralShare < 20 ? 0.6 + neutralShare/20*0.4
+    : neutralShare <= 60 ? 1
+    : clamp(1 - (neutralShare-60)/40*0.5, 0.5, 1);
+
+  var score = 0.45*harmony.clarity + 0.30*contrastTerm + 0.25*neutralTerm;
+
+  /* §4.7: ไม่มี neutral เลย + สีสดหลายตัว = รก ให้ลดชุดนั้น */
+  var vividCount = roleRows.filter(function(r){ return r.cls.isVivid; }).length;
+  if(neutralShare === 0 && vividCount >= 2) score *= 0.55;
+  if(vividCount >= 3) score *= 0.75;
+
+  /* โอกาส: เอนโทนเท่านั้น (spec FR-1 AC5) */
+  var tone = OCCASION_TONE[occasion] || OCCASION_TONE.unspecified;
+  var avgS = roleRows.reduce(function(s,r){ return s + r.cls.s * r.pct; }, 0) / 100;
+  var avgL = roleRows.reduce(function(s,r){ return s + r.cls.l * r.pct; }, 0) / 100;
+  score += tone.s * ((avgS - 40) / 60) * 0.35;
+  score += tone.l * ((avgL - 50) / 50) * 0.30;
+  if(accent) score += tone.accentBoost * 0.25;
+
+  return clamp(score, 0, 2);
+}
+
+/* --- 4.5 คำแนะนำ: template ล้วน เชิงบอกลักษณะ ไม่ตัดสินถูก-ผิด --- */
+function buildAdvice(rule, roleRows){
+  var out = [];
+  var neutralShare = roleRows.filter(function(r){ return r.role === "neutral"; })
+                             .reduce(function(s,r){ return s + r.pct; }, 0);
+  var accent  = roleRows.find(function(r){ return r.role === "accent"; });
+  var primary = roleRows.find(function(r){ return r.role === "primary"; });
+  var warm = roleRows.filter(function(r){ return r.cls.temp === "warm"; }).length;
+  var cool = roleRows.filter(function(r){ return r.cls.temp === "cool"; }).length;
+
+  var byRule = {
+    monochrome:"โทนนี้เป็น <b>Monochrome</b> ใช้สีเดียวไล่ระดับ ลุคดูเป็นชิ้นเดียวกันและสูงเพรียว",
+    analogous:"โทนนี้เป็น <b>Analogous</b> สีอยู่ใกล้กันบนวงล้อสี จึงกลมกลืนไม่ขัดตา",
+    complementary:"โทนนี้เป็น <b>Complementary</b> สีอยู่ตรงข้ามกันบนวงล้อสี ให้ความตัดกันชัดเจน",
+    triadic:"โทนนี้เป็น <b>Triadic</b> สีกระจายห่างกันเท่าๆ กัน ลุคจึงมีชีวิตชีวา",
+    "neutral-accent":"โทนนี้เป็น <b>Neutral + Accent</b> ใช้สีกลางเป็นพื้นแล้วปล่อยสีเน้นจุดเดียว",
+    neutral:"โทนนี้เป็น <b>สีกลางล้วน</b> ไม่มีสีไหนแย่งกันเด่น ลุคจึงเรียบและจับคู่ง่าย"
+  };
+  out.push(byRule[rule] || byRule.neutral);
+
+  if(primary) out.push("สีหลักของลุคคือ <b>" + colorNameTH(primary.hex) + "</b> ราว " + primary.pct + "% เป็นตัวคุมโทนรวม");
+  if(neutralShare >= 55)      out.push("มีสีกลางราว <b>" + Math.round(neutralShare) + "%</b> คุมโทนอยู่ ลุคจึงดูเรียบสะอาด");
+  else if(neutralShare >= 20) out.push("มีสีกลางช่วยถ่วงอยู่บ้าง ทำให้สีที่เหลือไม่ตีกัน");
+  if(accent)                  out.push("มีสีเน้นหนึ่งจุดคือ <b>" + colorNameTH(accent.hex) + "</b> ช่วยให้ลุคไม่จืด");
+  else if(neutralShare > 70)  out.push("ยังไม่มีสีเน้นในลุคนี้ ถ้าอยากให้สะดุดตาขึ้นลองเพิ่มของชิ้นเล็กสีสด");
+  if(warm && cool)            out.push("ลุคนี้ผสมทั้งโทนอุ่นและโทนเย็น ให้ความรู้สึกสมดุลไม่เอนไปทางใดทางหนึ่ง");
+
+  return out.slice(0,3);
+}
+
+/* --- ประกอบ outfit หนึ่งชุดจากรายการชิ้น --- */
+function buildOutfit(items, mode, occasion){
+  var entries = [], byCat = {};
+  CATEGORY_ORDER.forEach(function(cat){
+    var it = items[cat];
+    if(it){ entries.push({ hex:normHex(it.color), category:cat }); byCat[cat] = it; }
+  });
+  if(!entries.length) return null;
+  var breakdown = computeProportion(entries);
+  var harmony   = detectHarmony(breakdown.map(function(b){ return b.hex; }));
+  var roleRows  = assignRoles(breakdown, entries);
+  var outfit = {
+    sourceMode: mode,
+    items: byCat,
+    ruleUsed: harmony.rule,
+    colorBreakdown: roleRows.map(function(r){
+      return { hex:r.hex, pct:r.pct, role:r.role, name:colorNameTH(r.hex) };
+    }),
+    advice: buildAdvice(harmony.rule, roleRows)
+  };
+  /* คะแนนเงียบ: เก็บนอก object ที่จะ render (กันหลุดเข้า DOM โดยอุบัติเหตุ) */
+  SCORES.set(outfit, scoreOutfit(roleRows, harmony, occasion));
+  return outfit;
+}
+var SCORES = new WeakMap();
+function scoreOf(o){ return SCORES.get(o) || 0; }
+</script>
+
+<script>
+"use strict";
+/* ============================================================
+   D. การสร้างแบตช์ (spec §4.6): engine เดียว ต่างที่ "แหล่งของสี"
+   ============================================================ */
+function groupByCategory(list){
+  var g = {};
+  CATEGORY_ORDER.forEach(function(c){ g[c] = []; });
+  list.forEach(function(it){ if(g[it.category]) g[it.category].push(it); });
+  return g;
+}
+function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+function shuffle(a){
+  for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=a[i];a[i]=a[j];a[j]=t; }
+  return a;
+}
+function outfitKey(o){
+  return CATEGORY_ORDER.map(function(c){ return o.items[c] ? o.items[c].id : "-"; }).join("|");
+}
+
+/* --- โหมด "จากตู้ของฉัน": จับคู่จาก garment จริง --- */
+function generateWardrobeBatch(wardrobe, occasion, avoidKeys){
+  var g = groupByCategory(wardrobe);
+  var missing = [];
+  if(!g.top.length)    missing.push("top");
+  if(!g.bottom.length) missing.push("bottom");
+  if(missing.length)   return { insufficient:missing };
+
+  var pairs = [];
+  g.top.forEach(function(t){ g.bottom.forEach(function(b){ pairs.push([t,b]); }); });
+  shuffle(pairs);
+  if(pairs.length > COMBO_CAP) pairs = pairs.slice(0, COMBO_CAP);   /* spec §7C กันหน้าค้าง */
+
+  var perPair = pairs.length > 60 ? 1 : pairs.length > 20 ? 2 : 3;
+  var seen = {}, candidates = [];
+  pairs.forEach(function(p){
+    for(var v=0; v<perPair; v++){
+      var items = { top:p[0], bottom:p[1] };
+      if(g.shoes.length     && Math.random() < 0.85) items.shoes     = pick(g.shoes);
+      if(g.outer.length     && Math.random() < 0.35) items.outer     = pick(g.outer);
+      if(g.accessory.length && Math.random() < 0.40) items.accessory = pick(g.accessory);
+      var o = buildOutfit(items, "wardrobe", occasion);
+      if(!o) continue;
+      var k = outfitKey(o);
+      if(seen[k]) continue;
+      seen[k] = 1;
+      candidates.push(o);
+    }
+  });
+  if(!candidates.length) return { noMatch:true };
+
+  candidates.sort(function(a,b){ return scoreOf(b) - scoreOf(a); });
+  return { outfits: selectDiverse(candidates, avoidKeys) };
+}
+
+/* คัดชุดที่จะโชว์: คะแนนนำ แต่ไม่ให้ซ้ำคู่บน-ล่าง และพยายามเลี่ยงแบตช์เดิม */
+function selectDiverse(candidates, avoidKeys){
+  var avoid = avoidKeys || {};
+  var out = [], usedPair = {};
+  function tryFill(allowRepeatPair, allowAvoided){
+    candidates.forEach(function(o){
+      if(out.length >= BATCH_MAX) return;
+      var k = outfitKey(o);
+      if(!allowAvoided && avoid[k]) return;
+      var pk = (o.items.top ? o.items.top.id : "-") + "|" + (o.items.bottom ? o.items.bottom.id : "-");
+      if(!allowRepeatPair && usedPair[pk]) return;
+      if(out.indexOf(o) !== -1) return;
+      usedPair[pk] = 1; out.push(o);
+    });
+  }
+  tryFill(false, false);
+  if(out.length < BATCH_MIN) tryFill(true, false);
+  if(out.length < BATCH_MIN) tryFill(true, true);
+  return out.slice(0, Math.max(BATCH_MIN, Math.min(BATCH_MAX, out.length)));
+}
+
+/* --- โหมด "สีที่เราแนะนำ": สุ่มไล่ตาม role (spec §4.7) ไม่ใช่สุ่มสีแล้วค่อยจัด role --- */
+var IDEA_RULES = ["analogous","complementary","triadic","monochrome","neutral-accent"];
+function ideaColor(h, s, l){ return hslToHex(h, s, l); }
+function generateIdeaBatch(occasion, avoidKeys){
+  var tone = OCCASION_TONE[occasion] || OCCASION_TONE.unspecified;
+  var sMid = clamp((IDEA_S_RANGE[0]+IDEA_S_RANGE[1])/2 + tone.s*28, 22, 82);
+  var lMid = clamp((IDEA_L_RANGE[0]+IDEA_L_RANGE[1])/2 + tone.l*22, 24, 74);
+  var pool = [];
+  for(var n=0; n<24; n++){
+    var rule = pick(IDEA_RULES);
+    var hP = Math.random()*360;
+    var sP = clamp(sMid + (Math.random()*18-9), 20, 88);
+    var lP = clamp(lMid + (Math.random()*16-8), 20, 78);
+
+    /* 1) Primary */
+    var primary = ideaColor(hP, sP, lP);
+    /* 2) Secondary ตาม rule */
+    var dir = Math.random() < 0.5 ? 1 : -1, hS;
+    if(rule === "monochrome")          hS = hP;
+    else if(rule === "analogous")      hS = hP + dir*(20 + Math.random()*20);
+    else if(rule === "complementary")  hS = hP + 180 + (Math.random()*16-8);
+    else if(rule === "triadic")        hS = hP + dir*(120 + (Math.random()*14-7));
+    else                               hS = hP;                       /* neutral-accent */
+    var secondary = (rule === "monochrome")
+      ? ideaColor(hP, clamp(sP-14,12,80), clamp(lP + dir*22, 16, 86))
+      : (rule === "neutral-accent")
+        ? ideaColor(hP, 8 + Math.random()*10, 30 + Math.random()*50)  /* พื้นเป็นสีกลาง */
+        : ideaColor(hS, clamp(sP - 8 + Math.random()*16, 18, 82), clamp(lP + (Math.random()*24-12), 18, 82));
+    /* 3) Neutral ถ่วงโทน */
+    var neutral = ideaColor(hP, 5 + Math.random()*10, Math.random() < 0.5 ? 88 + Math.random()*8 : 12 + Math.random()*14);
+    /* 4) Accent จุดเดียว */
+    var accentHue = (rule === "complementary") ? hP + 180
+                  : (rule === "triadic")       ? hP + 240
+                  : hP + dir*(150 + Math.random()*40);
+    var wantAccent = Math.random() < (0.55 + tone.accentBoost);
+    var accent = ideaColor(accentHue, clamp(62 + Math.random()*22 + tone.s*20, 45, 92), clamp(46 + (Math.random()*16-8), 28, 66));
+
+    var items = {
+      top:    { id:"i-top-"+n,  name:colorNameTH(primary),   category:"top",    color:primary,   isIdea:true },
+      bottom: { id:"i-bot-"+n,  name:colorNameTH(secondary), category:"bottom", color:secondary, isIdea:true },
+      shoes:  { id:"i-sho-"+n,  name:colorNameTH(neutral),   category:"shoes",  color:neutral,   isIdea:true }
+    };
+    if(wantAccent) items.accessory = { id:"i-acc-"+n, name:colorNameTH(accent), category:"accessory", color:accent, isIdea:true };
+    var o = buildOutfit(items, "idea", occasion);
+    if(o) pool.push(o);
+  }
+  pool.sort(function(a,b){ return scoreOf(b) - scoreOf(a); });
+  /* ไม่ dedupe ด้วย id (สุ่มใหม่ทุกครั้งอยู่แล้ว) แต่ตัดชุดที่สีหลักซ้ำกันเกินไป */
+  var out = [], usedHue = [];
+  pool.forEach(function(o){
+    if(out.length >= BATCH_MAX) return;
+    var h = hexToHsl(o.colorBreakdown[0].hex).h;
+    if(usedHue.some(function(u){ return hueDist(u,h) < 25; })) return;
+    usedHue.push(h); out.push(o);
+  });
+  while(out.length < BATCH_MIN && pool.length > out.length){
+    var next = pool.find(function(o){ return out.indexOf(o) === -1; });
+    if(!next) break;
+    out.push(next);
+  }
+  return { outfits: out };
+}
+
+/* ============================================================
+   E. STORAGE  (spec §7: ทุก read/write ครอบ try/catch)
+   ============================================================ */
+var STORE_KEY = "outfit-color-matcher.v1";
+var storageOK = true;
+function loadStore(){
+  try{
+    var raw = localStorage.getItem(STORE_KEY);
+    storageOK = true;
+    if(!raw) return null;
+    return JSON.parse(raw);
+  }catch(e){ storageOK = false; return null; }
+}
+function saveStore(data){
+  try{
+    localStorage.setItem(STORE_KEY, JSON.stringify(data));
+    storageOK = true;
+    return { ok:true };
+  }catch(e){
+    var quota = e && (e.name === "QuotaExceededError" || e.code === 22 || e.code === 1014);
+    if(!quota) storageOK = false;
+    return { ok:false, quota:quota };
+  }
+}
+
+/* ============================================================
+   F. ชุดตัวอย่าง (seed): ทุกชิ้นติดป้าย "ตัวอย่าง" (ux §7B)
+   ============================================================ */
+function seedWardrobe(){
+  return [
+    { id:"s1", name:"เสื้อเชิ้ตขาว",        category:"top",       color:"#FFFFFF", isExample:true },
+    { id:"s2", name:"เสื้อยืดกรมท่า",       category:"top",       color:"#2B3A67", isExample:true },
+    { id:"s3", name:"เสื้อไหมพรมครีม",      category:"top",       color:"#EFE6D2", isExample:true },
+    { id:"s4", name:"กางเกงชิโนเบจ",        category:"bottom",    color:"#C8B79B", isExample:true },
+    { id:"s5", name:"ยีนส์ฟอกอ่อน",         category:"bottom",    color:"#7A93B8", isExample:true },
+    { id:"s6", name:"กระโปรงดำ",            category:"bottom",    color:"#17161A", isExample:true },
+    { id:"s7", name:"แจ็กเก็ตยีนส์",        category:"outer",     color:"#4A5D8A", isExample:true },
+    { id:"s8", name:"สนีกเกอร์ขาว",         category:"shoes",     color:"#F2F0EB", isExample:true },
+    { id:"s9", name:"รองเท้าหนังน้ำตาล",    category:"shoes",     color:"#6B4A2F", isExample:true },
+    { id:"s10",name:"เข็มขัดหนังแดง",       category:"accessory", color:"#C0392B", isExample:true }
+  ];
+}
+</script>
+
+<script>
+"use strict";
+/* ============================================================
+   G. STATE + RENDER + EVENTS
+   ============================================================ */
+function esc(s){
+  return String(s == null ? "" : s).replace(/[&<>"']/g, function(c){
+    return { "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c];
+  });
+}
+function $(sel){ return document.querySelector(sel); }
+function uid(){ return "g" + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+
+var state = {
+  mode:null,                         /* null = ยังไม่เคยเลือก -> ให้ความพร้อมของตู้ตัดสิน (spec §4.6) */
+  occasion:"unspecified", theme:"system",
+  wardrobe:[], batch:[], index:0, result:null,
+  autoSwitchedTo:null, quotaWarned:false, seenStorageNote:false,
+  formOpen:false, editingId:null, formDraft:null, openMenuId:null
+};
+
+/* ---------- โหลดสถานะ ---------- */
+function init(){
+  var saved = loadStore();
+  if(saved){
+    state.wardrobe = Array.isArray(saved.wardrobe) ? saved.wardrobe : [];
+    var st = saved.settings || {};
+    state.occasion       = st.occasion || "unspecified";
+    state.theme          = st.theme || "system";
+    state.seenStorageNote= !!st.seenStorageNote;
+    state.mode           = st.mode === "wardrobe" || st.mode === "idea" ? st.mode : null;
+  }else{
+    state.wardrobe = seedWardrobe();
+  }
+  applyTheme();
+  /* ค่าเริ่มต้นของโหมดตามความพร้อมตู้ (spec §4.6) ถ้าไม่เคยเลือกไว้ */
+  if(!state.mode) state.mode = wardrobeReady() ? "wardrobe" : "idea";
+  renderOccasion();
+  regenerate(true);
+  renderWardrobe();
+  renderBanners();
+  renderMode();
+  observeSections();
+}
+function wardrobeReady(){
+  var g = groupByCategory(state.wardrobe);
+  return g.top.length > 0 && g.bottom.length > 0;
+}
+function persist(opts){
+  var res = saveStore({
+    wardrobe: state.wardrobe,
+    favorites: [],
+    settings: {
+      mode:state.mode, occasion:state.occasion, theme:state.theme,
+      seenStorageNote:state.seenStorageNote
+    }
+  });
+  if(!res.ok && res.quota && opts && opts.onQuota) opts.onQuota();
+  renderBanners();
+  return res;
+}
+
+/* ---------- โหมด + โอกาส ---------- */
+function renderMode(){
+  document.querySelectorAll(".modetoggle__opt").forEach(function(b){
+    b.setAttribute("aria-checked", String(b.dataset.mode === state.mode));
+  });
+  var slot = $("#autoNoticeSlot");
+  /* no silent state change (ux §7B): ระบบสลับโหมดให้เอง = ต้องมีข้อความบอก */
+  slot.innerHTML = state.autoSwitchedTo
+    ? '<p class="notice"><span aria-hidden="true">ⓘ</span><span>ตู้ยังมีของไม่พอจัดชุด เลยแสดง <b>สีที่เราแนะนำ</b> ให้ก่อน เพิ่มเสื้อกับกางเกงอย่างน้อยอย่างละชิ้นแล้วจะสลับไปโหมด <b>จากตู้ของฉัน</b> ได้</span></p>'
+    : "";
+}
+function renderOccasion(){
+  $("#occasionChips").innerHTML = OCCASIONS.map(function(o){
+    return '<button class="chip" role="radio" data-occ="'+o.id+'" aria-checked="'+
+      (o.id === state.occasion)+'">'+esc(o.label)+'</button>';
+  }).join("");
+}
+
+/* ---------- สร้างแบตช์ ---------- */
+function regenerate(silent){
+  var avoid = {};
+  state.batch.forEach(function(o){ avoid[outfitKey(o)] = 1; });
+  var res = (state.mode === "wardrobe")
+    ? generateWardrobeBatch(state.wardrobe, state.occasion, avoid)
+    : generateIdeaBatch(state.occasion, avoid);
+
+  if(res.insufficient && state.mode === "wardrobe"){
+    state.result = res; state.batch = []; state.index = 0;
+  }else if(res.noMatch){
+    state.result = res; state.batch = []; state.index = 0;
+  }else{
+    state.result = null; state.batch = res.outfits || []; state.index = 0;
+  }
+  renderResults();
+  if(!silent) say("#liveFeedback", "สร้างชุดใหม่แล้ว " + state.batch.length + " ชุด");
+}
+function say(sel, msg){
+  var el = $(sel); if(!el) return;
+  el.textContent = msg;
+  clearTimeout(el._t);
+  el._t = setTimeout(function(){ el.textContent = ""; }, 2500);
+}
+
+/* ---------- การ์ดชุด ---------- */
+function tileHTML(item, cat){
+  if(!item){
+    return '<li class="tile tile--empty"><span class="tile__box">ไม่มี</span>'+
+      '<span class="tile__label"><span class="tile__cat">'+esc(CATEGORY_TH[cat])+'</span>'+
+      '<span class="tile__color">ไม่ได้ใส่ในชุดนี้</span></span></li>';
+  }
+  var hex = normHex(item.color), name = colorNameTH(hex);
+  var inner = item.photo
+    ? '<img src="'+esc(item.photo)+'" alt="" loading="lazy">'
+    : '<span style="display:block;width:100%;height:100%;background:'+hex+'"></span>';
+  return '<li class="tile"><span class="tile__box">'+inner+'</span>'+
+    '<span class="tile__label">'+
+      '<span class="tile__cat">'+esc(CATEGORY_TH[cat])+'</span>'+
+      (item.isIdea ? '' : '<span class="tile__name" title="'+esc(item.name)+'">'+esc(item.name)+'</span>')+
+      '<span class="tile__color">'+esc(name)+' · <span class="tnum">'+esc(hex)+'</span></span>'+
+    '</span></li>';
+}
+function pbarHTML(breakdown, cardId){
+  var segs = breakdown.map(function(b,i){
+    var label = b.name + " " + b.pct + "% (" + ROLE_TH[b.role || "neutral"] + ")";
+    return '<button type="button" class="pbar__seg" data-card="'+cardId+'" data-idx="'+i+'" '+
+      'style="flex:'+b.pct+' 1 0;background:'+b.hex+'" '+
+      'title="'+esc(b.name+" · "+b.hex+" · "+ROLE_TH[b.role||"neutral"]+" · "+b.pct+"%")+'" '+
+      'aria-label="'+esc(label)+'"></button>';
+  }).join("");
+  /* direct label เฉพาะ segment >= 12% ที่เหลืออ่านจาก legend (ui doc §3.4) */
+  var labs = breakdown.map(function(b){
+    return '<span class="pbar__lab" style="flex:'+b.pct+' 1 0">'+
+      (b.pct >= 12 ? esc(b.name)+" "+b.pct+"%" : "")+'</span>';
+  }).join("");
+  var legend = breakdown.map(function(b,i){
+    return '<span class="pbar__item" data-legend="'+cardId+'-'+i+'">'+
+      '<span class="swatch swatch--sm" style="background:'+b.hex+'"></span>'+
+      '<span><b>'+esc(b.name)+'</b> '+b.pct+'% <span class="tnum">'+esc(b.hex)+'</span>'+
+      ' <span class="pbar__role">'+esc(ROLE_TH[b.role || "neutral"])+'</span></span></span>';
+  }).join("");
+  var summary = breakdown.map(function(b){ return b.name+" "+b.pct+"%"; }).join(", ");
+  return '<div class="pbar">'+
+    '<div class="pbar__track" role="img" aria-label="'+esc("สัดส่วนสี: "+summary)+'">'+segs+'</div>'+
+    '<div class="pbar__labels" aria-hidden="true">'+labs+'</div>'+
+    '<div class="pbar__legend">'+legend+'</div></div>';
+}
+function cardHTML(o, i, focused){
+  var isSample = CATEGORY_ORDER.some(function(c){ return o.items[c] && o.items[c].isExample; });
+  var cardId = "c"+i;
+  var tiles = CATEGORY_ORDER
+    .filter(function(c){ return o.items[c] || c === "top" || c === "bottom"; })
+    .map(function(c){ return tileHTML(o.items[c], c); }).join("");
+  return '<article class="card '+(focused ? "card--focused" : "card--adjacent")+'" '+
+      'role="group" aria-roledescription="ชุดแนะนำ" aria-label="ชุดที่ '+(i+1)+' จาก '+state.batch.length+'" '+
+      (focused ? '' : 'aria-hidden="true" inert')+'>'+
+    '<div class="card__head">'+
+      (isSample ? '<span class="badge">ตัวอย่าง</span>' : '')+
+      '<span class="card__rule">'+esc(RULE_TH[o.ruleUsed] || o.ruleUsed)+'</span>'+
+    '</div>'+
+    '<ul class="tiles">'+tiles+'</ul>'+
+    pbarHTML(o.colorBreakdown, cardId)+
+    '<ul class="advice">'+o.advice.map(function(a){ return "<li>"+a+"</li>"; }).join("")+'</ul>'+
+  '</article>';
+}
+function renderResults(){
+  var slot = $("#resultsSlot");
+
+  if(state.result && state.result.insufficient){          /* A3 */
+    var miss = state.result.insufficient.map(function(c){ return CATEGORY_TH[c]; }).join(" และ ");
+    slot.innerHTML = '<div class="empty"><h3 class="empty__title">ยังขาด'+esc(miss)+'</h3>'+
+      '<p class="empty__body">โหมดนี้จัดชุดจากเสื้อผ้าจริงในตู้ ต้องมีอย่างน้อยเสื้อหนึ่งชิ้นและกางเกงหรือกระโปรงหนึ่งชิ้น</p>'+
+      '<div class="empty__actions">'+
+        '<button class="btn btn--primary" data-jump="sec-wardrobe">เพิ่ม'+esc(miss)+'</button>'+
+        '<button class="btn btn--ghost" data-setmode="idea">ดูไอเดียสีแทน</button>'+
+      '</div></div>';
+    return;
+  }
+  if(state.result && state.result.noMatch){               /* A4 */
+    slot.innerHTML = '<div class="empty"><h3 class="empty__title">ยังจับคู่ไม่ได้</h3>'+
+      '<p class="empty__body">ลองเพิ่มเสื้อผ้าอีกสักชิ้น หรือดูไอเดียสีเพื่อหาแนวทางก่อน</p>'+
+      '<div class="empty__actions"><button class="btn btn--ghost" data-setmode="idea">สลับไปโหมดไอเดีย</button></div></div>';
+    return;
+  }
+  if(!state.batch.length){
+    slot.innerHTML = '<div class="empty"><h3 class="empty__title">ยังไม่มีชุดแนะนำ</h3>'+
+      '<div class="empty__actions"><button class="btn btn--primary" data-gen="1">สร้างชุดให้ดูหน่อย</button></div></div>';
+    return;
+  }
+
+  var cards = state.batch.map(function(o,i){ return cardHTML(o, i, i === state.index); }).join("");
+  slot.innerHTML =
+    '<div class="carousel-wrap"><div class="carousel" id="carousel">'+
+      '<div class="carousel__track" id="track" style="--i:'+state.index+'">'+cards+'</div></div></div>'+
+    '<div class="navrow">'+
+      '<button class="iconbtn" data-nav="-1" aria-label="ชุดก่อนหน้า"'+(state.batch.length<2?" disabled":"")+'>‹</button>'+
+      '<span class="navrow__pos">ชุดที่ '+(state.index+1)+' จาก '+state.batch.length+'</span>'+
+      '<button class="iconbtn" data-nav="1" aria-label="ชุดถัดไป"'+(state.batch.length<2?" disabled":"")+'>›</button>'+
+      '<button class="btn btn--primary" data-gen="1">✨ เจนชุดใหม่</button>'+
+    '</div>';
+}
+</script>
+
+<script>
+"use strict";
+/* ---------- ตู้เสื้อผ้า ---------- */
+function renderWardrobe(){
+  var slot = $("#wardrobeSlot");
+  $("#wardCount").textContent = state.wardrobe.length ? state.wardrobe.length + " ชิ้น" : "";
+  if(!state.wardrobe.length){
+    slot.innerHTML = '<div class="empty"><h3 class="empty__title">ตู้ยังว่าง</h3>'+
+      '<p class="empty__body">เพิ่มเสื้อผ้าที่มีจริง แล้วโหมด “จากตู้ของฉัน” จะจัดชุดจากของจริงให้</p>'+
+      '<div class="empty__actions"><button class="btn btn--primary" data-add="1">+ เพิ่มเสื้อผ้าชิ้นแรก</button></div></div>';
+    return;
+  }
+  slot.innerHTML = '<div class="grid">' + state.wardrobe.map(function(it){
+    var hex = normHex(it.color);
+    var box = it.photo
+      ? '<img src="'+esc(it.photo)+'" alt="" loading="lazy">'
+      : '<span style="display:block;width:100%;height:100%;background:'+hex+'"></span>';
+    return '<article class="gchip">'+
+      '<div class="gchip__menu">'+
+        '<button class="gchip__more" data-more="'+esc(it.id)+'" aria-haspopup="true" aria-expanded="'+
+          (state.openMenuId === it.id)+'" aria-label="ตัวเลือกของ '+esc(it.name)+'">⋯</button>'+
+        (state.openMenuId === it.id
+          ? '<div class="gchip__pop" role="menu">'+
+              '<button role="menuitem" data-edit="'+esc(it.id)+'">✏️ แก้ไข</button>'+
+              '<button role="menuitem" data-del="'+esc(it.id)+'">🗑 ลบ</button>'+
+            '</div>'
+          : '')+
+      '</div>'+
+      '<div class="gchip__box">'+box+'</div>'+
+      '<h3 class="gchip__name" title="'+esc(it.name)+'">'+esc(it.name)+'</h3>'+
+      '<p class="gchip__meta">'+esc(CATEGORY_TH[it.category] || it.category)+
+        (it.isExample ? ' · <span class="badge">ตัวอย่าง</span>' : '')+'</p>'+
+      '<p class="gchip__color"><span class="swatch swatch--sm" style="background:'+hex+'"></span>'+
+        esc(colorNameTH(hex))+' · <span class="tnum">'+esc(hex)+'</span></p>'+
+    '</article>';
+  }).join("") + '</div>';
+}
+
+/* ---------- ฟอร์มเพิ่ม/แก้ไข ---------- */
+function openForm(id){
+  var g = id ? state.wardrobe.filter(function(x){ return x.id === id; })[0] : null;
+  state.editingId = id || null;
+  state.formOpen = true;
+  state.formDraft = g
+    ? { name:g.name, category:g.category, color:normHex(g.color), photo:g.photo || null, autoFilled:false }
+    : { name:"", category:"top", color:"#4A5D8A", photo:null, autoFilled:false };
+  renderForm();
+  setTimeout(function(){ var el = $("#fName"); if(el) el.focus(); }, 30);
+}
+function closeForm(){ state.formOpen = false; state.editingId = null; state.formDraft = null; renderForm(); }
+function renderForm(){
+  var slot = $("#formSlot");
+  if(!state.formOpen){ slot.innerHTML = ""; return; }
+  var d = state.formDraft;
+  var cats = CATEGORY_ORDER.map(function(c){
+    return '<button type="button" class="chip" data-cat="'+c+'" aria-pressed="'+(d.category===c)+'">'+
+      esc(CATEGORY_TH[c])+'</button>';
+  }).join("");
+  var drop = d.photo
+    ? '<div class="drop is-filled" id="drop"><img src="'+esc(d.photo)+'" alt="ตัวอย่างรูปที่เลือก">'+
+        '<span class="drop__over"><button type="button" class="btn btn--ghost" data-photo="change">เปลี่ยนรูป</button>'+
+        '<button type="button" class="btn btn--ghost" data-photo="remove">ลบรูป</button></span></div>'
+    : '<div class="drop" id="drop"><span aria-hidden="true">🖼</span><span>ลากรูปมาวาง หรือเลือกไฟล์</span>'+
+        '<button type="button" class="btn btn--secondary" data-photo="pick">เลือกไฟล์</button></div>';
+
+  slot.innerHTML = '<form class="form" id="gForm" novalidate>'+
+    '<h3 class="section__title" style="font-size:var(--fs-h2);margin-bottom:var(--sp-4)">'+
+      (state.editingId ? "แก้ไขเสื้อผ้า" : "เพิ่มเสื้อผ้า")+'</h3>'+
+    '<div class="form__grid">'+
+      '<div>'+drop+
+        '<input type="file" id="fFile" accept="image/*" class="visually-hidden">'+
+        '<p class="field__help" id="fImgHelp"></p>'+
+      '</div>'+
+      '<div>'+
+        '<div class="field"><label class="field__label" for="fName">ชื่อชิ้นนี้</label>'+
+          '<input class="input" id="fName" value="'+esc(d.name)+'" placeholder="เช่น เสื้อเชิ้ตลินินสีครีม" maxlength="80"></div>'+
+        '<div class="field"><span class="field__label">หมวด</span><div class="chips">'+cats+'</div></div>'+
+        '<div class="field"><label class="field__label" for="fHex">สี</label>'+
+          '<div class="hexrow">'+
+            '<span class="swatch swatch--md" id="fSwatch" style="background:'+d.color+'"></span>'+
+            '<input class="input tnum" id="fHex" value="'+esc(d.color)+'" maxlength="7" spellcheck="false">'+
+            '<input type="color" id="fPick" value="'+d.color+'" aria-label="เลือกสีจากจานสี">'+
+          '</div>'+
+          '<p class="field__help" id="fHexHelp">'+
+            (d.autoFilled ? "เดาสีจากรูปให้แล้ว แก้ค่าได้" : "ใส่รหัสสีเช่น #4A5D8A")+'</p>'+
+        '</div>'+
+      '</div>'+
+    '</div>'+
+    '<div class="form__actions">'+
+      '<button type="submit" class="btn btn--primary">'+(state.editingId ? "บันทึกการแก้ไข" : "เพิ่มเข้าตู้")+'</button>'+
+      '<button type="button" class="btn btn--ghost" data-cancel="1">ยกเลิก</button>'+
+    '</div></form>';
+}
+
+/* ---------- แบนเนอร์ (ux §7B no silent state change) ---------- */
+function renderBanners(){
+  var hasSample = state.wardrobe.some(function(g){ return g.isExample; });
+  $("#sampleBannerSlot").innerHTML = hasSample
+    ? '<div class="banner"><span class="banner__ico" aria-hidden="true">✨</span>'+
+      '<span class="banner__body">นี่คือชุดตัวอย่างให้ลองเล่น เพิ่มเสื้อผ้าของคุณเพื่อดูชุดจากตู้จริง</span>'+
+      '<button class="btn btn--ghost" data-clearsample="1">ล้างตัวอย่าง</button></div>'
+    : "";
+  var out = "";
+  if(!storageOK){
+    out += '<div class="banner banner--warning"><span class="banner__ico" aria-hidden="true">⚠</span>'+
+      '<span class="banner__body">ใช้งานได้ตามปกติ แต่เครื่องนี้บันทึกข้อมูลถาวรไม่ได้ (เบราว์เซอร์บล็อกที่เก็บข้อมูล) ปิดหน้านี้แล้วข้อมูลจะหาย</span></div>';
+  }else if(!state.seenStorageNote && state.wardrobe.some(function(g){ return !g.isExample; })){
+    out += '<div class="banner"><span class="banner__ico" aria-hidden="true">ⓘ</span>'+
+      '<span class="banner__body">บันทึกไว้ในเครื่องนี้เท่านั้น ไม่ได้ส่งขึ้นเซิร์ฟเวอร์ และเปิดจากเครื่องอื่นจะไม่เห็น</span>'+
+      '<button class="btn btn--ghost" data-notedone="1">เข้าใจแล้ว</button></div>';
+  }
+  if(state.quotaWarned){
+    out += '<div class="banner banner--warning"><span class="banner__ico" aria-hidden="true">⚠</span>'+
+      '<span class="banner__body">พื้นที่เก็บข้อมูลเต็ม บันทึกชิ้นนี้แบบไม่มีรูปให้แล้ว (สีและหมวดยังอยู่ครบ) ลองลบรูปของชิ้นเก่าเพื่อคืนพื้นที่</span></div>';
+  }
+  $("#storageBannerSlot").innerHTML = out;
+}
+
+/* ---------- ธีม ---------- */
+function applyTheme(){
+  if(state.theme === "system") document.documentElement.removeAttribute("data-theme");
+  else document.documentElement.setAttribute("data-theme", state.theme);
+  var lbl = { system:"ธีม: ตามเครื่อง", light:"ธีม: สว่าง", dark:"ธีม: มืด" }[state.theme];
+  var el = $("#themeLabel"); if(el){ el.textContent = "ธีม"; $("#themeBtn").setAttribute("aria-label", lbl); }
+}
+</script>
+
+<script>
+"use strict";
+/* ---------- รูปภาพ: ย่อเป็น data URL + ดึงสีจากโซนกลางภาพ (spec FR-0 AC2) ---------- */
+var MAX_IMG = 320;
+function processImage(file, cb){
+  if(!file || !/^image\//.test(file.type)) return cb({ error:"อ่านรูปไม่สำเร็จ ลองไฟล์อื่น" });
+  var fr = new FileReader();
+  fr.onerror = function(){ cb({ error:"อ่านรูปไม่สำเร็จ ลองไฟล์อื่น" }); };
+  fr.onload = function(){
+    var img = new Image();
+    img.onerror = function(){ cb({ error:"อ่านรูปไม่สำเร็จ ลองไฟล์อื่น" }); };
+    img.onload = function(){
+      try{
+        var sc = Math.min(1, MAX_IMG / Math.max(img.width, img.height));
+        var w = Math.max(1, Math.round(img.width*sc)), h = Math.max(1, Math.round(img.height*sc));
+        var cv = document.createElement("canvas"); cv.width = w; cv.height = h;
+        var cx = cv.getContext("2d", { willReadFrequently:true });
+        cx.drawImage(img, 0, 0, w, h);
+        /* เฉลี่ยโซนกลางภาพ 50%. รูปเป็นตัวช่วย ไม่ใช่ตัวตัดสิน ผู้ใช้แก้ hex ได้เสมอ */
+        var x0 = Math.floor(w*0.25), y0 = Math.floor(h*0.25);
+        var cw = Math.max(1, Math.floor(w*0.5)), ch = Math.max(1, Math.floor(h*0.5));
+        var d = cx.getImageData(x0, y0, cw, ch).data;
+        var r=0, g=0, b=0, n=0;
+        for(var i=0; i<d.length; i+=4){ if(d[i+3] < 200) continue; r+=d[i]; g+=d[i+1]; b+=d[i+2]; n++; }
+        var hex = n ? rgbToHex(r/n, g/n, b/n) : null;
+        cb({ dataUrl: cv.toDataURL("image/jpeg", 0.72), hex: hex });
+      }catch(err){ cb({ error:"อ่านรูปไม่สำเร็จ ลองไฟล์อื่น" }); }
+    };
+    img.src = fr.result;
+  };
+  fr.readAsDataURL(file);
+}
+
+/* ---------- carousel: อัปเดตในที่ ไม่ re-render (โฟกัสคีย์บอร์ดจะได้ไม่หลุด) ---------- */
+function updateCarousel(){
+  var track = $("#track"); if(!track) return;
+  track.style.setProperty("--i", state.index);
+  var cards = track.querySelectorAll(".card");
+  cards.forEach(function(c, i){
+    var on = (i === state.index);
+    c.classList.toggle("card--focused", on);
+    c.classList.toggle("card--adjacent", !on);
+    if(on){ c.removeAttribute("aria-hidden"); c.removeAttribute("inert"); c.inert = false; }
+    else  { c.setAttribute("aria-hidden","true"); c.setAttribute("inert",""); c.inert = true; }
+    c.setAttribute("aria-label", "ชุดที่ "+(i+1)+" จาก "+state.batch.length);
+  });
+  var pos = document.querySelector(".navrow__pos");
+  if(pos) pos.textContent = "ชุดที่ " + (state.index+1) + " จาก " + state.batch.length;
+}
+function goTo(delta){
+  if(state.batch.length < 2) return;
+  state.index = (state.index + delta + state.batch.length) % state.batch.length;
+  updateCarousel();
+}
+
+/* ---------- สลับโหมด ---------- */
+function setMode(m, isAuto){
+  state.mode = m;
+  state.autoSwitchedTo = isAuto ? m : null;
+  renderMode(); persist(); regenerate(true);
+}
+function autoSwitchIfNeeded(){
+  if(state.mode === "wardrobe" && !wardrobeReady()){ setMode("idea", true); return true; }
+  return false;
+}
+
+/* ---------- CRUD ---------- */
+function saveGarment(){
+  var d = state.formDraft;
+  var hexEl = $("#fHex"), nameEl = $("#fName");
+  var hex = hexEl ? hexEl.value : d.color;
+  if(!isValidHex(hex)){
+    hexEl.classList.add("input--invalid");
+    var hh = $("#fHexHelp"); hh.textContent = "ใส่รหัสสีเช่น #4A5D8A"; hh.className = "field__help field__help--err";
+    hexEl.focus(); return;
+  }
+  hex = normHex(hex);
+  var name = (nameEl.value || "").trim() || (colorNameTH(hex) + CATEGORY_TH[d.category]);
+
+  if(state.editingId){
+    var g = state.wardrobe.filter(function(x){ return x.id === state.editingId; })[0];
+    if(g){
+      g.name = name; g.category = d.category; g.color = hex;
+      g.photo = d.photo;                 /* AC4: ไม่เลือกรูปใหม่ = d.photo ยังเป็นรูปเดิม */
+      delete g.isExample;
+    }
+  }else{
+    state.wardrobe.push({ id:uid(), name:name, category:d.category, color:hex, photo:d.photo || undefined });
+  }
+  var res = persist();
+  if(!res.ok && res.quota){
+    /* spec §7C: quota เต็ม -> เตือนแล้วเซฟชิ้นนั้นแบบไม่มีรูป */
+    var last = state.editingId
+      ? state.wardrobe.filter(function(x){ return x.id === state.editingId; })[0]
+      : state.wardrobe[state.wardrobe.length-1];
+    if(last) delete last.photo;
+    state.quotaWarned = true;
+    persist();
+  }
+  closeForm(); renderWardrobe(); renderBanners();
+  if(!autoSwitchIfNeeded()) regenerate(true);
+  say("#wardFeedback", state.editingId ? "บันทึกการแก้ไขแล้ว" : "เพิ่ม " + name + " เข้าตู้แล้ว");
+}
+function deleteGarment(id){
+  var g = state.wardrobe.filter(function(x){ return x.id === id; })[0];
+  if(!g) return;
+  $("#dlgTitle").textContent = "ลบ " + g.name + "?";
+  $("#dlgBody").textContent  = "ชิ้นนี้จะถูกเอาออกจากตู้ และไม่ถูกใช้จัดชุดอีก";
+  var dlg = $("#confirmDlg");
+  dlg.returnValue = "";
+  dlg.showModal();
+  dlg.addEventListener("close", function onc(){
+    dlg.removeEventListener("close", onc);
+    if(dlg.returnValue !== "ok") return;
+    state.wardrobe = state.wardrobe.filter(function(x){ return x.id !== id; });
+    persist(); renderWardrobe(); renderBanners();
+    if(!autoSwitchIfNeeded()) regenerate(true);
+    say("#wardFeedback", "ลบ " + g.name + " แล้ว");
+  }, false);
+}
+
+/* ---------- events ---------- */
+document.addEventListener("click", function(e){
+  var t = e.target.closest("[data-jump],[data-mode],[data-occ],[data-nav],[data-gen],[data-setmode],"+
+    "[data-add],[data-edit],[data-del],[data-more],[data-cat],[data-photo],[data-cancel],"+
+    "[data-clearsample],[data-notedone],.pbar__seg");
+  /* คลิกที่อื่น = ปิดเมนูของชิ้นเสื้อผ้า */
+  if(state.openMenuId && (!t || (!t.dataset.more && !t.dataset.edit && !t.dataset.del))){
+    state.openMenuId = null; renderWardrobe();
+  }
+  if(!t) return;
+  if(t.dataset.more){
+    state.openMenuId = (state.openMenuId === t.dataset.more) ? null : t.dataset.more;
+    renderWardrobe();
+    var reopened = document.querySelector('[data-more="'+t.dataset.more+'"]');
+    if(reopened) reopened.focus();
+    return;
+  }
+
+  if(t.dataset.jump){
+    var el = document.getElementById(t.dataset.jump);
+    if(el){
+      var top = window.matchMedia("(min-width:640px)").matches ? 56 + 8 : 8;
+      window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - top, behavior:"smooth" });
+    }
+    return;
+  }
+  if(t.dataset.mode)    { setMode(t.dataset.mode, false); return; }
+  if(t.dataset.setmode) { setMode(t.dataset.setmode, false); return; }
+  if(t.dataset.occ)     { state.occasion = t.dataset.occ; renderOccasion(); persist(); regenerate(true);
+                          say("#liveFeedback", "ปรับโทนตามโอกาสให้แล้ว"); return; }
+  if(t.dataset.nav)     { goTo(parseInt(t.dataset.nav,10)); return; }
+  if(t.dataset.gen)     { regenerate(false); return; }
+  if(t.dataset.add)     { openForm(null); return; }
+  if(t.dataset.edit)    { state.openMenuId = null; renderWardrobe(); openForm(t.dataset.edit); return; }
+  if(t.dataset.del)     { var delId = t.dataset.del; state.openMenuId = null; renderWardrobe(); deleteGarment(delId); return; }
+  if(t.dataset.cancel)  { closeForm(); return; }
+  if(t.dataset.notedone){ state.seenStorageNote = true; persist(); return; }
+  if(t.dataset.clearsample){
+    state.wardrobe = state.wardrobe.filter(function(g){ return !g.isExample; });
+    persist(); renderWardrobe(); renderBanners();
+    if(!autoSwitchIfNeeded()) regenerate(true);
+    say("#wardFeedback", "ล้างชุดตัวอย่างแล้ว"); return;
+  }
+  if(t.dataset.cat){
+    state.formDraft.category = t.dataset.cat;
+    document.querySelectorAll("[data-cat]").forEach(function(b){
+      b.setAttribute("aria-pressed", String(b.dataset.cat === t.dataset.cat));
+    });
+    return;
+  }
+  if(t.dataset.photo){
+    if(t.dataset.photo === "remove"){ state.formDraft.photo = null; renderForm(); }
+    else $("#fFile").click();
+    return;
+  }
+  if(t.classList.contains("pbar__seg")){
+    /* จอสัมผัสไม่มี hover: แตะ segment แล้วไฮไลต์รายการที่ตรงกันใน legend (plan §0.4) */
+    var key = t.dataset.card + "-" + t.dataset.idx;
+    document.querySelectorAll(".pbar__item").forEach(function(li){
+      li.classList.toggle("is-active", li.dataset.legend === key);
+    });
+    return;
+  }
+}, false);
+
+document.addEventListener("submit", function(e){
+  if(e.target.id === "gForm"){ e.preventDefault(); saveGarment(); }
+}, false);
+
+document.addEventListener("input", function(e){
+  if(e.target.id === "fHex" || e.target.id === "fPick"){
+    var v = e.target.value;
+    if(isValidHex(v)){
+      var hex = normHex(v);
+      state.formDraft.color = hex;
+      $("#fSwatch").style.background = hex;
+      if(e.target.id === "fPick") $("#fHex").value = hex; else $("#fPick").value = hex;
+      $("#fHex").classList.remove("input--invalid");
+      var hh = $("#fHexHelp");
+      if(hh.classList.contains("field__help--err")){ hh.className = "field__help"; hh.textContent = "ใส่รหัสสีเช่น #4A5D8A"; }
+    }
+  }
+  if(e.target.id === "fName") state.formDraft.name = e.target.value;
+}, false);
+
+document.addEventListener("change", function(e){
+  if(e.target.id !== "fFile") return;
+  var file = e.target.files && e.target.files[0];
+  if(!file) return;
+  var help = $("#fImgHelp"), drop = $("#drop");
+  help.className = "field__help"; help.textContent = "กำลังอ่านสีจากรูป…";
+  if(drop) drop.classList.add("is-loading");
+  processImage(file, function(r){
+    if(r.error){
+      help.className = "field__help field__help--err"; help.textContent = r.error;
+      if(drop) drop.classList.remove("is-loading");
+      return;                             /* ฟอร์มยังใช้ต่อได้ กรอก hex เองได้ (spec §7C) */
+    }
+    state.formDraft.photo = r.dataUrl;
+    if(r.hex){ state.formDraft.color = r.hex; state.formDraft.autoFilled = true; }
+    renderForm();
+    var h2 = $("#fImgHelp"); if(h2) h2.textContent = r.hex ? "เดาสีจากรูปให้แล้ว แก้ค่าได้" : "";
+  });
+}, false);
+
+/* คีย์บอร์ด: ลูกศรซ้าย-ขวาเมื่อโฟกัสอยู่ในแทร็ก */
+document.addEventListener("keydown", function(e){
+  if(e.key === "Escape" && state.openMenuId){ state.openMenuId = null; renderWardrobe(); return; }
+  if(e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+  if(!e.target.closest || !e.target.closest("#sec-suggest")) return;
+  if(/^(INPUT|TEXTAREA)$/.test(e.target.tagName)) return;
+  e.preventDefault();
+  goTo(e.key === "ArrowRight" ? 1 : -1);
+}, false);
+
+/* ปัดซ้าย-ขวา */
+var tx = null;
+document.addEventListener("touchstart", function(e){
+  var c = e.target.closest && e.target.closest("#carousel");
+  tx = c ? e.touches[0].clientX : null;
+}, { passive:true });
+document.addEventListener("touchend", function(e){
+  if(tx === null) return;
+  var dx = e.changedTouches[0].clientX - tx; tx = null;
+  if(Math.abs(dx) > 45) goTo(dx < 0 ? 1 : -1);
+}, { passive:true });
+
+/* drag & drop รูป */
+document.addEventListener("dragover", function(e){
+  var d = e.target.closest && e.target.closest("#drop");
+  if(d){ e.preventDefault(); d.classList.add("is-over"); }
+}, false);
+document.addEventListener("dragleave", function(e){
+  var d = e.target.closest && e.target.closest("#drop");
+  if(d) d.classList.remove("is-over");
+}, false);
+document.addEventListener("drop", function(e){
+  var d = e.target.closest && e.target.closest("#drop");
+  if(!d) return;
+  e.preventDefault(); d.classList.remove("is-over");
+  var f = e.dataTransfer.files && e.dataTransfer.files[0];
+  if(!f) return;
+  var input = $("#fFile");
+  var dt = new DataTransfer(); dt.items.add(f); input.files = dt.files;
+  input.dispatchEvent(new Event("change", { bubbles:true }));
+}, false);
+
+$("#heroGen").addEventListener("click", function(){
+  document.getElementById("sec-suggest").scrollIntoView({ behavior:"smooth", block:"start" });
+  regenerate(false);
+});
+$("#themeBtn").addEventListener("click", function(){
+  state.theme = state.theme === "system" ? "light" : state.theme === "light" ? "dark" : "system";
+  applyTheme(); persist();
+  say("#liveFeedback", { system:"ใช้ธีมตามเครื่อง", light:"ธีมสว่าง", dark:"ธีมมืด" }[state.theme]);
+});
+$("#addBtn").addEventListener("click", function(){ openForm(null); });
+
+/* nav active ตาม section ที่อยู่ในจอ */
+function observeSections(){
+  var ids = ["sec-suggest","sec-wardrobe"];
+  if(!("IntersectionObserver" in window)) return;
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(en){
+      if(!en.isIntersecting) return;
+      document.querySelectorAll("[data-jump]").forEach(function(b){
+        if(b.classList.contains("nav__btn")) b.setAttribute("aria-current", String(b.dataset.jump === en.target.id));
+      });
+    });
+  }, { rootMargin:"-45% 0px -45% 0px" });
+  ids.forEach(function(id){ var el = document.getElementById(id); if(el) io.observe(el); });
+}
+
+init();
+</script>
