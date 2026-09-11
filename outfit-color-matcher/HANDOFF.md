@@ -1,11 +1,11 @@
 # Handoff: Outfit Color Matcher
 
-> อัปเดต 2026-09-10 · เฟส 1 เสร็จและทดสอบผ่านแล้ว รอผู้ใช้ตัดสินใจ 2 ข้อก่อนเดินต่อ
+> อัปเดต 2026-09-11 · หลัง `/code-review origin/main` เจอ 4 ข้อค้าง ตอนนี้แก้ครบแล้ว
 > ผู้ใช้สื่อสารเป็นภาษาไทย ตอบไทยเสมอ
 
 ## เอกสารและโค้ดอยู่ที่ไหน
 
-repo `artitthesun14-ux/skills` โฟลเดอร์ `outfit-color-matcher/`
+repo `artitthesun14-ux/skills` โฟลเดอร์ `outfit-color-matcher/` บรานช์ `claude/ready-to-use-qhe3ak`
 ทุก path ในเอกสารนี้อ้างจากโฟลเดอร์นั้น
 
 ถ้าเซสชันใหม่ยังไม่มี repo ให้ดึงเข้ามาก่อน (ใน Claude Code ใช้ `add_repo` แล้ว clone)
@@ -21,20 +21,43 @@ repo `artitthesun14-ux/skills` โฟลเดอร์ `outfit-color-matcher/`
 
 ## สถานะปัจจุบัน
 
-**เฟส 2 เสร็จ (Swap + Favorites, V6) ทดสอบผ่าน 238 ข้อในเทสต์ 7 ชุด**
+**เฟส 2 เสร็จ (Swap + Favorites) ทดสอบผ่าน 238 ข้อในเทสต์ 7 ชุด publish เป็น Version 7 แล้ว**
 artifact: `https://claude.ai/code/artifact/ee952a4d-7525-4446-a827-548546fe68b0`
 
 - publish ทับลิงก์เดิมเสมอ (localStorage ของผู้ใช้ไม่หาย) และต้อง `action:"read"` ก่อน publish ทุกครั้ง
-- artifact นี้ไม่ได้สร้างในเซสชันแรกของโปรเจกต์ เคยแจ้งผู้ใช้ไว้แล้ว
+  (อ่านให้ครบทุกบรรทัดของไฟล์ที่ระบบเก็บไว้ ไม่ใช่แค่ head ที่โชว์มา ไม่งั้น publish จะถูกปฏิเสธ)
 - แหล่งความจริงของโค้ดคือ `app.html` แก้แล้วรัน `./build.sh` ทุกครั้ง อย่าแก้ `outfit-color-matcher.html` ตรงๆ
 - watch subscription ของ artifact ลงทะเบียนไม่สำเร็จ (`mint_failed`) จึงไม่มีการปลุกเมื่อมีคนแก้จากที่อื่น ห้ามอ้างว่ากำลังเฝ้าอยู่
+
+### `/code-review origin/main` (fixed point ก่อนหน้า `a56ffaa`) เจอ 4 ข้อ ตอนนี้แก้ครบแล้ว (fixed point ใหม่ = HEAD ปัจจุบันของบรานช์นี้)
+
+1. **[แก้แล้ว] `app.html` เคยมี doctype/html/head/body wrapper ฝังอยู่ที่บรรทัดแรก** ทั้งที่สัญญาไว้ว่า
+   app.html ต้องไม่มี 3 แท็กนี้ (README/PROJECT_STATE ยืนยันตรงกัน) ทำให้ `outfit-color-matcher.html`
+   ที่ build และ **artifact ที่ publish ไว้ทุกเวอร์ชัน (V4-V6) ซ้อนกัน 2 ชั้น** เพราะ build.sh และ Artifact
+   tool ต่างก็ห่อ skeleton ของตัวเองทับอีกที ลบบรรทัดที่ฝังอยู่ออกแล้ว, build/เทสต์/publish ใหม่เป็น V7
+2. **[แก้แล้ว ด้วยการแก้สเปก ไม่ใช่แก้โค้ด]** FR-3 เคยเขียนว่าเมนู ⋯ ของ favorite ต้องมี "เปิดแก้ไข"
+   แต่ของจริงมีแค่ แก้ชื่อ/ทำสำเนา/ลบ (`favFromLook()` เก็บ snapshot ล้วน ไม่มี garment id อ้างอิงกลับ)
+   ผู้ใช้เลือกให้แก้สเปกให้ตรงของจริง: ตัด "เปิดแก้ไข" ออกจาก FR-3 และตัดประโยค "ถ้ากดแก้จะเตือนว่า
+   ชิ้นเดิมถูกลบแล้ว" ออกจาก spec §7C (state Deleted Garment ยังอยู่ เพราะ snapshot behavior จริง
+   ยังทำงานอยู่ แค่ไม่มี "เปิดแก้ไข" ให้เตือน) **ไม่ได้แก้โค้ดใดๆ ในข้อนี้**
+3. **[แก้แล้ว]** `docs/spec-outfit-color-matcher.md` §9 และ `docs/ui-outfit-color-matcher.md` §3.7/§8
+   เคยบอกว่ามี "~17 ทรง" ทั้งที่ของจริงมี 21 ตรงกับ `PROJECT_STATE.md` และ `SHAPES` array ใน app.html
+   แก้ทั้ง 3 จุดเป็น "21 ทรง" แล้ว
+4. **[แก้แล้ว]** `docs/ux-outfit-color-matcher.md` §7 เคยเขียนว่า Swap คือ "แตะช่องหมวดในการ์ด"
+   ทั้งที่ของจริงเป็นปุ่มแยก `.tile__swap` (ตรงกับที่ `docs/ui-outfit-color-matcher.md` บันทึกไว้ถูกต้อง
+   อยู่แล้วในรายการ SwapButton และ `PROJECT_STATE.md` §4) แก้บรรทัดนั้นให้บอกว่า Swap = กดปุ่ม 🔄 แล้ว
+
+**ข้อควรระวังจากข้อ 1:** เวลาอ่าน artifact ที่เคย publish ไว้เพื่อเช็ค drift ก่อนแก้โค้ด ให้เทียบ
+บรรทัดแรกของ artifact กับบรรทัดแรกของ `app.html` ในเครื่องเสมอ ถ้า artifact มี `<!doctype html><html>...`
+ขึ้นต้นแปลว่ามี wrapper แฝงอยู่ ให้สงสัยว่า sync ครั้งก่อนอาจคัดลอกมาจากไฟล์ cache ที่ผ่านการอ่าน
+artifact (ซึ่งมี skeleton ห่ออยู่) แทนไฟล์ต้นฉบับที่ไม่มี wrapper
 
 ## รอผู้ใช้ตัดสินใจ
 
 1. **เริ่มเฟส 3 เมื่อไหร่** FR-4 วิเคราะห์ตู้ + FR-5 เลือกสีก่อน + FR-6 Outfit Generator
 2. **เปิด PR ใหม่ไหม** บรานช์ `claude/ready-to-use-qhe3ak` push ต่อเนื่อง ยังไม่ได้เปิด PR ของงานหลัง merge #2
 
-## กฎการทำงานที่ผู้ใช้ยึด (เขาแก้มาแล้วทั้ง 3 ข้อ ระวังให้มาก)
+## กฎการทำงานที่ผู้ใช้ยึด (เขาแก้มาแล้วหลายรอบ ระวังให้มาก)
 
 - **ห้ามพูดเกินจริง** ห้ามใช้คำว่า "การันตีว่ากลมกลืนเสมอ" ให้ใช้ "เพิ่มโอกาสให้ชุดที่สุ่มออกมากลมกลืน
   ภายใต้กฎที่กำหนด" เพราะมุม hue ไม่ได้แปลว่าเสื้อผ้าสองสีจะดูดีเสมอ ขึ้นกับ saturation, lightness และบริบท
@@ -43,6 +66,7 @@ artifact: `https://claude.ai/code/artifact/ee952a4d-7525-4446-a827-548546fe68b0`
 - **no silent state change** ทุกอย่างที่ระบบเปลี่ยนเองต้องมีข้อความกำกับ (ux §7B)
 - ยึด `docs/working-guidelines.md`: คิดก่อนเขียน, เรียบง่ายก่อน, แก้แบบ surgical, ทำตามเป้าหมาย
 - **ห้ามใส่ em-dash ในงานเขียนทั้งหมดของ repo นี้** รวมถึงคอมเมนต์ในโค้ด (กฎใน `CLAUDE.md` ที่ root)
+- **ก่อนแก้อะไรที่กระทบ publish ต้อง `Artifact action:"read"` เช็ค drift ก่อนเสมอ**
 
 ## กับดักที่เจอมาแล้ว อย่าเสียเวลาซ้ำ
 
@@ -52,13 +76,16 @@ artifact: `https://claude.ai/code/artifact/ee952a4d-7525-4446-a827-548546fe68b0`
   ไม่งั้น fallback กับป้าย "ทรงเริ่มต้น" กลายเป็นโค้ดตาย และทรงที่ผู้ใช้เลือกหายถาวร
 - **`closeForm()` ล้าง `state.editingId`** ถ้าอ่านค่านั้นหลังปิดฟอร์มจะได้ค่าผิด
   (เคยทำให้ข้อความบอกว่า "เพิ่มเข้าตู้" ทั้งที่ผู้ใช้กดแก้ไข)
-- **โหมดแก้ชื่อ favorite (`favEditId`) ต้องมีทางออกโดยไม่บันทึกเสมอ** (คลิกนอกฟอร์ม + Escape)
+- **โหมดแก้ชื่อ favorite (`favEditId`) และเมนู ⋯ ต้องมีทางออกโดยไม่บันทึกเสมอ** (คลิกนอกฟอร์ม + Escape)
   ไม่งั้นผู้ใช้ติดอยู่ในฟอร์มจนกว่าจะ submit
 - **Escape handler ต้อง branch ตาม prefix `fav-` เหมือน click-outside handler** ถ้า `state.openMenuId`
   เป็นเมนูของ favorite ต้องเรียก `renderFavorites()` ไม่ใช่ `renderWardrobe()` (คนละเซกชัน คนละ DOM)
 - **การ์ดข้างถูก `scale(.92)`** เวลาวัดความสูงต้องใช้ `offsetHeight` ไม่ใช่ `getBoundingClientRect()`
 - **`getComputedStyle(el, ":focus-visible")` ใช้ไม่ได้** (รับเฉพาะ pseudo-element) ต้องกด Tab จริงแล้วอ่าน outline
 - **`.pbar__seg` ต้องไม่เป็น control ที่โฟกัสได้** เพราะอยู่ใน `role="img"` มีเทสต์ล็อกไว้แล้ว
+- **`app.html` ต้องไม่มี doctype/html/head/body ของตัวเอง** (รูปแบบ artifact ล้วน เริ่มที่ `<title>`)
+  `build.sh` เป็นตัวเดียวที่ห่อ 3 แท็กนี้ ถ้าฝ่าฝืนจะซ้อนกัน 2 ชั้นทั้งในไฟล์ build และใน artifact ที่ publish
+  (ดูรายละเอียดในหัวข้อ "สถานะปัจจุบัน" ข้อ 1 ด้านบน)
 - artifact CSP: ไม่มี external fetch, รูป, หรือสคริปต์ ทุกอย่าง inline
 - เซสชันนี้ไม่มี `gh` CLI ใช้ GitHub MCP tools (`mcp__github__*`) แทน
 
@@ -72,6 +99,7 @@ artifact: `https://claude.ai/code/artifact/ee952a4d-7525-4446-a827-548546fe68b0`
 | ถ้าทำ FR-4 วิเคราะห์ตู้ (มีกราฟ) | `dataviz` ก่อนเขียนโค้ดกราฟบรรทัดแรก |
 | ถ้าผู้ใช้อยากถูกซักก่อนตัดสินใจ | `grilling` (เคยใช้แล้วรอบหนึ่ง เขาชอบ) |
 | ถ้าเจอบั๊กยาก | `diagnosing-bugs` |
+| ถ้าจะตรวจซ้ำอีกรอบ | `code-review` (fixed point ใหม่ = HEAD ปัจจุบันของบรานช์นี้) |
 
 ## ถ้าผู้ใช้สั่งให้เริ่มเฟส 3 (FR-4/5/6)
 

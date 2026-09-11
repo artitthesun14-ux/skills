@@ -215,7 +215,7 @@ Stack: `Inter, "Helvetica Neue", system-ui, "Noto Sans Thai", sans-serif`
 - เก็บแค่ `shapeId` (~ไม่กี่ไบต์) แทน data URL (~60KB) → **ปัญหา localStorage เต็มหมดไป**
 - inline ในหน้า ไม่โหลดจากภายนอก → ผ่าน CSP; คมทุกความละเอียด
 
-**คลังทรงเฟส 1 (~17 ทรง ครบ 5 หมวด)**
+**คลังทรงเฟส 1 (21 ทรง ครบ 5 หมวด)**
 
 | หมวด | ทรง |
 |---|---|
@@ -362,7 +362,7 @@ L = relative luminance ของ --garment-fill
 
 ## 8. ส่งต่อการสร้าง (เฟส 1)
 
-**ต้องมีในเฟส 1:** tokens ทั้งชุด · **คลังทรง SVG ~17 ทรง (§3.7)** · **GarmentShape** · PrimaryButton/SecondaryButton/GhostButton/IconSquareButton · ModeToggle + AutoSwitchNotice · OccasionChips · Carousel + PositionIndicator · OutfitCard + CategoryTile · ColorSwatch · ProportionBar (+legend, tooltip) · AdviceList · GarmentChip/GarmentGrid · GarmentForm (**CategorySelect, ShapePicker, ColorPicker**) · Banner · SampleBadge · EmptyState · InlineFeedback · ConfirmDialog
+**ต้องมีในเฟส 1:** tokens ทั้งชุด · **คลังทรง SVG 21 ทรง (§3.7)** · **GarmentShape** · PrimaryButton/SecondaryButton/GhostButton/IconSquareButton · ModeToggle + AutoSwitchNotice · OccasionChips · Carousel + PositionIndicator · OutfitCard + CategoryTile · ColorSwatch · ProportionBar (+legend, tooltip) · AdviceList · GarmentChip/GarmentGrid · GarmentForm (**CategorySelect, ShapePicker, ColorPicker**) · Banner · SampleBadge · EmptyState · InlineFeedback · ConfirmDialog
 
 **ตัดออกแล้ว (จากการเลิกใช้รูปถ่าย):** ImageDropzone · การดึงสีจากรูปด้วย canvas · สถานะ image-error / quota-exceeded / loading ดึงสี
 
