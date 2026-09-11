@@ -21,7 +21,7 @@ repo `artitthesun14-ux/skills` โฟลเดอร์ `outfit-color-matcher/`
 
 ## สถานะปัจจุบัน
 
-**เฟส 2 เสร็จ (Swap + Favorites, V5) ทดสอบผ่าน 227 ข้อในเทสต์ 7 ชุด**
+**เฟส 2 เสร็จ (Swap + Favorites, V6) ทดสอบผ่าน 238 ข้อในเทสต์ 7 ชุด**
 artifact: `https://claude.ai/code/artifact/ee952a4d-7525-4446-a827-548546fe68b0`
 
 - publish ทับลิงก์เดิมเสมอ (localStorage ของผู้ใช้ไม่หาย) และต้อง `action:"read"` ก่อน publish ทุกครั้ง
@@ -52,6 +52,10 @@ artifact: `https://claude.ai/code/artifact/ee952a4d-7525-4446-a827-548546fe68b0`
   ไม่งั้น fallback กับป้าย "ทรงเริ่มต้น" กลายเป็นโค้ดตาย และทรงที่ผู้ใช้เลือกหายถาวร
 - **`closeForm()` ล้าง `state.editingId`** ถ้าอ่านค่านั้นหลังปิดฟอร์มจะได้ค่าผิด
   (เคยทำให้ข้อความบอกว่า "เพิ่มเข้าตู้" ทั้งที่ผู้ใช้กดแก้ไข)
+- **โหมดแก้ชื่อ favorite (`favEditId`) ต้องมีทางออกโดยไม่บันทึกเสมอ** (คลิกนอกฟอร์ม + Escape)
+  ไม่งั้นผู้ใช้ติดอยู่ในฟอร์มจนกว่าจะ submit
+- **Escape handler ต้อง branch ตาม prefix `fav-` เหมือน click-outside handler** ถ้า `state.openMenuId`
+  เป็นเมนูของ favorite ต้องเรียก `renderFavorites()` ไม่ใช่ `renderWardrobe()` (คนละเซกชัน คนละ DOM)
 - **การ์ดข้างถูก `scale(.92)`** เวลาวัดความสูงต้องใช้ `offsetHeight` ไม่ใช่ `getBoundingClientRect()`
 - **`getComputedStyle(el, ":focus-visible")` ใช้ไม่ได้** (รับเฉพาะ pseudo-element) ต้องกด Tab จริงแล้วอ่าน outline
 - **`.pbar__seg` ต้องไม่เป็น control ที่โฟกัสได้** เพราะอยู่ใน `role="img"` มีเทสต์ล็อกไว้แล้ว

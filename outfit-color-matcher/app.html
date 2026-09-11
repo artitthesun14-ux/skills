@@ -2010,6 +2010,10 @@ document.addEventListener("click", function(e){
     state.openMenuId = null;
     if(wasFav) renderFavorites(); else renderWardrobe();
   }
+  /* คลิกนอกฟอร์มแก้ชื่อ = ออกจากโหมดแก้ชื่อโดยไม่บันทึก (กันติดอยู่ในฟอร์มแบบออกไม่ได้) */
+  if(state.favEditId && !e.target.closest('[data-favrename]') && !e.target.closest('[data-favedit]')){
+    state.favEditId = null; renderFavorites();
+  }
   if(!t) return;
   if(t.dataset.more){
     state.openMenuId = (state.openMenuId === t.dataset.more) ? null : t.dataset.more;
@@ -2127,7 +2131,13 @@ document.addEventListener("input", function(e){
 
 /* คีย์บอร์ด: ลูกศรซ้าย-ขวาเมื่อโฟกัสอยู่ในแทร็ก */
 document.addEventListener("keydown", function(e){
-  if(e.key === "Escape" && state.openMenuId){ state.openMenuId = null; renderWardrobe(); return; }
+  if(e.key === "Escape" && state.favEditId){ state.favEditId = null; renderFavorites(); return; }
+  if(e.key === "Escape" && state.openMenuId){
+    var wasFavEsc = String(state.openMenuId).indexOf("fav-") === 0;
+    state.openMenuId = null;
+    if(wasFavEsc) renderFavorites(); else renderWardrobe();
+    return;
+  }
   if(e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
   if(!e.target.closest || !e.target.closest("#sec-suggest")) return;
   if(/^(INPUT|TEXTAREA)$/.test(e.target.tagName)) return;

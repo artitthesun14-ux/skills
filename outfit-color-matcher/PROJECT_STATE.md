@@ -62,6 +62,7 @@
 - ProportionBar: ช่องว่าง 2px ระหว่าง segment, legend เสมอ, direct label เฉพาะ >=12%
 
 ## 4. การเปลี่ยนแปลงจากสเปก/ดีไซน์ก่อนหน้า (delta ของสเตจนี้)
+-0. **(V6) แก้ 2 บั๊กที่ /test เฟส2 เจอ:** (1) โหมดแก้ชื่อ favorite (`favEditId`) ไม่มีทางออกโดยไม่บันทึก คลิกนอกฟอร์มหรือกด Escape ไม่ปิด ตอนนี้ทั้งสองทางออกได้ (2) กด Escape ตอนเมนู ⋯ ของ favorite เปิดอยู่ เคลียร์ state ถูกแต่เรียก `renderWardrobe()` แทน `renderFavorites()` ทำให้เมนูค้างในจอ แก้ให้ branch ตาม prefix `fav-`
 -1. **(V5 เฟส 2) Swap One Item:** ปุ่ม 🔄 ต่อชิ้นบนการ์ดโฟกัส (เฉพาะโหมดจากตู้ของฉัน) วนตัวถัดไปที่เข้ากันดีตามคะแนนเงียบ ล็อกชิ้นอื่น หมวดชิ้นเดียว disabled; ring เก็บบน look ฟิลด์ `_swap` (ไม่หลุด DOM)
 -2. **(V5 เฟส 2) Favorites:** หัวใจบนการ์ด + เซกชัน `#sec-favorites` (แท็บ 'บันทึกไว้') เก็บ snapshot สูงสุด 20 ชุด rename/duplicate/delete; toggle ด้วย favKey; เต็ม 20 เตือน
 -3. **(V5) แก้การ์ดยืด:** `.carousel__track{align-items:flex-start}` การ์ดสั้นไม่ถูกยืดตามใบสูงสุดอีก
@@ -82,10 +83,10 @@
 
 ## 6. สเตจ
 - **สเตจปัจจุบัน (จบแล้ว): เฟส 2 (Swap One Item + Favorites) + แก้การ์ดยืด**
-  - artifact: `https://claude.ai/code/artifact/ee952a4d-7525-4446-a827-548546fe68b0` (Version 5, ลิงก์เดิม localStorage ไม่หาย)
+  - artifact: `https://claude.ai/code/artifact/ee952a4d-7525-4446-a827-548546fe68b0` (Version 6, ลิงก์เดิม localStorage ไม่หาย)
   - แหล่งความจริงของโค้ด: `app.html` (รูปแบบ artifact) รัน `./build.sh` ได้ `outfit-color-matcher.html` ที่เปิดตรงๆ ได้
   - แผนที่ใช้: `docs/plan-phase1-shape-migration.md`
-  - ผลตรวจ (Version 5) รวม 227 ข้อ ผ่านหมด: syntax 6/6 · engine 44 · browser 74 · shape 17 · migration 10 · `tests/ac-test.js` 60 (FR-0/FR-1/FR-2/FR-3 AC + §7C) · a11y 20 · regress 2 · ไม่มี JS error · ไม่มี external request
+  - ผลตรวจ (Version 6) รวม 238 ข้อ ผ่านหมด: syntax 6/6 · engine 44 · browser 74 · shape 17 · migration 10 · `tests/ac-test.js` 71 (FR-0/FR-1/FR-2/FR-3 AC + §7C + เคสขอบจาก /test) · a11y 20 · regress 2 · ไม่มี JS error · ไม่มี external request
   - แก้จากผลทดสอบ 3 จุด: ข้อความหลังแก้ไขชิ้นบอกผิดว่า "เพิ่มเข้าตู้" · สวอทช์พรีเซ็ตสี 34px ไม่ถึงเกณฑ์แตะ 44px · `.pbar__seg` เป็น `<button>` อยู่ใน `role="img"` ทำให้ tab เข้าไปในสิ่งที่ AT บอกว่าเป็นภาพ
 - **สเตจถัดไป: เฟส 3** (FR-4 วิเคราะห์ตู้ + FR-5 เลือกสีก่อน + FR-6 Generator) เริ่มเมื่อผู้ใช้สั่ง
 

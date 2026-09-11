@@ -369,6 +369,93 @@ const H = require("./helper.js");
     allErrs.push(...errs); await ctx.close();
   }
 
+
+  /* ============ SW+FV. เคสขอบเพิ่มเติม (/test เฟส2) ============ */
+  {   /* สลับวนครบทุกตัวเลือกแล้วย้อนกลับมาที่เดิม ไม่ใช่แค่สลับไป-มา 2 ตัว */
+    const seed = [H.g("t1","top","tee-crew","#2B3A67"), H.g("t2","top","polo","#3F6B4F"),
+      H.g("t3","top","hoodie","#C0392B"), H.g("b1","bottom","chino","#C8B79B")];
+    const { ctx, page, errs } = await H.open(browser, H.store(seed, { mode:"wardrobe" }));
+    const ids = [];
+    for(let i = 0; i < 4; i++){
+      ids.push(await page.evaluate(() => state.batch[state.index].items.top.id));
+      await page.click('.card--focused [data-swap$=":top"]'); await page.waitForTimeout(100);
+    }
+    R.ok(new Set(ids).size === 3, "SW7 · วนสลับครบทั้ง 3 ตัวเลือกในหมวด ไม่ค้างที่ 2 ตัว", JSON.stringify(ids));
+    R.ok(ids[0] === ids[3], "SW8 · วนครบรอบแล้วย้อนกลับมาที่ชิ้นเดิม", JSON.stringify(ids));
+    allErrs.push(...errs); await ctx.close();
+  }
+  {   /* คีย์บอร์ด: ปุ่มสลับและหัวใจกด Enter ได้ */
+    const seed = [H.g("t1","top","tee-crew","#2B3A67"), H.g("t2","top","polo","#3F6B4F"), H.g("b1","bottom","chino","#C8B79B")];
+    const { ctx, page, errs } = await H.open(browser, H.store(seed, { mode:"wardrobe" }));
+    const before = await page.evaluate(() => state.batch[state.index].items.top.id);
+    await page.locator('.card--focused [data-swap$=":top"]').focus();
+    await page.keyboard.press("Enter"); await page.waitForTimeout(100);
+    const after = await page.evaluate(() => state.batch[state.index].items.top.id);
+    R.ok(after !== before, "SW9 · ปุ่มสลับกด Enter จากคีย์บอร์ดได้", before+" -> "+after);
+    await page.locator(".card--focused .card__fav").focus();
+    await page.keyboard.press("Enter"); await page.waitForTimeout(100);
+    R.ok(await page.evaluate(() => state.favorites.length) === 1, "FV10 · ปุ่มหัวใจกด Enter จากคีย์บอร์ดได้");
+    allErrs.push(...errs); await ctx.close();
+  }
+  {   /* สลับแล้วชุดไม่ตรงกับ favorite เดิมอีกต่อไป หัวใจต้องคลายสถานะ (ไม่ค้างว่า "บันทึกแล้ว" ทั้งที่ชุดเปลี่ยน) */
+    const seed = [H.g("t1","top","tee-crew","#2B3A67"), H.g("t2","top","polo","#3F6B4F"), H.g("b1","bottom","chino","#C8B79B")];
+    const { ctx, page, errs } = await H.open(browser, H.store(seed, { mode:"wardrobe" }));
+    await page.click(".card--focused .card__fav"); await page.waitForTimeout(120);
+    const pressedBefore = await page.getAttribute(".card--focused .card__fav", "aria-pressed");
+    await page.click('.card--focused [data-swap$=":top"]'); await page.waitForTimeout(120);
+    const pressedAfter = await page.getAttribute(".card--focused .card__fav", "aria-pressed");
+    R.ok(pressedBefore === "true" && pressedAfter === "false",
+      "FV11 · สลับชิ้นแล้วหัวใจคลายสถานะ ไม่ค้างว่าบันทึกแล้วทั้งที่ชุดเปลี่ยนไปแล้ว");
+    allErrs.push(...errs); await ctx.close();
+  }
+  {   /* ทำสำเนาแล้วแก้ชื่อสำเนาต้องไม่กระทบต้นฉบับ */
+    const seed = [H.g("t1","top","tee-crew","#2B3A67"), H.g("b1","bottom","chino","#C8B79B")];
+    const { ctx, page, errs } = await H.open(browser, H.store(seed, { mode:"wardrobe" }));
+    await page.click(".card--focused .card__fav"); await page.waitForTimeout(120);
+    const fid = await page.evaluate(() => state.favorites[0].id);
+    await page.click('[data-favmore="'+fid+'"]'); await page.waitForTimeout(80);
+    await page.click('[data-favdup="'+fid+'"]'); await page.waitForTimeout(120);
+    const dupId = await page.evaluate(() => state.favorites[1].id);
+    await page.click('[data-favmore="'+dupId+'"]'); await page.waitForTimeout(80);
+    await page.click('[data-favedit="'+dupId+'"]'); await page.waitForTimeout(80);
+    await page.fill("#favNameInput", "ชื่อใหม่เฉพาะสำเนา");
+    await page.click('[data-favrename="'+dupId+'"] button[type=submit]'); await page.waitForTimeout(120);
+    const names = await page.evaluate(() => state.favorites.map(f => f.name));
+    R.ok(names[1] === "ชื่อใหม่เฉพาะสำเนา" && names[0] !== "ชื่อใหม่เฉพาะสำเนา",
+      "FV12 · แก้ชื่อสำเนาแล้วไม่กระทบชื่อต้นฉบับ", JSON.stringify(names));
+    allErrs.push(...errs); await ctx.close();
+  }
+  {   /* กันติด: คลิกนอกฟอร์มแก้ชื่อ หรือกด Escape ต้องออกจากโหมดแก้ชื่อได้โดยไม่บันทึก (bug ที่เจอจาก /test) */
+    const seed = [H.g("t1","top","tee-crew","#2B3A67"), H.g("b1","bottom","chino","#C8B79B")];
+    const { ctx, page, errs } = await H.open(browser, H.store(seed, { mode:"wardrobe" }));
+    await page.click(".card--focused .card__fav"); await page.waitForTimeout(120);
+    const fid = await page.evaluate(() => state.favorites[0].id);
+    await page.click('[data-favmore="'+fid+'"]'); await page.waitForTimeout(80);
+    await page.click('[data-favedit="'+fid+'"]'); await page.waitForTimeout(80);
+    R.ok(await page.locator('[data-favrename]').count() === 1, "FV13a · เปิดโหมดแก้ชื่อได้");
+    await page.click("#favTitle"); await page.waitForTimeout(100);
+    R.ok(await page.locator('[data-favrename]').count() === 0,
+      "FV13b · คลิกนอกฟอร์มแก้ชื่อ = ออกจากโหมดแก้ชื่อโดยไม่บันทึก (ไม่ติดอยู่ในฟอร์ม)");
+    await page.click('[data-favmore="'+fid+'"]'); await page.waitForTimeout(80);
+    await page.click('[data-favedit="'+fid+'"]'); await page.waitForTimeout(80);
+    await page.keyboard.press("Escape"); await page.waitForTimeout(100);
+    R.ok(await page.locator('[data-favrename]').count() === 0,
+      "FV13c · กด Escape ในโหมดแก้ชื่อ = ออกจากโหมดแก้ชื่อได้เช่นกัน");
+    allErrs.push(...errs); await ctx.close();
+  }
+  {   /* กันติด: Escape ตอนเมนู ⋯ ของ favorite เปิดอยู่ ต้องปิดเมนูจริง (ไม่ใช่แค่เคลียร์ state แต่ DOM ยังค้าง) */
+    const seed = [H.g("t1","top","tee-crew","#2B3A67"), H.g("b1","bottom","chino","#C8B79B")];
+    const { ctx, page, errs } = await H.open(browser, H.store(seed, { mode:"wardrobe" }));
+    await page.click(".card--focused .card__fav"); await page.waitForTimeout(120);
+    const fid = await page.evaluate(() => state.favorites[0].id);
+    await page.click('[data-favmore="'+fid+'"]'); await page.waitForTimeout(80);
+    R.ok(await page.locator("#sec-favorites .gchip__pop").count() === 1, "FV14a · เมนู ⋯ ของ favorite เปิดได้");
+    await page.keyboard.press("Escape"); await page.waitForTimeout(100);
+    R.ok(await page.locator("#sec-favorites .gchip__pop").count() === 0,
+      "FV14b · กด Escape ปิดเมนู ⋯ ของ favorite จริง (ไม่ค้างเพราะ render ผิดเซกชัน)");
+    allErrs.push(...errs); await ctx.close();
+  }
+
   await browser.close();
   R.finish(allErrs);
 })();
