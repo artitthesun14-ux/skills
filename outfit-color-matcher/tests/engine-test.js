@@ -134,6 +134,23 @@ console.log('\n== 10. §4.7 กฎสีโหมด "สีที่เรา�
   t('Primary/Secondary/Neutral ไม่ล้ำเข้าเขต vivid ของ Accent', baseTooVivid===0, baseTooVivid+' ครั้งที่ role ฐานอิ่มสีเกิน VIVID_MIN_S');
 }
 {
+  // regression: floor ของ S/L ที่ Secondary ชิฟต์จาก Primary เคยต่ำกว่า NEUTRAL_MAX_S=20 ทำให้
+  // Secondary หลุดไปเป็น role "neutral" แทน (พบจาก /code-review: เกิด ~64% ของทุกลุคที่ rule
+  // ไม่ใช่ neutral-accent) rule "neutral-accent" เท่านั้นที่ไม่มี secondary โดยออกแบบ (§4.7)
+  let missingSecondary=0, notNeutralAccent=0, total=0;
+  for(let n=0;n<300;n++){
+    const idea=generateIdeaBatch('unspecified',{});
+    idea.outfits.forEach(o=>{
+      total++;
+      if(o.ruleUsed==='neutral-accent') return;
+      notNeutralAccent++;
+      if(!o.colorBreakdown.some(r=>r.role==='secondary')) missingSecondary++;
+    });
+  }
+  t('Secondary ไม่หลุดไปเป็น neutral เมื่อ rule ไม่ใช่ neutral-accent',
+    missingSecondary===0, missingSecondary+'/'+notNeutralAccent+' ลุค (จาก '+total+' รวม)');
+}
+{
   // Secondary ต้องเป็น "เฉดเดียวกับ Primary" (Itten tint/shade): S ของ Secondary ต้องแปรผัน
   // ไปกับ S ของ Primary ที่สุ่มได้แล้ว (correlation เป็นบวกชัดเจน) ไม่ใช่สุ่มอิสระจากกัน
   const pairs=[];

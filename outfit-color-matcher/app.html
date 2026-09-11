@@ -1291,13 +1291,16 @@ function generateIdeaBatch(occasion, avoidKeys){
     else if(rule === "complementary")  hS = hP + 180 + (Math.random()*16-8);
     else if(rule === "triadic")        hS = hP + dir*(120 + (Math.random()*14-7));
     else                               hS = hP;                       /* neutral-accent */
+    /* floor 26/ช่วง L 26-74 ของสอง branch ล่าง (ไม่ใช่ neutral-accent): กันไม่ให้ S หลุดต่ำกว่า
+       NEUTRAL_MAX_S=20 ที่ L สุดขั้ว (isNeutralHex เช็คทั้ง S และ rgbSpread ซึ่งขึ้นกับ L ด้วย)
+       ไม่งั้น Secondary จะถูกจัด role เป็น neutral โดยไม่ตั้งใจ (พบจาก /code-review: เคยเกิด ~64%) */
     var secondary = (rule === "monochrome")
-      ? ideaColor(hP, clamp(sP-14,12,48), clamp(lP + dir*22, 16, 86))
+      ? ideaColor(hP, clamp(sP-14,26,48), clamp(lP + dir*18, 26, 74))
       : (rule === "neutral-accent")
         /* พื้นเป็นสีกลาง: ยังต้องชิฟต์จาก sP/lP (ไม่ใช่สุ่มอิสระ) แต่ชิฟต์แรงพอให้ตกเขต
            neutral จริง (< NEUTRAL_MAX_S) และ L สุดขั้ว สมกับบทบาท "พื้นกลาง" ของ rule นี้ */
         ? ideaColor(hP, clamp(sP - (18 + Math.random()*8), 5, 18), clamp(lP + dir*(30 + Math.random()*18), 14, 90))
-        : ideaColor(hS, clamp(sP - (8 + Math.random()*10), 12, 48), clamp(lP + dir*(14 + Math.random()*10), 16, 86));
+        : ideaColor(hS, clamp(sP - (8 + Math.random()*10), 26, 48), clamp(lP + dir*(12 + Math.random()*8), 26, 74));
     /* 3) Neutral ถ่วงโทน */
     var neutral = ideaColor(hP, 5 + Math.random()*10, Math.random() < 0.5 ? 88 + Math.random()*8 : 12 + Math.random()*14);
     /* 4) Accent จุดเดียว: ต้องมีแทบทุกครั้ง ไม่ใช่เหรียญโยน (spec §4.7, §9) โอกาสปรับความสด/ความเด่น

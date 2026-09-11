@@ -1,7 +1,7 @@
 # Handoff: Outfit Color Matcher
 
-> อัปเดต 2026-09-11 · หลัง `/implement` กติกาสีโหมดไอเดีย (spec §4.1/4.7/9) ตามผลวิจัย publish เป็น V8 แล้ว
-> ผู้ใช้สื่อสารเป็นภาษาไทย ตอบไทยเสมอ
+> อัปเดต 2026-09-11 · หลัง `/implement` กติกาสีโหมดไอเดีย (spec §4.1/4.7/9) + `/code-review` เจอบั๊กจริง
+> แก้แล้ว publish เป็น V9 · ผู้ใช้สื่อสารเป็นภาษาไทย ตอบไทยเสมอ
 
 ## เอกสารและโค้ดอยู่ที่ไหน
 
@@ -21,7 +21,7 @@ repo `artitthesun14-ux/skills` โฟลเดอร์ `outfit-color-matcher/` 
 
 ## สถานะปัจจุบัน
 
-**กติกาสีโหมดไอเดีย (spec §4.1/4.7/9) implement แล้ว + เฟส 2 (Swap + Favorites) เสร็จ ทดสอบผ่าน 243 ข้อในเทสต์ 7 ชุด publish เป็น Version 8 แล้ว**
+**กติกาสีโหมดไอเดีย (spec §4.1/4.7/9) implement แล้ว + เฟส 2 (Swap + Favorites) เสร็จ ทดสอบผ่าน 244 ข้อในเทสต์ 7 ชุด publish เป็น Version 9 แล้ว**
 artifact: `https://claude.ai/code/artifact/ee952a4d-7525-4446-a827-548546fe68b0`
 
 - publish ทับลิงก์เดิมเสมอ (localStorage ของผู้ใช้ไม่หาย) และต้อง `action:"read"` ก่อน publish ทุกครั้ง
@@ -30,7 +30,7 @@ artifact: `https://claude.ai/code/artifact/ee952a4d-7525-4446-a827-548546fe68b0`
 - แหล่งความจริงของโค้ดคือ `app.html` แก้แล้วรัน `./build.sh` ทุกครั้ง อย่าแก้ `outfit-color-matcher.html` ตรงๆ
 - watch subscription ของ artifact ลงทะเบียนไม่สำเร็จ (`mint_failed`) จึงไม่มีการปลุกเมื่อมีคนแก้จากที่อื่น ห้ามอ้างว่ากำลังเฝ้าอยู่
 
-### งานล่าสุด: กติกาสีโหมดไอเดีย (V8)
+### งานล่าสุด: กติกาสีโหมดไอเดีย (V8 -> V9 หลัง /code-review)
 
 `research/film-and-fashion-color-palette-principles.md` สรุปว่าทำไมพาเลตสุ่มของโหมดไอเดียไม่ดูเหมือนชุดจริง
 (อิง Itten/Albers/Munsell) แปลงเป็น 3 กติกาใน spec §4.1/4.7/9 แล้ว implement ใน `generateIdeaBatch()`/`ideaColor()`
@@ -38,6 +38,14 @@ artifact: `https://claude.ai/code/artifact/ee952a4d-7525-4446-a827-548546fe68b0`
 `neutral-accent` บังคับให้ secondary ตกเป็น neutral จริง เทสต์ใหม่ใน `tests/engine-test.js` §10 (Pearson
 correlation ยืนยัน S ของ Secondary สัมพันธ์กับ Primary) และแก้ `tests/ac-test.js` B4c/B4d ที่เคยเช็ค accent
 แบบเก่า (ดู `PROJECT_STATE.md` §4 delta `-5` สำหรับรายละเอียดโค้ด)
+
+**`/code-review` (fixed point `94cf16e`) เจอบั๊กจริง 1 ข้อ แก้แล้วเป็น V9:** floor S ของ Secondary
+(branch monochrome/default ใน `generateIdeaBatch()`) เคยต่ำกว่า `NEUTRAL_MAX_S=20` ทำให้ Secondary
+หลุดไปเป็น role "neutral" เองโดยไม่ตั้งใจ ~64% ของทุกลุคที่ rule ไม่ใช่ neutral-accent (พิสูจน์ด้วยการรัน
+generator 12,000 ครั้งเทียบก่อน/หลัง) แก้โดยยก floor S เป็น 26 และหด L clamp เป็น [26,74] เพิ่ม regression
+test ใน `engine-test.js` ล็อกไว้ **ยังมีข้อค้าง (ไม่ได้แก้รอบนี้ ดู PROJECT_STATE.md §5):** โหมดไอเดียตอนนี้
+โชว์ rule ไม่ครบ 5 แบบ (แบตช์ที่ผู้ใช้เห็นเกือบทั้งหมดเป็นแค่ triadic/neutral-accent) เพราะ Accent ที่มีทุก
+ลุคไปกระทบการตรวจจับ rule ใน `detectHarmony()` (engine ร่วมกับโหมดตู้ ไม่ได้แก้เพราะเกินขอบเขตงานนี้)
 
 ### `/code-review origin/main` (fixed point ก่อนหน้า `a56ffaa`) เจอ 4 ข้อ ตอนนี้แก้ครบแล้ว (fixed point ใหม่ = HEAD ปัจจุบันของบรานช์นี้)
 

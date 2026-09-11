@@ -94,6 +94,16 @@
 6. **การตัดสินใจเชิงภาพในสเตจนี้:** OccasionChips ที่เลือกใช้ `--ink` (ไม่ใช่ accent) เพื่อสงวนแดงให้ CTA · DiversityBar [P3] ใช้สีเดียวทุกแถบ (งานคือเทียบขนาด ไม่ใช่บอกตัวตน)
 
 ## 5. เรื่องที่ยังไม่ปิด (open)
+- **[พบใหม่จาก /code-review, ต้องให้ผู้ใช้ตัดสินใจ] โหมดไอเดียแสดง rule ไม่ครบ 5 แบบ**
+  หลัง implement กติกาสี §4.7 (Accent มีทุกลุค) แล้ววัดจริง (12,000 ลุค) พบว่าแบตช์ที่โชว์ผู้ใช้เกือบทั้งหมด
+  เป็นแค่ 2 ใน 5 rule (~56% triadic, ~44% neutral-accent) monochrome/analogous/complementary แทบไม่โผล่เลย
+  สาเหตุ: เมื่อ Accent มีทุกลุค `detectHarmony()` (ฟังก์ชันร่วมกับโหมดตู้ ไม่ได้แก้ในรอบนี้) วัดระยะมุม hue
+  จากสีที่ไม่ใช่ neutral **ทุกตัวรวม Accent ด้วย** และ Accent ถูกออกแบบให้ห่างจาก Primary มาก (~150-190°)
+  เสมอ ทำให้ maxD สูงเกินเกณฑ์ monochrome (half=12°)/analogous (half=15°) เกือบทุกครั้ง และ complementary
+  ต้องการ nn.length===2 พอดี (ตอนนี้มักเป็น 3 เพราะมี Accent) จึงแทบไม่ถูกตรวจพบเช่นกัน ไม่ได้แก้ในรอบนี้
+  เพราะ `detectHarmony`/`scoreOutfit` เป็น engine ร่วมกับโหมดตู้ (แก้แล้วเสี่ยงกระทบเทสต์/พฤติกรรมโหมดตู้
+  เกินขอบเขตงานสี 3 ข้อที่ตกลงไว้) ตัวเลือกที่เป็นไปได้: (ก) ให้ Accent วัด harmony แยกจาก Primary/Secondary
+  (ข) ลดระยะห่าง accentHue ลง (ค) ยอมรับว่า "rule ที่แสดง" เป็นป้ายบรรยาย ไม่ใช่สัญญาว่าจะกระจายเท่ากัน
 - **ค่าที่ต้องจูนจากผลจริงตอนสร้าง:** threshold neutral `S < 20%`, threshold accent `S >= 55%`, ช่วงองศาของแต่ละ harmony rule
 - **dog-ear มุมการ์ด** เป็นลูกเล่นทางเลือก ยังไม่ฟันธงว่าใส่หรือไม่
 - **พฤติกรรม "ผ่อนเงื่อนไข" ใน No-match (A4)** ระบุไว้ระดับ UX ยังไม่ลงรายละเอียดว่าคลายอะไรก่อน
@@ -102,10 +112,14 @@
 
 ## 6. สเตจ
 - **สเตจปัจจุบัน (จบแล้ว): กติกาสีโหมดไอเดีย (spec §4.1/4.7/9) implement ตามผลวิจัย + เฟส 2 (Swap One Item + Favorites) + แก้การ์ดยืด**
-  - artifact: `https://claude.ai/code/artifact/ee952a4d-7525-4446-a827-548546fe68b0` (Version 8, ลิงก์เดิม localStorage ไม่หาย)
+  - artifact: `https://claude.ai/code/artifact/ee952a4d-7525-4446-a827-548546fe68b0` (Version 9, ลิงก์เดิม localStorage ไม่หาย)
   - แหล่งความจริงของโค้ด: `app.html` (รูปแบบ artifact) รัน `./build.sh` ได้ `outfit-color-matcher.html` ที่เปิดตรงๆ ได้
   - แผนที่ใช้: `docs/plan-phase1-shape-migration.md`
-  - ผลตรวจ (Version 8) รวม 243 ข้อ ผ่านหมด: engine 48 · browser 74 · shape 17 · migration 10 · `tests/ac-test.js` 72 (FR-0/FR-1/FR-2/FR-3 AC + §4.7 + §7C + เคสขอบจาก /test) · a11y 20 · regress 2 · ไม่มี JS error · ไม่มี external request
+  - ผลตรวจ (Version 9) รวม 244 ข้อ ผ่านหมด: engine 49 · browser 74 · shape 17 · migration 10 · `tests/ac-test.js` 72 (FR-0/FR-1/FR-2/FR-3 AC + §4.7 + §7C + เคสขอบจาก /test) · a11y 20 · regress 2 · ไม่มี JS error · ไม่มี external request
+  - **[แก้แล้วจาก /code-review]** floor S ของ Secondary ใน `generateIdeaBatch()` (branch monochrome/default)
+    เคยต่ำกว่า `NEUTRAL_MAX_S=20` ทำให้ Secondary หลุดไปเป็น role "neutral" เอง ~64% ของทุกลุคที่ rule
+    ไม่ใช่ neutral-accent (ตรวจพบผ่านการรัน generator 12,000 ครั้งเทียบก่อน/หลัง) แก้โดยยก floor เป็น 26
+    และหด L clamp เป็น [26,74] (จาก [16,86]) เพิ่มเทสต์ regression ใน `engine-test.js` ล็อกพฤติกรรมนี้ไว้
   - แก้จากผลทดสอบ 3 จุด (เฟส 2): ข้อความหลังแก้ไขชิ้นบอกผิดว่า "เพิ่มเข้าตู้" · สวอทช์พรีเซ็ตสี 34px ไม่ถึงเกณฑ์แตะ 44px · `.pbar__seg` เป็น `<button>` อยู่ใน `role="img"` ทำให้ tab เข้าไปในสิ่งที่ AT บอกว่าเป็นภาพ
   - รายละเอียดงาน implement กติกาสี ดู §4 delta `-5` ด้านบน
 - **สเตจถัดไป: เฟส 3** (FR-4 วิเคราะห์ตู้ + FR-5 เลือกสีก่อน + FR-6 Generator) เริ่มเมื่อผู้ใช้สั่ง
