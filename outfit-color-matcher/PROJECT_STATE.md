@@ -62,6 +62,7 @@
 - ProportionBar: ช่องว่าง 2px ระหว่าง segment, legend เสมอ, direct label เฉพาะ >=12%
 
 ## 4. การเปลี่ยนแปลงจากสเปก/ดีไซน์ก่อนหน้า (delta ของสเตจนี้)
+0. **(V4) สวอตช์สีต่อชิ้นในการ์ดแนะนำ:** เพิ่มสี่เหลี่ยมสีล้วนทางขวาของแต่ละชิ้น (มือถือ) / แถบสีใต้ทรง (เดสก์ท็อป) แสดงสีจริงของชิ้นนั้น มี `--data-ring` และ `aria-hidden` (ข้อความ ชื่อสี+hex ข้างกันเป็นตัวสื่อ) `.tile__chip` ใน `tileHTML()`; ไม่ใส่กรอบแดงตามภาพร่างเพราะขัดกฎแดง=การกระทำ
 1. **Label:** `สีที่ลูกค้ามี` → **`จากตู้ของฉัน`** ทุกที่ (spec + ux) และตัดคำว่า "ลูกค้า" ออก
 2. **UX §0 Target user & wording** เพิ่มใหม่ (ยืนยัน target = ใครก็ได้, IA = ตู้เดียวต่อเครื่อง ไม่มีหลายโปรไฟล์)
 3. **UX §7B Micro-copy** เพิ่มใหม่ (กฎ no silent state change)
@@ -79,10 +80,10 @@
 
 ## 6. สเตจ
 - **สเตจปัจจุบัน (จบแล้ว): สร้างเฟส 1 + ย้ายมาใช้ระบบทรงเสื้อผ้า SVG**
-  - artifact: `https://claude.ai/code/artifact/ee952a4d-7525-4446-a827-548546fe68b0` (Version 3, ลิงก์เดิม localStorage ไม่หาย)
+  - artifact: `https://claude.ai/code/artifact/ee952a4d-7525-4446-a827-548546fe68b0` (Version 4, ลิงก์เดิม localStorage ไม่หาย)
   - แหล่งความจริงของโค้ด: `app.html` (รูปแบบ artifact) รัน `./build.sh` ได้ `outfit-color-matcher.html` ที่เปิดตรงๆ ได้
   - แผนที่ใช้: `docs/plan-phase1-shape-migration.md`
-  - ผลตรวจ (Version 3) รวม 208 ข้อ ผ่านหมด: syntax 6/6 · `tests/engine-test.js` 44 · `tests/browser-test.js` 70 · `tests/shape-test.js` 17/17 · `tests/migration-test.js` 10/10 · `tests/ac-test.js` 45/45 (FR-0/FR-1 AC + §7C) · `tests/a11y-test.js` 20/20 (คอนทราสต์วัดจริง/คีย์บอร์ด/ทัช/ธีม/responsive) · `tests/regress.js` 2/2 (700 แบตช์ 2,800 ชุด) · ไม่มี JS error · ไม่มี external request
+  - ผลตรวจ (Version 4) รวม 212 ข้อ ผ่านหมด: syntax 6/6 · `tests/engine-test.js` 44 · `tests/browser-test.js` 74 · `tests/shape-test.js` 17/17 · `tests/migration-test.js` 10/10 · `tests/ac-test.js` 45/45 (FR-0/FR-1 AC + §7C) · `tests/a11y-test.js` 20/20 (คอนทราสต์วัดจริง/คีย์บอร์ด/ทัช/ธีม/responsive) · `tests/regress.js` 2/2 (700 แบตช์ 2,800 ชุด) · ไม่มี JS error · ไม่มี external request
   - แก้จากผลทดสอบ 3 จุด: ข้อความหลังแก้ไขชิ้นบอกผิดว่า "เพิ่มเข้าตู้" · สวอทช์พรีเซ็ตสี 34px ไม่ถึงเกณฑ์แตะ 44px · `.pbar__seg` เป็น `<button>` อยู่ใน `role="img"` ทำให้ tab เข้าไปในสิ่งที่ AT บอกว่าเป็นภาพ
 - **สเตจถัดไป: เฟส 2** (FR-2 Swap One Item + FR-3 Favorites) เริ่มเมื่อผู้ใช้สั่ง
 

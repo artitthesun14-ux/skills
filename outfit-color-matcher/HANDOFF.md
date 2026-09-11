@@ -21,7 +21,7 @@ repo `artitthesun14-ux/skills` โฟลเดอร์ `outfit-color-matcher/`
 
 ## สถานะปัจจุบัน
 
-**เฟส 1 เสร็จ ทดสอบผ่าน 208 ข้อในเทสต์ 7 ชุด publish เป็น Version 3 แล้ว**
+**เฟส 1 เสร็จ + เพิ่มสวอตช์สีต่อชิ้นในการ์ด (V4) ทดสอบผ่าน 212 ข้อในเทสต์ 7 ชุด**
 artifact: `https://claude.ai/code/artifact/ee952a4d-7525-4446-a827-548546fe68b0`
 
 - publish ทับลิงก์เดิมเสมอ (localStorage ของผู้ใช้ไม่หาย) และต้อง `action:"read"` ก่อน publish ทุกครั้ง

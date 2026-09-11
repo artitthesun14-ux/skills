@@ -234,6 +234,11 @@ body{padding-bottom:calc(var(--nav-h) + env(safe-area-inset-bottom))}
 .tile__name{font-size:var(--fs-sm);color:var(--ink);white-space:nowrap;text-overflow:ellipsis}
 /* บรรทัดสีต้องอ่านครบเสมอ ห้ามตัด: ยอมขึ้นบรรทัดใหม่ดีกว่าเสียข้อมูล a11y */
 .tile__color{font-size:var(--fs-xs);color:var(--ink-muted);overflow-wrap:anywhere}
+.tile__chip{flex:0 0 auto;width:44px;height:44px;border-radius:var(--r-sm);
+  border:1px solid var(--data-ring);align-self:center}
+/* สีล้ำ ไม่บังคับผ่านคอนทราสต์ (คือค่าจริงของเสื้อผ้า) กันกลืนด้วย --data-ring;
+   ข้อความ ชื่อสี+hex ข้างกันเป็นตัวสื่อ chip นี้จึง aria-hidden ไม่สื่อด้วยสีเดี่ยว (ux §9) */
+.tile__chip--empty{background:var(--surface-sunken);border-style:dashed}
 .tile--empty .tile__box{border-style:dashed;display:flex;align-items:center;justify-content:center;color:var(--ink-muted);font-size:var(--fs-sm)}
 
 /* --- 4.4 สีเป็นข้อมูล (ui doc §3.4) --- */
@@ -432,6 +437,8 @@ body{padding-bottom:calc(var(--nav-h) + env(safe-area-inset-bottom))}
   .tiles{flex-direction:row;flex-wrap:wrap;gap:var(--sp-4)}
   .tile{flex-direction:column;align-items:stretch;gap:var(--sp-2);flex:0 0 96px}
   .tile__box{flex:none;width:96px}
+  /* md/lg: tile เป็นคอลัมน์ สวอตช์กลายเป็นแถบสีเต็มความกว้างใต้ป้าย */
+  .tile__chip{width:100%;height:12px;align-self:stretch}
 
   .carousel-wrap{
     margin-inline:auto;
@@ -1463,7 +1470,8 @@ function tileHTML(item, cat){
   if(!item){
     return '<li class="tile tile--empty"><span class="tile__box">ไม่มี</span>'+
       '<span class="tile__label"><span class="tile__cat">'+esc(CATEGORY_TH[cat])+'</span>'+
-      '<span class="tile__color">ไม่ได้ใส่ในชุดนี้</span></span></li>';
+      '<span class="tile__color">ไม่ได้ใส่ในชุดนี้</span></span>'+
+      '<span class="tile__chip tile__chip--empty" aria-hidden="true"></span></li>';
   }
   var hex = normHex(item.color), name = colorNameTH(hex);
   /* โหมดไอเดียไม่มีชื่อชิ้นจริง จึงแสดง "ชื่อทรง" แทน
@@ -1474,7 +1482,8 @@ function tileHTML(item, cat){
       '<span class="tile__cat">'+esc(CATEGORY_TH[cat])+'</span>'+
       '<span class="tile__name" title="'+esc(label)+'">'+esc(label)+'</span>'+
       '<span class="tile__color">'+esc(name)+' · <span class="tnum">'+esc(hex)+'</span></span>'+
-    '</span></li>';
+    '</span>'+
+    '<span class="tile__chip" aria-hidden="true" style="background:'+hex+'"></span></li>';
 }
 function pbarHTML(breakdown, cardId){
   var segs = breakdown.map(function(b,i){

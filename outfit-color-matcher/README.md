@@ -34,7 +34,7 @@ node tests/browser-test.js      # acceptance ผ่านเบราว์เ�
 `engine-test.js` ใช้ node ล้วน วิ่งได้ทันที (ดึงโค้ดจาก `app.html` โดยตรง จึงทดสอบของจริงเสมอ)
 ที่เหลือต้องมี `playwright-core` และ Chromium (หาที่ `/opt/pw-browsers/chromium`)
 
-รวมทั้งหมด 208 ข้อ (engine 44 · shape 17 · migration 10 · ac 45 · a11y 20 · regress 2 · browser 70)
+รวมทั้งหมด 212 ข้อ (engine 44 · shape 17 · migration 10 · ac 45 · a11y 20 · regress 2 · browser 74)
 ปัจจุบันผ่านหมด ต้องเขียวทุกชุดก่อนทุกครั้งที่จะ publish
 
 ## ขอบเขตตอนนี้

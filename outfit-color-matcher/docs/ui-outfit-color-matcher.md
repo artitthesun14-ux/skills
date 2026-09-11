@@ -135,6 +135,8 @@ Stack: `Inter, "Helvetica Neue", system-ui, "Noto Sans Thai", sans-serif`
   5. แถวปุ่ม: FavoriteButton [P2] · (Swap อยู่บน tile)
 - **variants:** `focused` (scale 1, opacity 1, `--shadow-raised`) · `adjacent` (scale .92, opacity .4, ไม่รับ pointer, `aria-hidden`) · `idea` (tile = ทรงเริ่มต้นของหมวด ย้อมสีที่แนะนำ) · `wardrobe` (tile = ทรงจริงของชิ้น ย้อมสีจริง)
 
+**GarmentColorChip** (`.tile__chip`) สวอตช์สีล้วนต่อชิ้นในการ์ด: มือถืออยู่ขวาสุดของแถว เดสก์ท็อปเป็นแถบสีเต็มกว้างใต้ทรง แสดงสีจริงของชิ้น มี `--data-ring` และ `aria-hidden` (ชื่อสี+hex ข้างกันเป็นตัวสื่อ ไม่สื่อด้วยสีเดี่ยว) แดงเป็น fill ของชิ้นแดงได้ แต่ห้ามเป็นกรอบ/สถานะ
+
 **CategoryTile**: ช่องสี่เหลี่ยมต่อหมวด
 - อัตราส่วน 1:1, `--r-sm`, พื้น `--surface-sunken`, **ขอบ 1px `--data-ring` เสมอ**
 - เนื้อใน: **`GarmentShape` (SVG ทรงเสื้อผ้าย้อมสี)** เต็มช่อง มี padding ในกรอบ ~10% (ดู §3.7)
