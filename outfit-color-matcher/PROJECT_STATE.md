@@ -53,7 +53,7 @@
 **Engine**
 - harmony rule = มุม hue **"เพิ่มโอกาสให้กลมกลืนภายใต้กฎ"** ไม่ใช่การันตี (ต้องถ่วงด้วย contrast + สัดส่วน neutral + Color Role)
 - คะแนนความกลมกลืน = **คำนวณเงียบเบื้องหลังเพื่อคัด/เรียงเท่านั้น ห้ามแสดงต่อผู้ใช้**
-- **Color Role** (Primary/Secondary/Neutral/Accent) เป็นแกนจัดองค์ประกอบ map เข้ากับ 60-30-10; Accent ไม่เกิน 1
+- **Color Role** (Primary/Secondary/Neutral/Accent) เป็นแกนจัดองค์ประกอบ map เข้ากับ 60-30-10; Accent มีได้อย่างมาก 1 และในโหมด "สีที่เราแนะนำ" ต้องมีแทบทุกครั้ง (ไม่ใช่เหรียญโยน); Primary/Secondary/Neutral ต้องอยู่ต่ำกว่า threshold accent (S < ~55%) เป็นส่วนใหญ่; Secondary เป็นเฉดเดียวกับ Primary (แปรผันจากค่า Primary ไม่ใช่สุ่มอิสระ) ทุก rule ไม่ใช่แค่ monochrome (spec §4.7, delta ล่าสุดใน §4 ข้อ -4)
 
 **ภาพ (จาก ui-design)**
 - แดง `--accent` = ใช้เฉพาะ **การกระทำ** ห้ามเป็นสีของข้อมูล
@@ -62,6 +62,13 @@
 - ProportionBar: ช่องว่าง 2px ระหว่าง segment, legend เสมอ, direct label เฉพาะ >=12%
 
 ## 4. การเปลี่ยนแปลงจากสเปก/ดีไซน์ก่อนหน้า (delta ของสเตจนี้)
+-4. **(หลังงานวิจัย color palette) spec §4.1/§4.7/§9 แก้กติกาการสุ่มสีของโหมด "สีที่เราแนะนำ":**
+   ผู้ใช้ตั้งคำถามว่าสีที่สุ่มออกมาดูไม่เหมือนของจริงที่มีคนใส่ ใช้ภาพตัวอย่าง palette จากหนัง (The Darjeeling
+   Limited, The Royal Tenenbaums) เทียบ วิจัยเก็บไว้ที่ `../research/film-and-fashion-color-palette-principles.md`
+   สรุปเป็นกติกาสเปกใหม่ 3 ข้อ (ยังไม่ implement โค้ด แค่แก้สเปก): (ก) Accent ต้องมีแทบทุกครั้งในโหมด idea ไม่ใช่
+   ความน่าจะเป็นแบบเดิม (ข) Secondary ต้องเป็นเฉดเดียวกับ Primary (แปรผันจากค่า Primary) ทุก rule ไม่ใช่แค่
+   monochrome (ค) Primary/Secondary/Neutral ต้องอยู่ต่ำกว่า threshold accent (S < ~55%, ตั้งชื่อ threshold นี้
+   ใหม่ใน §4.1 ผูกกับโค้ด `VIVID_MIN_S`) แยกจากช่วงของ Accent ไม่ใช้ `IDEA_S_RANGE` ช่วงเดียวทับซ้อนกันแบบเดิม
 -0. **(V6) แก้ 2 บั๊กที่ /test เฟส2 เจอ:** (1) โหมดแก้ชื่อ favorite (`favEditId`) ไม่มีทางออกโดยไม่บันทึก คลิกนอกฟอร์มหรือกด Escape ไม่ปิด ตอนนี้ทั้งสองทางออกได้ (2) กด Escape ตอนเมนู ⋯ ของ favorite เปิดอยู่ เคลียร์ state ถูกแต่เรียก `renderWardrobe()` แทน `renderFavorites()` ทำให้เมนูค้างในจอ แก้ให้ branch ตาม prefix `fav-`
 -1. **(V5 เฟส 2) Swap One Item:** ปุ่ม 🔄 ต่อชิ้นบนการ์ดโฟกัส (เฉพาะโหมดจากตู้ของฉัน) วนตัวถัดไปที่เข้ากันดีตามคะแนนเงียบ ล็อกชิ้นอื่น หมวดชิ้นเดียว disabled; ring เก็บบน look ฟิลด์ `_swap` (ไม่หลุด DOM)
 -2. **(V5 เฟส 2) Favorites:** หัวใจบนการ์ด + เซกชัน `#sec-favorites` (แท็บ 'บันทึกไว้') เก็บ snapshot สูงสุด 20 ชุด rename/duplicate/delete; toggle ด้วย favKey; เต็ม 20 เตือน
@@ -75,7 +82,10 @@
 6. **การตัดสินใจเชิงภาพในสเตจนี้:** OccasionChips ที่เลือกใช้ `--ink` (ไม่ใช่ accent) เพื่อสงวนแดงให้ CTA · DiversityBar [P3] ใช้สีเดียวทุกแถบ (งานคือเทียบขนาด ไม่ใช่บอกตัวตน)
 
 ## 5. เรื่องที่ยังไม่ปิด (open)
-- **ค่าที่ต้องจูนจากผลจริงตอนสร้าง:** threshold neutral `S < 20%`, ช่วงองศาของแต่ละ harmony rule, ย่าน S/L ที่ "สวย" ตอนสุ่มสี
+- **ค่าที่ต้องจูนจากผลจริงตอนสร้าง:** threshold neutral `S < 20%`, threshold accent `S >= 55%`, ช่วงองศาของแต่ละ harmony rule
+- **[ใหม่] ยังไม่ implement โค้ดตามกติกาสี §4.7/§9 ที่แก้ในสเตจนี้:** `generateIdeaBatch()`/`ideaColor()` ใน `app.html`
+  ยังเป็นของเดิม (accent เป็นความน่าจะเป็น, Secondary สุ่มอิสระยกเว้น rule monochrome, `IDEA_S_RANGE` ใช้ช่วงเดียว
+  ทับซ้อนกับ accent) ต้องแก้โค้ดให้ตรงสเปกใหม่ก่อนถือว่าปิดเรื่องนี้ (ดู delta §4 ข้อ -4)
 - **dog-ear มุมการ์ด** เป็นลูกเล่นทางเลือก ยังไม่ฟันธงว่าใส่หรือไม่
 - **พฤติกรรม "ผ่อนเงื่อนไข" ใน No-match (A4)** ระบุไว้ระดับ UX ยังไม่ลงรายละเอียดว่าคลายอะไรก่อน
 - ยังไม่มี issue tracker → เอกสารทุกฉบับส่งเป็นไฟล์ ไม่ได้ publish ลง tracker
