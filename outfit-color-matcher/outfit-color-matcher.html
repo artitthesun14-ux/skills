@@ -800,7 +800,11 @@ var VIVID_MIN_S        = 55;      /* อิ่มพอจะเป็น accent
 /* HSL saturation หลอกตาในสีอ่อน: ครีม #EFE6D2 ได้ S=47% ทั้งที่ตาอ่านเป็นสีกลาง
    จึงถ่วงด้วย "ระยะห่าง R-G-B จริง" ด้วย ค่านี้จูนจากสีในตู้ตัวอย่าง */
 var NEUTRAL_SPREAD_MAX = 32;
-var IDEA_S_RANGE       = [35, 75];
+/* โหมด "สีที่เราแนะนำ": Primary/Secondary/Neutral ต้องอยู่ต่ำกว่า VIVID_MIN_S เป็นส่วนใหญ่
+   ไม่ใช้ช่วงเดียวทับซ้อนกับ Accent (spec §4.7, §9; research film-and-fashion-color-palette-principles.md ส่วน 6 ข้อ 3)
+   ค่าตรงกลางของช่วงนี้ = midpoint ที่ occasion เอนไปมาได้ ส่วน sP เองถูก clamp แคบกว่านี้อีกชั้นตอนสุ่ม
+   เพื่อไม่ให้ข้ามเข้าเขต neutral (<NEUTRAL_MAX_S) หรือ vivid (>=VIVID_MIN_S) โดยไม่ตั้งใจ */
+var IDEA_S_RANGE       = [26, 50];
 var IDEA_L_RANGE       = [30, 70];
 var COMBO_CAP          = 400;     /* spec §7C large wardrobe */
 var BATCH_MIN = 3, BATCH_MAX = 4;
@@ -1272,18 +1276,23 @@ var IDEA_RULES = ["analogous","complementary","triadic","monochrome","neutral-ac
 function ideaColor(h, s, l){ return hslToHex(h, s, l); }
 function generateIdeaBatch(occasion, avoidKeys){
   var tone = OCCASION_TONE[occasion] || OCCASION_TONE.unspecified;
-  var sMid = clamp((IDEA_S_RANGE[0]+IDEA_S_RANGE[1])/2 + tone.s*28, 22, 82);
+  var sMid = clamp((IDEA_S_RANGE[0]+IDEA_S_RANGE[1])/2 + tone.s*28, 24, 52);
   var lMid = clamp((IDEA_L_RANGE[0]+IDEA_L_RANGE[1])/2 + tone.l*22, 24, 74);
   var pool = [];
   for(var n=0; n<24; n++){
     var rule = pick(IDEA_RULES);
     var hP = Math.random()*360;
-    var sP = clamp(sMid + (Math.random()*18-9), 20, 88);
+    /* clamp แคบกว่า NEUTRAL_MAX_S..VIVID_MIN_S เพื่อไม่ให้ Primary หลุดเข้าเขต neutral/vivid
+       โดยไม่ตั้งใจ (spec §4.7, §9): Primary/Secondary/Neutral ต้องอยู่ต่ำกว่า Accent เป็นส่วนใหญ่ */
+    var sP = clamp(sMid + (Math.random()*18-9), 26, 50);
     var lP = clamp(lMid + (Math.random()*16-8), 20, 78);
 
     /* 1) Primary */
     var primary = ideaColor(hP, sP, lP);
-    /* 2) Secondary ตาม rule */
+    /* 2) Secondary ตาม rule: hue ขยับตาม rule (เหมือนเดิม) แต่ S/L ต้องเป็น "เฉดเดียวกับ Primary"
+       คือชิฟต์ทิศทางเดียว (tint/shade ของ Itten) จากค่า sP/lP ที่สุ่มได้แล้ว ไม่ใช่สุ่มค่าใหม่อิสระ
+       (spec §4.7; research film-and-fashion-color-palette-principles.md ส่วน 6 ข้อ 2)
+       ใช้ dir ตัวเดียวกับที่กำหนดทิศ hue เพื่อให้ชิฟต์ไปทิศเดียวกันตลอดทั้งลุค */
     var dir = Math.random() < 0.5 ? 1 : -1, hS;
     if(rule === "monochrome")          hS = hP;
     else if(rule === "analogous")      hS = hP + dir*(20 + Math.random()*20);
@@ -1291,26 +1300,28 @@ function generateIdeaBatch(occasion, avoidKeys){
     else if(rule === "triadic")        hS = hP + dir*(120 + (Math.random()*14-7));
     else                               hS = hP;                       /* neutral-accent */
     var secondary = (rule === "monochrome")
-      ? ideaColor(hP, clamp(sP-14,12,80), clamp(lP + dir*22, 16, 86))
+      ? ideaColor(hP, clamp(sP-14,12,48), clamp(lP + dir*22, 16, 86))
       : (rule === "neutral-accent")
-        ? ideaColor(hP, 8 + Math.random()*10, 30 + Math.random()*50)  /* พื้นเป็นสีกลาง */
-        : ideaColor(hS, clamp(sP - 8 + Math.random()*16, 18, 82), clamp(lP + (Math.random()*24-12), 18, 82));
+        /* พื้นเป็นสีกลาง: ยังต้องชิฟต์จาก sP/lP (ไม่ใช่สุ่มอิสระ) แต่ชิฟต์แรงพอให้ตกเขต
+           neutral จริง (< NEUTRAL_MAX_S) และ L สุดขั้ว สมกับบทบาท "พื้นกลาง" ของ rule นี้ */
+        ? ideaColor(hP, clamp(sP - (18 + Math.random()*8), 5, 18), clamp(lP + dir*(30 + Math.random()*18), 14, 90))
+        : ideaColor(hS, clamp(sP - (8 + Math.random()*10), 12, 48), clamp(lP + dir*(14 + Math.random()*10), 16, 86));
     /* 3) Neutral ถ่วงโทน */
     var neutral = ideaColor(hP, 5 + Math.random()*10, Math.random() < 0.5 ? 88 + Math.random()*8 : 12 + Math.random()*14);
-    /* 4) Accent จุดเดียว */
+    /* 4) Accent จุดเดียว: ต้องมีแทบทุกครั้ง ไม่ใช่เหรียญโยน (spec §4.7, §9) โอกาสปรับความสด/ความเด่น
+       ผ่าน tone.s ที่มีอยู่แล้ว ไม่ปรับว่าจะมีหรือไม่มี */
     var accentHue = (rule === "complementary") ? hP + 180
                   : (rule === "triadic")       ? hP + 240
                   : hP + dir*(150 + Math.random()*40);
-    var wantAccent = Math.random() < (0.55 + tone.accentBoost);
     var accent = ideaColor(accentHue, clamp(62 + Math.random()*22 + tone.s*20, 45, 92), clamp(46 + (Math.random()*16-8), 28, 66));
 
     /* โหมดไอเดียใช้ "ทรงเริ่มต้นของหมวด" ย้อมสีที่แนะนำ (ui doc §3.7) */
     var items = {
-      top:    { id:"i-top-"+n,  name:colorNameTH(primary),   category:"top",    shapeId:DEFAULT_SHAPE.top,    color:primary,   isIdea:true },
-      bottom: { id:"i-bot-"+n,  name:colorNameTH(secondary), category:"bottom", shapeId:DEFAULT_SHAPE.bottom, color:secondary, isIdea:true },
-      shoes:  { id:"i-sho-"+n,  name:colorNameTH(neutral),   category:"shoes",  shapeId:DEFAULT_SHAPE.shoes,  color:neutral,   isIdea:true }
+      top:      { id:"i-top-"+n, name:colorNameTH(primary),   category:"top",       shapeId:DEFAULT_SHAPE.top,       color:primary,   isIdea:true },
+      bottom:   { id:"i-bot-"+n, name:colorNameTH(secondary), category:"bottom",    shapeId:DEFAULT_SHAPE.bottom,    color:secondary, isIdea:true },
+      shoes:    { id:"i-sho-"+n, name:colorNameTH(neutral),   category:"shoes",     shapeId:DEFAULT_SHAPE.shoes,     color:neutral,   isIdea:true },
+      accessory:{ id:"i-acc-"+n, name:colorNameTH(accent),    category:"accessory", shapeId:DEFAULT_SHAPE.accessory, color:accent,    isIdea:true }
     };
-    if(wantAccent) items.accessory = { id:"i-acc-"+n, name:colorNameTH(accent), category:"accessory", shapeId:DEFAULT_SHAPE.accessory, color:accent, isIdea:true };
     var o = buildOutfit(items, "idea", occasion);
     if(o) pool.push(o);
   }

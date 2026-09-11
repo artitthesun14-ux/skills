@@ -113,5 +113,45 @@ const t0=Date.now(); const bb=generateWardrobeBatch(big,'party',{}); const ms=Da
 t(`ตู้ 60 ชิ้น สร้างแบตช์ใน ${ms}ms (< 1500ms)`, ms<1500, ms+'ms');
 t('ยังได้ 3-4 ชุด', bb.outfits.length>=3&&bb.outfits.length<=4, bb.outfits.length);
 
+
+console.log('\n== 10. §4.7 กฎสีโหมด "สีที่เราแนะนำ" (film/fashion palette research) ==');
+{
+  let noAccent=0, accentNotVivid=0, baseTooVivid=0, total=0;
+  for(let n=0;n<300;n++){
+    const idea=generateIdeaBatch('unspecified',{});
+    idea.outfits.forEach(o=>{
+      total++;
+      const accentRow=o.colorBreakdown.find(r=>r.role==='accent');
+      if(!accentRow) noAccent++;
+      else if(hexToHsl(accentRow.hex).s < VIVID_MIN_S) accentNotVivid++;
+      o.colorBreakdown.forEach(r=>{
+        if(r.role!=='accent' && hexToHsl(r.hex).s >= VIVID_MIN_S) baseTooVivid++;
+      });
+    });
+  }
+  t('Accent มีทุกลุค ไม่ใช่เหรียญโยน (300 แบตช์)', noAccent===0, 'ขาด '+noAccent+' จาก '+total+' ลุค');
+  t('Accent ที่มี อิ่มสีถึงระดับ vivid จริง', accentNotVivid===0, accentNotVivid+' ครั้งที่ accent ไม่ถึงเกณฑ์');
+  t('Primary/Secondary/Neutral ไม่ล้ำเข้าเขต vivid ของ Accent', baseTooVivid===0, baseTooVivid+' ครั้งที่ role ฐานอิ่มสีเกิน VIVID_MIN_S');
+}
+{
+  // Secondary ต้องเป็น "เฉดเดียวกับ Primary" (Itten tint/shade): S ของ Secondary ต้องแปรผัน
+  // ไปกับ S ของ Primary ที่สุ่มได้แล้ว (correlation เป็นบวกชัดเจน) ไม่ใช่สุ่มอิสระจากกัน
+  const pairs=[];
+  for(let n=0;n<300;n++){
+    const idea=generateIdeaBatch('unspecified',{});
+    idea.outfits.forEach(o=>{
+      const primary=o.colorBreakdown.find(r=>r.role==='primary');
+      const secondary=o.colorBreakdown.find(r=>r.role==='secondary');
+      if(primary&&secondary) pairs.push([hexToHsl(primary.hex).s, hexToHsl(secondary.hex).s]);
+    });
+  }
+  const n=pairs.length;
+  const mx=pairs.reduce((s,p)=>s+p[0],0)/n, my=pairs.reduce((s,p)=>s+p[1],0)/n;
+  let num=0,dx2=0,dy2=0;
+  pairs.forEach(([x,y])=>{ num+=(x-mx)*(y-my); dx2+=(x-mx)**2; dy2+=(y-my)**2; });
+  const corr=num/Math.sqrt(dx2*dy2);
+  t('S ของ Secondary สัมพันธ์เชิงบวกกับ S ของ Primary (r='+corr.toFixed(2)+', ไม่ใช่สุ่มอิสระ)', corr>0.3, 'n='+n);
+}
+
 console.log(fails? `\n### ${fails} ข้อไม่ผ่าน\n` : '\n### ผ่านทั้งหมด\n');
 process.exit(fails?1:0);

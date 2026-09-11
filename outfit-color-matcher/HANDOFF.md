@@ -1,6 +1,6 @@
 # Handoff: Outfit Color Matcher
 
-> อัปเดต 2026-09-11 · หลัง `/code-review origin/main` เจอ 4 ข้อค้าง ตอนนี้แก้ครบแล้ว
+> อัปเดต 2026-09-11 · หลัง `/implement` กติกาสีโหมดไอเดีย (spec §4.1/4.7/9) ตามผลวิจัย publish เป็น V8 แล้ว
 > ผู้ใช้สื่อสารเป็นภาษาไทย ตอบไทยเสมอ
 
 ## เอกสารและโค้ดอยู่ที่ไหน
@@ -21,13 +21,23 @@ repo `artitthesun14-ux/skills` โฟลเดอร์ `outfit-color-matcher/` 
 
 ## สถานะปัจจุบัน
 
-**เฟส 2 เสร็จ (Swap + Favorites) ทดสอบผ่าน 238 ข้อในเทสต์ 7 ชุด publish เป็น Version 7 แล้ว**
+**กติกาสีโหมดไอเดีย (spec §4.1/4.7/9) implement แล้ว + เฟส 2 (Swap + Favorites) เสร็จ ทดสอบผ่าน 243 ข้อในเทสต์ 7 ชุด publish เป็น Version 8 แล้ว**
 artifact: `https://claude.ai/code/artifact/ee952a4d-7525-4446-a827-548546fe68b0`
 
 - publish ทับลิงก์เดิมเสมอ (localStorage ของผู้ใช้ไม่หาย) และต้อง `action:"read"` ก่อน publish ทุกครั้ง
-  (อ่านให้ครบทุกบรรทัดของไฟล์ที่ระบบเก็บไว้ ไม่ใช่แค่ head ที่โชว์มา ไม่งั้น publish จะถูกปฏิเสธ)
+  (อ่านให้ครบทุกบรรทัดของไฟล์ที่ระบบเก็บไว้ ไม่ใช่แค่ head ที่โชว์มา ไม่งั้น publish จะถูกปฏิเสธ ถ้าถูกปฏิเสธซ้ำว่า
+  "identical content already refused" ให้ `Artifact action:"read"` ใหม่อีกครั้งก่อน publish ซ้ำ)
 - แหล่งความจริงของโค้ดคือ `app.html` แก้แล้วรัน `./build.sh` ทุกครั้ง อย่าแก้ `outfit-color-matcher.html` ตรงๆ
 - watch subscription ของ artifact ลงทะเบียนไม่สำเร็จ (`mint_failed`) จึงไม่มีการปลุกเมื่อมีคนแก้จากที่อื่น ห้ามอ้างว่ากำลังเฝ้าอยู่
+
+### งานล่าสุด: กติกาสีโหมดไอเดีย (V8)
+
+`research/film-and-fashion-color-palette-principles.md` สรุปว่าทำไมพาเลตสุ่มของโหมดไอเดียไม่ดูเหมือนชุดจริง
+(อิง Itten/Albers/Munsell) แปลงเป็น 3 กติกาใน spec §4.1/4.7/9 แล้ว implement ใน `generateIdeaBatch()`/`ideaColor()`
+(`app.html`): Accent มีทุกลุคเสมอ (เลิกสุ่มเหรียญ), Secondary derive S/L จาก Primary ทิศทางเดียว (ไม่สุ่มอิสระ),
+`neutral-accent` บังคับให้ secondary ตกเป็น neutral จริง เทสต์ใหม่ใน `tests/engine-test.js` §10 (Pearson
+correlation ยืนยัน S ของ Secondary สัมพันธ์กับ Primary) และแก้ `tests/ac-test.js` B4c/B4d ที่เคยเช็ค accent
+แบบเก่า (ดู `PROJECT_STATE.md` §4 delta `-5` สำหรับรายละเอียดโค้ด)
 
 ### `/code-review origin/main` (fixed point ก่อนหน้า `a56ffaa`) เจอ 4 ข้อ ตอนนี้แก้ครบแล้ว (fixed point ใหม่ = HEAD ปัจจุบันของบรานช์นี้)
 

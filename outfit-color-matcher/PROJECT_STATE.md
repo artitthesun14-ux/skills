@@ -62,13 +62,25 @@
 - ProportionBar: ช่องว่าง 2px ระหว่าง segment, legend เสมอ, direct label เฉพาะ >=12%
 
 ## 4. การเปลี่ยนแปลงจากสเปก/ดีไซน์ก่อนหน้า (delta ของสเตจนี้)
+-5. **(V8, `/implement`) กติกาสี §4.1/§4.7/§9 จากงานวิจัย color palette: implement โค้ดแล้ว ไม่ใช่แค่สเปก**
+   แก้ `generateIdeaBatch()`/`ideaColor()` ใน `app.html` ตามกติกา 3 ข้อที่ -4 สรุปไว้: (ก) เอา `wantAccent`
+   ที่เป็นความน่าจะเป็นออก accessory (accent) ใส่ทุกลุคเสมอ โอกาสปรับแค่ความสด (`tone.s`) ไม่ปรับว่ามีหรือไม่
+   (ข) Secondary ทุก rule (เดิมทำถูกแค่ monochrome) ชิฟต์ S/L ทิศทางเดียวจากค่า `sP`/`lP` ที่ Primary สุ่มได้
+   แล้ว (ใช้ตัวแปร `dir` เดียวกับที่กำหนดทิศ hue) แทนการสุ่มอิสระ; rule `neutral-accent` ก็ชิฟต์จาก `sP`/`lP`
+   เหมือนกันแต่ชิฟต์แรงพอให้ตกเขต neutral จริง (สมกับบทบาท "พื้นกลาง") (ค) เปลี่ยน `IDEA_S_RANGE` จาก
+   `[35,75]` เป็น `[26,50]` และ clamp ค่า `sP` แคบกว่าเดิม (26-50 แทน 20-88) ให้อยู่ต่ำกว่า `VIVID_MIN_S`=55
+   เสมอ แยกจากช่วงของ Accent (62-92) ชัดเจน · ทดสอบก่อน-หลังด้วย TDD ใน `tests/engine-test.js` ==10==
+   (accent มีทุกลุค, ไม่มี role ฐานล้ำเขต vivid, S ของ Secondary สัมพันธ์บวกกับ Primary r=0.81)
+   แก้ `tests/ac-test.js` B4c ที่เช็คพฤติกรรมเดิม (accent count ต่อโอกาส) ให้เช็คของใหม่แทน (accent มีเสมอ
+   ทุกโอกาส + ความสดของ accent ต่างกันตามโอกาส) ยืนยันด้วยภาพหน้าจอ `.shots/idea-work.png`/`idea-party.png`
 -4. **(หลังงานวิจัย color palette) spec §4.1/§4.7/§9 แก้กติกาการสุ่มสีของโหมด "สีที่เราแนะนำ":**
    ผู้ใช้ตั้งคำถามว่าสีที่สุ่มออกมาดูไม่เหมือนของจริงที่มีคนใส่ ใช้ภาพตัวอย่าง palette จากหนัง (The Darjeeling
    Limited, The Royal Tenenbaums) เทียบ วิจัยเก็บไว้ที่ `../research/film-and-fashion-color-palette-principles.md`
-   สรุปเป็นกติกาสเปกใหม่ 3 ข้อ (ยังไม่ implement โค้ด แค่แก้สเปก): (ก) Accent ต้องมีแทบทุกครั้งในโหมด idea ไม่ใช่
+   สรุปเป็นกติกาสเปกใหม่ 3 ข้อ: (ก) Accent ต้องมีแทบทุกครั้งในโหมด idea ไม่ใช่
    ความน่าจะเป็นแบบเดิม (ข) Secondary ต้องเป็นเฉดเดียวกับ Primary (แปรผันจากค่า Primary) ทุก rule ไม่ใช่แค่
    monochrome (ค) Primary/Secondary/Neutral ต้องอยู่ต่ำกว่า threshold accent (S < ~55%, ตั้งชื่อ threshold นี้
    ใหม่ใน §4.1 ผูกกับโค้ด `VIVID_MIN_S`) แยกจากช่วงของ Accent ไม่ใช้ `IDEA_S_RANGE` ช่วงเดียวทับซ้อนกันแบบเดิม
+   (โค้ด implement แล้วที่ -5 ด้านบน)
 -0. **(V6) แก้ 2 บั๊กที่ /test เฟส2 เจอ:** (1) โหมดแก้ชื่อ favorite (`favEditId`) ไม่มีทางออกโดยไม่บันทึก คลิกนอกฟอร์มหรือกด Escape ไม่ปิด ตอนนี้ทั้งสองทางออกได้ (2) กด Escape ตอนเมนู ⋯ ของ favorite เปิดอยู่ เคลียร์ state ถูกแต่เรียก `renderWardrobe()` แทน `renderFavorites()` ทำให้เมนูค้างในจอ แก้ให้ branch ตาม prefix `fav-`
 -1. **(V5 เฟส 2) Swap One Item:** ปุ่ม 🔄 ต่อชิ้นบนการ์ดโฟกัส (เฉพาะโหมดจากตู้ของฉัน) วนตัวถัดไปที่เข้ากันดีตามคะแนนเงียบ ล็อกชิ้นอื่น หมวดชิ้นเดียว disabled; ring เก็บบน look ฟิลด์ `_swap` (ไม่หลุด DOM)
 -2. **(V5 เฟส 2) Favorites:** หัวใจบนการ์ด + เซกชัน `#sec-favorites` (แท็บ 'บันทึกไว้') เก็บ snapshot สูงสุด 20 ชุด rename/duplicate/delete; toggle ด้วย favKey; เต็ม 20 เตือน
@@ -83,21 +95,19 @@
 
 ## 5. เรื่องที่ยังไม่ปิด (open)
 - **ค่าที่ต้องจูนจากผลจริงตอนสร้าง:** threshold neutral `S < 20%`, threshold accent `S >= 55%`, ช่วงองศาของแต่ละ harmony rule
-- **[ใหม่] ยังไม่ implement โค้ดตามกติกาสี §4.7/§9 ที่แก้ในสเตจนี้:** `generateIdeaBatch()`/`ideaColor()` ใน `app.html`
-  ยังเป็นของเดิม (accent เป็นความน่าจะเป็น, Secondary สุ่มอิสระยกเว้น rule monochrome, `IDEA_S_RANGE` ใช้ช่วงเดียว
-  ทับซ้อนกับ accent) ต้องแก้โค้ดให้ตรงสเปกใหม่ก่อนถือว่าปิดเรื่องนี้ (ดู delta §4 ข้อ -4)
 - **dog-ear มุมการ์ด** เป็นลูกเล่นทางเลือก ยังไม่ฟันธงว่าใส่หรือไม่
 - **พฤติกรรม "ผ่อนเงื่อนไข" ใน No-match (A4)** ระบุไว้ระดับ UX ยังไม่ลงรายละเอียดว่าคลายอะไรก่อน
 - ยังไม่มี issue tracker → เอกสารทุกฉบับส่งเป็นไฟล์ ไม่ได้ publish ลง tracker
 - **นอกโปรเจกต์นี้:** PR #2 ของ repo `artitthesun14-ux/skills` **merge เข้า main แล้ว** (10 ก.ย. 2026) งานต่อจากนี้ต้องเริ่มบรานช์ใหม่จาก main ไม่ต่อท้ายประวัติที่ merge ไปแล้ว
 
 ## 6. สเตจ
-- **สเตจปัจจุบัน (จบแล้ว): เฟส 2 (Swap One Item + Favorites) + แก้การ์ดยืด**
-  - artifact: `https://claude.ai/code/artifact/ee952a4d-7525-4446-a827-548546fe68b0` (Version 6, ลิงก์เดิม localStorage ไม่หาย)
+- **สเตจปัจจุบัน (จบแล้ว): กติกาสีโหมดไอเดีย (spec §4.1/4.7/9) implement ตามผลวิจัย + เฟส 2 (Swap One Item + Favorites) + แก้การ์ดยืด**
+  - artifact: `https://claude.ai/code/artifact/ee952a4d-7525-4446-a827-548546fe68b0` (Version 8, ลิงก์เดิม localStorage ไม่หาย)
   - แหล่งความจริงของโค้ด: `app.html` (รูปแบบ artifact) รัน `./build.sh` ได้ `outfit-color-matcher.html` ที่เปิดตรงๆ ได้
   - แผนที่ใช้: `docs/plan-phase1-shape-migration.md`
-  - ผลตรวจ (Version 6) รวม 238 ข้อ ผ่านหมด: syntax 6/6 · engine 44 · browser 74 · shape 17 · migration 10 · `tests/ac-test.js` 71 (FR-0/FR-1/FR-2/FR-3 AC + §7C + เคสขอบจาก /test) · a11y 20 · regress 2 · ไม่มี JS error · ไม่มี external request
-  - แก้จากผลทดสอบ 3 จุด: ข้อความหลังแก้ไขชิ้นบอกผิดว่า "เพิ่มเข้าตู้" · สวอทช์พรีเซ็ตสี 34px ไม่ถึงเกณฑ์แตะ 44px · `.pbar__seg` เป็น `<button>` อยู่ใน `role="img"` ทำให้ tab เข้าไปในสิ่งที่ AT บอกว่าเป็นภาพ
+  - ผลตรวจ (Version 8) รวม 243 ข้อ ผ่านหมด: engine 48 · browser 74 · shape 17 · migration 10 · `tests/ac-test.js` 72 (FR-0/FR-1/FR-2/FR-3 AC + §4.7 + §7C + เคสขอบจาก /test) · a11y 20 · regress 2 · ไม่มี JS error · ไม่มี external request
+  - แก้จากผลทดสอบ 3 จุด (เฟส 2): ข้อความหลังแก้ไขชิ้นบอกผิดว่า "เพิ่มเข้าตู้" · สวอทช์พรีเซ็ตสี 34px ไม่ถึงเกณฑ์แตะ 44px · `.pbar__seg` เป็น `<button>` อยู่ใน `role="img"` ทำให้ tab เข้าไปในสิ่งที่ AT บอกว่าเป็นภาพ
+  - รายละเอียดงาน implement กติกาสี ดู §4 delta `-5` ด้านบน
 - **สเตจถัดไป: เฟส 3** (FR-4 วิเคราะห์ตู้ + FR-5 เลือกสีก่อน + FR-6 Generator) เริ่มเมื่อผู้ใช้สั่ง
 
 ## 7. ลำดับเฟสที่ตกลงไว้

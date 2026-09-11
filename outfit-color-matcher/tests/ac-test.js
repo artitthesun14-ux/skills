@@ -166,16 +166,18 @@ const H = require("./helper.js");
     const { ctx, page, errs } = await H.open(browser, H.store([]));
     const m = await page.evaluate(() => {
       function measure(occ){
-        let s = 0, l = 0, acc = 0, n = 0, looks = 0;
+        let s = 0, l = 0, accS = 0, accN = 0, looks = 0;
         for(let i = 0; i < 40; i++){
           const b = generateIdeaBatch(occ, {}).outfits;
           b.forEach(o => {
             looks++;
-            if(o.colorBreakdown.some(x => x.role === "accent")) acc++;
-            o.colorBreakdown.forEach(x => { const c = hexToHsl(x.hex); s += c.s * x.pct; l += c.l * x.pct; n += x.pct; });
+            o.colorBreakdown.forEach(x => {
+              const c = hexToHsl(x.hex); s += c.s * x.pct; l += c.l * x.pct;
+              if(x.role === "accent"){ accS += c.s; accN++; }
+            });
           });
         }
-        return { s: s/n, l: l/n, accent: acc/looks };
+        return { s: s/(looks*100), l: l/(looks*100), accent: accN/looks, accentS: accN ? accS/accN : 0 };
       }
       return { work: measure("work"), party: measure("party") };
     });
@@ -183,8 +185,13 @@ const H = require("./helper.js");
       "S work " + m.work.s.toFixed(1) + " vs party " + m.party.s.toFixed(1));
     R.ok(m.work.l < m.party.l, "B4b · FR-1 AC5: Work เอนเข้มกว่า Party",
       "L work " + m.work.l.toFixed(1) + " vs party " + m.party.l.toFixed(1));
-    R.ok(m.work.accent < m.party.accent, "B4c · FR-1 AC5: Work มี accent น้อยกว่า Party",
+    /* spec §4.7 (แก้ตามงานวิจัย): Accent ต้องมีแทบทุกครั้งไม่ว่าโอกาสไหน โอกาสปรับแค่ "ความสด"
+       ของ accent ไม่ใช่ว่าจะมีหรือไม่มี จึงเช็คว่ามีครบทุกลุค + accent สดกว่าใน party มากกว่า work */
+    R.ok(m.work.accent === 1 && m.party.accent === 1,
+      "B4c · spec §4.7: Accent มีทุกลุคไม่ว่าโอกาสไหน (ไม่ใช่เหรียญโยน)",
       "accent/ชุด work " + m.work.accent.toFixed(2) + " vs party " + m.party.accent.toFixed(2));
+    R.ok(m.work.accentS < m.party.accentS, "B4d · spec §4.7: โอกาสปรับความสดของ Accent (work สุขุมกว่า party)",
+      "accent S work " + m.work.accentS.toFixed(1) + " vs party " + m.party.accentS.toFixed(1));
     allErrs.push(...errs); await ctx.close();
   }
   {   /* B6: ตู้ไม่พอ (AC7) */
