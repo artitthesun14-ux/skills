@@ -285,6 +285,90 @@ const H = require("./helper.js");
     allErrs.push(...errs); await ctx.close();
   }
 
+
+  /* ============ SW. FR-2 Swap One Item ============ */
+  {
+    const seed = [
+      H.g("t1","top","tee-crew","#2B3A67"), H.g("t2","top","polo","#3F6B4F"), H.g("t3","top","hoodie","#C0392B"),
+      H.g("b1","bottom","chino","#C8B79B"), H.g("b2","bottom","jeans-straight","#7A93B8"),
+      H.g("s1","shoes","sneaker","#F2F0EB")
+    ];
+    const { ctx, page, errs } = await H.open(browser, H.store(seed, { mode:"wardrobe" }));
+    const look = () => page.evaluate(() => {
+      const o = state.batch[state.index];
+      return { top:o.items.top&&o.items.top.id, bottom:o.items.bottom&&o.items.bottom.id,
+               shoes:o.items.shoes&&o.items.shoes.id, sig: JSON.stringify(o.colorBreakdown) };
+    });
+    const a = await look();
+    await page.click('.card--focused [data-swap$=":top"]'); await page.waitForTimeout(120);
+    const b = await look();
+    R.ok(b.top !== a.top, "SW1 · FR-2 AC1: กดสลับเสื้อแล้วเสื้อเปลี่ยน", a.top+" -> "+b.top);
+    R.ok(b.bottom === a.bottom && b.shoes === a.shoes, "SW2 · FR-2 AC1: ชิ้นหมวดอื่นไม่เปลี่ยน");
+    R.ok(b.sig !== a.sig, "SW3 · FR-2 AC3: สัดส่วนสี/คำแนะนำอัปเดตตามชุดใหม่");
+    await page.click('.card--focused [data-swap$=":top"]'); await page.waitForTimeout(120);
+    const c = await look();
+    R.ok(c.top !== b.top, "SW4 · FR-2 AC2: กดซ้ำวนไปตัวถัดไป", b.top+" -> "+c.top);
+    R.ok(await page.locator('.card--focused [data-swap$=":shoes"]:disabled').count() === 1,
+      "SW5 · spec §7C: หมวดที่มีชิ้นเดียว ปุ่มสลับ disabled");
+    allErrs.push(...errs); await ctx.close();
+  }
+  {   /* โหมดไอเดียไม่มีปุ่มสลับ (ไม่มีตู้ให้เลือกตัวถัดไป) */
+    const { ctx, page, errs } = await H.open(browser, H.store([], { mode:"idea" }));
+    R.ok(await page.locator('.card--focused .tile__swap').count() === 0,
+      "SW6 · โหมดไอเดียไม่โชว์ปุ่มสลับ");
+    allErrs.push(...errs); await ctx.close();
+  }
+
+  /* ============ FV. FR-3 Favorites ============ */
+  {
+    const seed = [H.g("f1","top","polo","#2B3A67"), H.g("f2","bottom","chino","#C8B79B"), H.g("f3","shoes","sneaker","#F2F0EB")];
+    const { ctx, page, errs } = await H.open(browser, H.store(seed, { mode:"wardrobe" }));
+    const favN = () => page.evaluate(() => state.favorites.length);
+    await page.click('.card--focused .card__fav'); await page.waitForTimeout(120);
+    R.ok(await favN() === 1 && await page.getAttribute('.card--focused .card__fav','aria-pressed') === "true",
+      "FV1 · กดหัวใจ = บันทึก + ปุ่มเป็น pressed");
+    await page.click('.card--focused .card__fav'); await page.waitForTimeout(120);
+    R.ok(await favN() === 0, "FV2 · ux §7: กดหัวใจซ้ำ = เอาออก (toggle)");
+    await page.click('.card--focused .card__fav'); await page.waitForTimeout(120);
+    await page.reload(); await page.waitForTimeout(450);
+    R.ok(await favN() === 1, "FV3 · FR-3 AC1: ชุดที่บันทึกอยู่รอดหลังรีเฟรช");
+    R.ok(await page.locator('#sec-favorites .favcard').count() === 1, "FV4 · เซกชัน 'บันทึกไว้' โชว์ 1 ชุด");
+    /* duplicate */
+    const fid = await page.evaluate(() => state.favorites[0].id);
+    await page.click('[data-favmore="'+fid+'"]'); await page.waitForTimeout(80);
+    await page.click('[data-favdup="'+fid+'"]'); await page.waitForTimeout(120);
+    R.ok(await favN() === 2 && await page.locator('#sec-favorites .favcard').count() === 2,
+      "FV5 · FR-3 AC2: ทำสำเนาได้ชุดแยก");
+    /* delete หนึ่งชุด */
+    const del = await page.evaluate(() => state.favorites[0].id);
+    await page.click('[data-favmore="'+del+'"]'); await page.waitForTimeout(80);
+    await page.click('[data-favdel="'+del+'"]'); await page.waitForTimeout(100);
+    await page.click("#dlgOk"); await page.waitForTimeout(150);
+    R.ok(await favN() === 1 && !(await page.evaluate((id)=>state.favorites.some(f=>f.id===id), del)),
+      "FV6 · FR-3 AC3: ลบเฉพาะชุดนั้น");
+    /* ลบ garment ต้นทาง แล้ว favorite ยังเรนเดอร์สีได้ (snapshot) */
+    const shapes = await page.evaluate(() => {
+      state.wardrobe = []; persist(); renderWardrobe(); renderFavorites();
+      return document.querySelectorAll('#sec-favorites .favcard__shape svg.shape').length;
+    });
+    R.ok(shapes >= 2, "FV7 · snapshot: ลบเสื้อผ้าต้นทางแล้ว favorite ยังโชว์ทรง+สีได้", "shapes "+shapes);
+    allErrs.push(...errs); await ctx.close();
+  }
+  {   /* เต็ม 20 เตือน ไม่เพิ่มเงียบ */
+    const seed = [H.g("g1","top","polo","#2B3A67"), H.g("g2","bottom","chino","#C8B79B")];
+    const { ctx, page, errs } = await H.open(browser, H.store(seed, { mode:"wardrobe" }));
+    await page.evaluate(() => {
+      state.favorites = [];
+      for(let i=0;i<20;i++) state.favorites.push({ id:"x"+i, name:"ชุด"+i, key:"k"+i, rule:"neutral",
+        items:[{cat:"top",name:"a",shapeId:"polo",color:"#2B3A67"}], breakdown:[{hex:"#2B3A67",pct:100,role:"primary",name:"กรมท่า"}] });
+      persist(); renderFavorites();
+    });
+    await page.click('.card--focused .card__fav'); await page.waitForTimeout(120);
+    R.ok(await page.evaluate(() => state.favorites.length) === 20, "FV8 · เต็ม 20 แล้วกดหัวใจ ไม่เพิ่มเกิน");
+    R.ok(/20/.test(await page.locator("#liveFeedback").textContent()), "FV9 · เต็ม 20 มีข้อความเตือน ไม่เงียบ");
+    allErrs.push(...errs); await ctx.close();
+  }
+
   await browser.close();
   R.finish(allErrs);
 })();

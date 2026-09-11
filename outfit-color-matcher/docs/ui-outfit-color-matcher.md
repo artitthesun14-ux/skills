@@ -135,6 +135,12 @@ Stack: `Inter, "Helvetica Neue", system-ui, "Noto Sans Thai", sans-serif`
   5. แถวปุ่ม: FavoriteButton [P2] · (Swap อยู่บน tile)
 - **variants:** `focused` (scale 1, opacity 1, `--shadow-raised`) · `adjacent` (scale .92, opacity .4, ไม่รับ pointer, `aria-hidden`) · `idea` (tile = ทรงเริ่มต้นของหมวด ย้อมสีที่แนะนำ) · `wardrobe` (tile = ทรงจริงของชิ้น ย้อมสีจริง)
 
+**SwapButton** (`.tile__swap`) ปุ่ม 🔄 ท้ายไทล์ เฉพาะการ์ดโฟกัส + โหมดจากตู้ของฉัน สลับชิ้นหมวดนั้นไปตัวถัดไปที่เข้ากันดี (คะแนนเงียบ) ล็อกชิ้นอื่น หมวดชิ้นเดียว disabled + hint; touch 44 (View C)
+
+**FavoriteToggle** (`.card__fav`) หัวใจมุมขวาบนของการ์ด กด = บันทึก/เอาออก snapshot; เต็ม 20 เตือน สีขอบ/ตัวอักษร accent เมื่อ pressed แต่เป็นสถานะปุ่ม (การกระทำ) ไม่ใช่สีข้อมูล
+
+**FavCard** (`.favcard`, View D) การ์ดชุดที่บันทึก: แถวทรงย้อมสี (snapshot) + ชื่อแก้ได้ + rule + ProportionBar จาก snapshot + เมนู ⋯ (แก้ชื่อ/ทำสำเนา/ลบ) reuse `.gchip__*`
+
 **GarmentColorChip** (`.tile__chip`) สวอตช์สีล้วนต่อชิ้นในการ์ด: มือถืออยู่ขวาสุดของแถว เดสก์ท็อปเป็นแถบสีเต็มกว้างใต้ทรง แสดงสีจริงของชิ้น มี `--data-ring` และ `aria-hidden` (ชื่อสี+hex ข้างกันเป็นตัวสื่อ ไม่สื่อด้วยสีเดี่ยว) แดงเป็น fill ของชิ้นแดงได้ แต่ห้ามเป็นกรอบ/สถานะ
 
 **CategoryTile**: ช่องสี่เหลี่ยมต่อหมวด

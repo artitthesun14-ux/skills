@@ -21,7 +21,7 @@ repo `artitthesun14-ux/skills` โฟลเดอร์ `outfit-color-matcher/`
 
 ## สถานะปัจจุบัน
 
-**เฟส 1 เสร็จ + เพิ่มสวอตช์สีต่อชิ้นในการ์ด (V4) ทดสอบผ่าน 212 ข้อในเทสต์ 7 ชุด**
+**เฟส 2 เสร็จ (Swap + Favorites, V5) ทดสอบผ่าน 227 ข้อในเทสต์ 7 ชุด**
 artifact: `https://claude.ai/code/artifact/ee952a4d-7525-4446-a827-548546fe68b0`
 
 - publish ทับลิงก์เดิมเสมอ (localStorage ของผู้ใช้ไม่หาย) และต้อง `action:"read"` ก่อน publish ทุกครั้ง
@@ -31,11 +31,8 @@ artifact: `https://claude.ai/code/artifact/ee952a4d-7525-4446-a827-548546fe68b0`
 
 ## รอผู้ใช้ตัดสินใจ
 
-1. **แก้การ์ดถูกยืดเท่ากันหมดไหม** flex `align-items:stretch` ทำให้การ์ดที่สั้นกว่ามีที่ว่างท้ายการ์ด
-   111-136px ที่ 375px และสูงสุด 212px ที่ 1280px (ตัวเลขจาก `tests/a11y-test.js`)
-   แก้ด้วย `align-items:flex-start` ที่ `.carousel__track` บรรทัดเดียว เนื้อหาไม่ถูกตัดและไม่มี horizontal scroll
-   จึงเป็นเรื่องความสวยงามล้วน **ห้ามแก้เองจนกว่าผู้ใช้จะสั่ง**
-2. **เริ่มเฟส 2 เมื่อไหร่** FR-2 Swap One Item + FR-3 Favorites (สูงสุด 20 ชุด เก็บ snapshot สี+ชื่อ)
+1. **เริ่มเฟส 3 เมื่อไหร่** FR-4 วิเคราะห์ตู้ + FR-5 เลือกสีก่อน + FR-6 Outfit Generator
+2. **เปิด PR ใหม่ไหม** บรานช์ `claude/ready-to-use-qhe3ak` push ต่อเนื่อง ยังไม่ได้เปิด PR ของงานหลัง merge #2
 
 ## กฎการทำงานที่ผู้ใช้ยึด (เขาแก้มาแล้วทั้ง 3 ข้อ ระวังให้มาก)
 
@@ -72,12 +69,11 @@ artifact: `https://claude.ai/code/artifact/ee952a4d-7525-4446-a827-548546fe68b0`
 | ถ้าผู้ใช้อยากถูกซักก่อนตัดสินใจ | `grilling` (เคยใช้แล้วรอบหนึ่ง เขาชอบ) |
 | ถ้าเจอบั๊กยาก | `diagnosing-bugs` |
 
-## ถ้าผู้ใช้สั่งให้เริ่มเฟส 2
+## ถ้าผู้ใช้สั่งให้เริ่มเฟส 3 (FR-4/5/6)
 
-1. อ่าน FR-2 และ FR-3 พร้อม AC ในสเปกให้ครบก่อน
-2. อ่าน `app.html` ส่วน engine: คะแนนเงียบเก็บใน `WeakMap` ชื่อ `SCORES` (ห้ามให้หลุดเข้า DOM)
-   FR-2 ต้องใช้คะแนนนี้เลือก "ตัวถัดไปที่เข้ากันดี" และวนตัวถัดไปเมื่อกดซ้ำ
-3. Favorites เก็บ **snapshot สี+ชื่อ** ไม่ใช่ reference ไป garment (ลบชิ้นแล้ว favorite ต้องยังโชว์ได้)
-   เต็ม 20 ต้องเตือน ห้ามเงียบดรอป
-4. เพิ่มเคสลง `tests/ac-test.js` ให้ครอบ AC ใหม่ รันเทสต์ทั้งหมดให้เขียว แล้วค่อย `./build.sh` และ publish ทับลิงก์เดิม
-5. อัปเดต `PROJECT_STATE.md` §4 §5 §6 ให้ตรงกับของจริง
+1. อ่าน FR-4/5/6 พร้อม AC ในสเปก; FR-4 มีกราฟ = โหลด skill `dataviz` ก่อนเขียนโค้ดกราฟ
+2. เฟส 2 ทำเสร็จแล้วเป็นตัวอย่างแพทเทิร์น: Swap ใน `swapItem()` (ring บน `o._swap`), Favorites
+   ใน `toggleFav/favFromLook/renderFavorites` (snapshot ใน `state.favorites`), เซกชันใหม่แบบ `#sec-favorites`
+3. FR-4 วิเคราะห์ตู้: สัดส่วนสีจาก garment จริง + กลุ่ม Neutral/Cool/Warm/Accent + insight template; ข้อมูลน้อย = บอกตรงๆ
+4. เพิ่มเคสลง `tests/ac-test.js` รันครบ 7 ชุดให้เขียว แล้ว `./build.sh` + publish ทับลิงก์เดิม
+5. อัปเดต `PROJECT_STATE.md` §4 §6 ให้ตรงกับของจริง
