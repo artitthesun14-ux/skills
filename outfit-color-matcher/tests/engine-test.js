@@ -169,6 +169,25 @@ console.log('\n== 10. §4.7 กฎสีโหมด "สีที่เรา�
   const corr=num/Math.sqrt(dx2*dy2);
   t('S ของ Secondary สัมพันธ์เชิงบวกกับ S ของ Primary (r='+corr.toFixed(2)+', ไม่ใช่สุ่มอิสระ)', corr>0.3, 'n='+n);
 }
+{
+  // rule ที่โชว์ในโหมดไอเดียต้องกระจายครบทั้ง 5 แบบ ไม่กระจุกอยู่แค่ 2 แบบ
+  // (เดิม detectHarmony ตีความ rule ใหม่จากสีที่มี Accent ปนอยู่ด้วย จึงเห็นแต่ triadic/neutral-accent
+  //  แก้โดยให้ generateIdeaBatch ส่ง rule ที่ตัวเองเลือกไว้แล้วไปเป็น ruleUsed ตรงๆ)
+  const seen={}, all=['monochrome','analogous','complementary','triadic','neutral-accent'];
+  let total=0, distinctPerBatch=0, batches=0;
+  for(let n=0;n<300;n++){
+    const b=generateIdeaBatch('unspecified',{}).outfits;
+    const inBatch={};
+    b.forEach(o=>{ seen[o.ruleUsed]=(seen[o.ruleUsed]||0)+1; total++; inBatch[o.ruleUsed]=1; });
+    distinctPerBatch+=Object.keys(inBatch).length; batches++;
+  }
+  const minShare=Math.min(...all.map(r=>(seen[r]||0)/total));
+  const maxShare=Math.max(...all.map(r=>(seen[r]||0)/total));
+  const avgDistinct=distinctPerBatch/batches;
+  t('rule ทุกแบบมีสัดส่วนจริง (ต่ำสุด >= 8%) ไม่ใช่โผล่ประปราย', minShare>=0.08, 'ต่ำสุด '+(minShare*100).toFixed(0)+'%');
+  t('ไม่มี rule ไหนกินสัดส่วนเกิน 40% ของแบตช์', maxShare<=0.40, 'สูงสุด '+(maxShare*100).toFixed(0)+'%');
+  t('แต่ละแบตช์เห็น rule หลากหลาย (เฉลี่ย >= 3.5 แบบ)', avgDistinct>=3.5, 'เฉลี่ย '+avgDistinct.toFixed(2)+' แบบ/แบตช์');
+}
 
 console.log(fails? `\n### ${fails} ข้อไม่ผ่าน\n` : '\n### ผ่านทั้งหมด\n');
 process.exit(fails?1:0);

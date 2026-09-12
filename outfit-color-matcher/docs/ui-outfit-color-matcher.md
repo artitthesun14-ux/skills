@@ -125,8 +125,7 @@ Stack: `Inter, "Helvetica Neue", system-ui, "Noto Sans Thai", sans-serif`
 ### 3.3 การ์ดชุด (หัวใจ)
 
 **OutfitCard**
-- ทรง: `--surface`, `--r-lg`, ขอบ 1px `--line`, padding `--sp-5`
-- **มุมตัด (dog-ear)** มุมขวาบน 28px ตามคลิปอ้างอิง: ทำด้วย `clip-path` (ตกแต่ง, ปิดได้)
+- ทรง: `--surface`, `--r-lg`, ขอบ 1px `--line`, padding `--sp-5` มุมโค้งธรรมดา
 - โครงใน (บนลงล่าง):
   1. แถวหัว: `SampleBadge` (ถ้าเป็นตัวอย่าง) + ชื่อ rule เช่น "Analogous" เป็น eyebrow
   2. **CategoryTile stack** (บน → ล่าง → รองเท้า → [นอก] → [แอกเซส])
@@ -277,7 +276,7 @@ L = relative luminance ของ --garment-fill
 - **A2 Wardrobe mode:** CategoryTile = **ทรงจริงของชิ้นนั้น ย้อมสีจริงของชิ้นนั้น**
 - *(ทั้งสองโหมดใช้ภาษาภาพเดียวกัน ต่างแค่ที่มาของทรง/สี ทำให้เทียบกันได้ตรงๆ)*
 - **A3 Insufficient:** แทน Carousel ด้วย EmptyState: *"ยังขาด{หมวด} เพิ่มอีกนิดเพื่อจัดชุดจากตู้"* + PrimaryButton "เพิ่ม{หมวด}" + GhostButton "ดูไอเดียสีแทน" (สลับโหมด)
-- **A4 No-match:** EmptyState + ปุ่ม "ผ่อนเงื่อนไข" / "สลับไปโหมดไอเดีย"
+- **A4 No-match:** EmptyState + ปุ่ม "สลับไปโหมดไอเดีย" (fallback เชิงป้องกัน: ตัวแนะนำไม่มีเงื่อนไขตายตัวให้ผ่อน มีบน+ล่างเมื่อไรก็ได้ชุดที่คิดคะแนนออกมาเสมอ ทางออกจริงคือสลับไปโหมดไอเดีย)
 - **A5 Transition:** pan; ปุ่มเจนใหม่เข้าสถานะ loading; หลังเสร็จ InlineFeedback "สร้างชุดใหม่แล้ว"
 
 ### View B · ตู้เสื้อผ้า [P1]

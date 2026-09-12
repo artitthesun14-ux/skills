@@ -1,7 +1,7 @@
 # Handoff: Outfit Color Matcher
 
 > อัปเดต 2026-09-11 · หลัง `/implement` กติกาสีโหมดไอเดีย (spec §4.1/4.7/9) + `/code-review` เจอบั๊กจริง
-> แก้แล้ว publish เป็น V9 · ผู้ใช้สื่อสารเป็นภาษาไทย ตอบไทยเสมอ
+> แก้แล้ว + `/to-tickets` + `/implement` ปิด 4 open item publish เป็น V10 · ผู้ใช้สื่อสารเป็นภาษาไทย ตอบไทยเสมอ
 
 ## เอกสารและโค้ดอยู่ที่ไหน
 
@@ -21,7 +21,7 @@ repo `artitthesun14-ux/skills` โฟลเดอร์ `outfit-color-matcher/` 
 
 ## สถานะปัจจุบัน
 
-**กติกาสีโหมดไอเดีย (spec §4.1/4.7/9) implement แล้ว + เฟส 2 (Swap + Favorites) เสร็จ ทดสอบผ่าน 244 ข้อในเทสต์ 7 ชุด publish เป็น Version 9 แล้ว**
+**ปิด 4 open item (rule variety + threshold + dog-ear + No-match) + กติกาสีโหมดไอเดีย + เฟส 2 เสร็จ ทดสอบผ่าน 247 ข้อในเทสต์ 7 ชุด publish เป็น Version 10 แล้ว**
 artifact: `https://claude.ai/code/artifact/ee952a4d-7525-4446-a827-548546fe68b0`
 
 - publish ทับลิงก์เดิมเสมอ (localStorage ของผู้ใช้ไม่หาย) และต้อง `action:"read"` ก่อน publish ทุกครั้ง
@@ -43,9 +43,24 @@ correlation ยืนยัน S ของ Secondary สัมพันธ์ก
 (branch monochrome/default ใน `generateIdeaBatch()`) เคยต่ำกว่า `NEUTRAL_MAX_S=20` ทำให้ Secondary
 หลุดไปเป็น role "neutral" เองโดยไม่ตั้งใจ ~64% ของทุกลุคที่ rule ไม่ใช่ neutral-accent (พิสูจน์ด้วยการรัน
 generator 12,000 ครั้งเทียบก่อน/หลัง) แก้โดยยก floor S เป็น 26 และหด L clamp เป็น [26,74] เพิ่ม regression
-test ใน `engine-test.js` ล็อกไว้ **ยังมีข้อค้าง (ไม่ได้แก้รอบนี้ ดู PROJECT_STATE.md §5):** โหมดไอเดียตอนนี้
-โชว์ rule ไม่ครบ 5 แบบ (แบตช์ที่ผู้ใช้เห็นเกือบทั้งหมดเป็นแค่ triadic/neutral-accent) เพราะ Accent ที่มีทุก
-ลุคไปกระทบการตรวจจับ rule ใน `detectHarmony()` (engine ร่วมกับโหมดตู้ ไม่ได้แก้เพราะเกินขอบเขตงานนี้)
+test ใน `engine-test.js` ล็อกไว้
+
+### `/to-tickets` + `/implement` (V10): ปิด 4 open item ที่เหลือ
+
+แตกเป็น 4 ตั๋วที่ `.scratch/outfit-color-matcher/issues/` แล้ว implement ตามลำดับ (ยึด working-guidelines):
+1. **โหมดไอเดียโชว์ rule ครบ 5 แบบ (โค้ด):** เดิมโชว์แต่ triadic/neutral-accent เพราะ (1) `detectHarmony()` ตีความ
+   rule ใหม่จากสีที่รวม Accent (2) คัดเลือก top-4-by-score ทิ้ง rule คะแนนต่ำ แก้ 2 จุด: `buildOutfit(items,mode,
+   occasion,forcedRule)` รับ rule ที่โหมดไอเดียเลือกไว้เป็นป้ายตรงๆ (ไม่แตะ `detectHarmony` โหมดตู้ไม่กระทบ) +
+   การคัดเลือกใน `generateIdeaBatch` เปลี่ยนเป็น "rule ละหนึ่งก่อน แล้วค่อยเติม" ผลวัดจริง ~17-25%/แบบ 4 rule/แบตช์
+2. **threshold (docs):** วัดจริง 3,200 ลุค ยืนยันว่า `NEUTRAL_MAX_S=20`/`VIVID_MIN_S=55` ตกในช่องว่างระหว่างกลุ่ม
+   role คงค่าไว้ บันทึกตัวเลขใน spec §9
+3. **dog-ear (docs):** ตัดทิ้ง ลบจาก ui/spec docs (ไม่เคยมีในโค้ด)
+4. **No-match "ผ่อนเงื่อนไข" (docs):** ตัวแนะนำไม่มี hard constraint ให้ผ่อน A4 เป็น fallback ที่ทางออกจริงคือสลับโหมด
+   ไอเดีย แก้ ui/ux docs ให้ตรง
+
+**ข้อควรระวังถ้าจะแตะ `generateIdeaBatch` ต่อ:** ป้าย ruleUsed ในโหมดไอเดียมาจาก `forcedRule` (rule ที่สุ่มเลือก
+สร้างสี) ไม่ใช่จาก `detectHarmony` แล้ว ดังนั้นถ้าเพิ่ม/แก้ rule ต้องแก้ทั้ง `IDEA_RULES`, สูตรสร้างสีของ rule นั้น,
+และ `RULE_TH`/`buildAdvice` ให้ครบ ส่วนโหมดตู้ยังใช้ `detectHarmony` เดิม (ไม่ส่ง forcedRule) ตามเดิม
 
 ### `/code-review origin/main` (fixed point ก่อนหน้า `a56ffaa`) เจอ 4 ข้อ ตอนนี้แก้ครบแล้ว (fixed point ใหม่ = HEAD ปัจจุบันของบรานช์นี้)
 

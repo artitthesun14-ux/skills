@@ -94,28 +94,25 @@
 6. **การตัดสินใจเชิงภาพในสเตจนี้:** OccasionChips ที่เลือกใช้ `--ink` (ไม่ใช่ accent) เพื่อสงวนแดงให้ CTA · DiversityBar [P3] ใช้สีเดียวทุกแถบ (งานคือเทียบขนาด ไม่ใช่บอกตัวตน)
 
 ## 5. เรื่องที่ยังไม่ปิด (open)
-- **[พบใหม่จาก /code-review, ต้องให้ผู้ใช้ตัดสินใจ] โหมดไอเดียแสดง rule ไม่ครบ 5 แบบ**
-  หลัง implement กติกาสี §4.7 (Accent มีทุกลุค) แล้ววัดจริง (12,000 ลุค) พบว่าแบตช์ที่โชว์ผู้ใช้เกือบทั้งหมด
-  เป็นแค่ 2 ใน 5 rule (~56% triadic, ~44% neutral-accent) monochrome/analogous/complementary แทบไม่โผล่เลย
-  สาเหตุ: เมื่อ Accent มีทุกลุค `detectHarmony()` (ฟังก์ชันร่วมกับโหมดตู้ ไม่ได้แก้ในรอบนี้) วัดระยะมุม hue
-  จากสีที่ไม่ใช่ neutral **ทุกตัวรวม Accent ด้วย** และ Accent ถูกออกแบบให้ห่างจาก Primary มาก (~150-190°)
-  เสมอ ทำให้ maxD สูงเกินเกณฑ์ monochrome (half=12°)/analogous (half=15°) เกือบทุกครั้ง และ complementary
-  ต้องการ nn.length===2 พอดี (ตอนนี้มักเป็น 3 เพราะมี Accent) จึงแทบไม่ถูกตรวจพบเช่นกัน ไม่ได้แก้ในรอบนี้
-  เพราะ `detectHarmony`/`scoreOutfit` เป็น engine ร่วมกับโหมดตู้ (แก้แล้วเสี่ยงกระทบเทสต์/พฤติกรรมโหมดตู้
-  เกินขอบเขตงานสี 3 ข้อที่ตกลงไว้) ตัวเลือกที่เป็นไปได้: (ก) ให้ Accent วัด harmony แยกจาก Primary/Secondary
-  (ข) ลดระยะห่าง accentHue ลง (ค) ยอมรับว่า "rule ที่แสดง" เป็นป้ายบรรยาย ไม่ใช่สัญญาว่าจะกระจายเท่ากัน
-- **ค่าที่ต้องจูนจากผลจริงตอนสร้าง:** threshold neutral `S < 20%`, threshold accent `S >= 55%`, ช่วงองศาของแต่ละ harmony rule
-- **dog-ear มุมการ์ด** เป็นลูกเล่นทางเลือก ยังไม่ฟันธงว่าใส่หรือไม่
-- **พฤติกรรม "ผ่อนเงื่อนไข" ใน No-match (A4)** ระบุไว้ระดับ UX ยังไม่ลงรายละเอียดว่าคลายอะไรก่อน
-- ยังไม่มี issue tracker → เอกสารทุกฉบับส่งเป็นไฟล์ ไม่ได้ publish ลง tracker
+- **[ปิดแล้ว V10] โหมดไอเดียแสดง rule ครบทั้ง 5 แบบ:** เดิมโชว์แต่ triadic/neutral-accent เพราะ (1) `detectHarmony()`
+  ตีความ rule ใหม่จากสีที่รวม Accent และ (2) การคัดเลือก top-4-by-score ทิ้ง rule คะแนนต่ำ แก้โดยให้ `generateIdeaBatch`
+  ส่ง rule ที่เลือกไว้ผ่าน `buildOutfit(items,mode,occasion,forcedRule)` เป็นป้าย ruleUsed ตรงๆ (ไม่แตะ `detectHarmony`
+  โหมดตู้ไม่กระทบ) แล้วคัดเลือกแบบ "rule ละหนึ่งก่อน" ผลวัดจริง: กระจาย ~17-25% ต่อแบบ, เฉลี่ย 4 rule/แบตช์
+- **[ปิดแล้ว V10] ค่า threshold neutral/vivid/มุม rule:** วัดจริงแล้วยืนยันว่าทั้งสอง threshold ตกในช่องว่างระหว่างกลุ่ม
+  ไม่ได้ผ่ากลาง จึงคงค่าไว้ ไม่ปรับ (รายละเอียดตัวเลขบันทึกใน spec §9)
+- **[ปิดแล้ว V10] dog-ear มุมการ์ด:** ตัดทิ้งอย่างเป็นทางการ (ไม่เคย implement) ลบออกจาก ui/spec docs แล้ว
+- **[ปิดแล้ว V10] "ผ่อนเงื่อนไข" ใน No-match (A4):** ตัวแนะนำไม่มีเงื่อนไขตายตัวให้ผ่อน (มีบน+ล่างก็ได้ชุดเสมอ) A4 เป็น
+  fallback เชิงป้องกันที่ทางออกจริงคือสลับไปโหมดไอเดีย แก้ ui/ux docs ให้ตรงของจริง ไม่มีโค้ดเปลี่ยน
+- ยังไม่มี issue tracker → เอกสารทุกฉบับส่งเป็นไฟล์ ไม่ได้ publish ลง tracker (ตั๋วงานรอบนี้อยู่ที่ `.scratch/outfit-color-matcher/issues/`)
 - **นอกโปรเจกต์นี้:** PR #2 ของ repo `artitthesun14-ux/skills` **merge เข้า main แล้ว** (10 ก.ย. 2026) งานต่อจากนี้ต้องเริ่มบรานช์ใหม่จาก main ไม่ต่อท้ายประวัติที่ merge ไปแล้ว
 
 ## 6. สเตจ
-- **สเตจปัจจุบัน (จบแล้ว): กติกาสีโหมดไอเดีย (spec §4.1/4.7/9) implement ตามผลวิจัย + เฟส 2 (Swap One Item + Favorites) + แก้การ์ดยืด**
-  - artifact: `https://claude.ai/code/artifact/ee952a4d-7525-4446-a827-548546fe68b0` (Version 9, ลิงก์เดิม localStorage ไม่หาย)
+- **สเตจปัจจุบัน (จบแล้ว): ปิด 4 open item (rule variety + threshold + dog-ear + No-match) + กติกาสีโหมดไอเดีย (spec §4.1/4.7/9) + เฟส 2 (Swap + Favorites)**
+  - artifact: `https://claude.ai/code/artifact/ee952a4d-7525-4446-a827-548546fe68b0` (Version 10, ลิงก์เดิม localStorage ไม่หาย)
   - แหล่งความจริงของโค้ด: `app.html` (รูปแบบ artifact) รัน `./build.sh` ได้ `outfit-color-matcher.html` ที่เปิดตรงๆ ได้
   - แผนที่ใช้: `docs/plan-phase1-shape-migration.md`
-  - ผลตรวจ (Version 9) รวม 244 ข้อ ผ่านหมด: engine 49 · browser 74 · shape 17 · migration 10 · `tests/ac-test.js` 72 (FR-0/FR-1/FR-2/FR-3 AC + §4.7 + §7C + เคสขอบจาก /test) · a11y 20 · regress 2 · ไม่มี JS error · ไม่มี external request
+  - ผลตรวจ (Version 10) รวม 247 ข้อ ผ่านหมด: engine 52 · browser 74 · shape 17 · migration 10 · `tests/ac-test.js` 72 (FR-0/FR-1/FR-2/FR-3 AC + §4.7 + §7C + เคสขอบจาก /test) · a11y 20 · regress 2 · ไม่มี JS error · ไม่มี external request
+  - **[V10 ปิด 4 open item]** rule variety (forcedRule ผ่าน `buildOutfit` + คัดเลือก rule ละหนึ่ง), threshold ยืนยันจากผลวัด (spec §9), dog-ear ตัดทิ้ง (docs), No-match "ผ่อนเงื่อนไข" แก้ docs ให้ตรงของจริง ตั๋วงานที่ `.scratch/outfit-color-matcher/issues/`
   - **[แก้แล้วจาก /code-review]** floor S ของ Secondary ใน `generateIdeaBatch()` (branch monochrome/default)
     เคยต่ำกว่า `NEUTRAL_MAX_S=20` ทำให้ Secondary หลุดไปเป็น role "neutral" เอง ~64% ของทุกลุคที่ rule
     ไม่ใช่ neutral-accent (ตรวจพบผ่านการรัน generator 12,000 ครั้งเทียบก่อน/หลัง) แก้โดยยก floor เป็น 26

@@ -53,7 +53,7 @@
 - A1 Idea mode ("สีที่เราแนะนำ"): carousel การ์ด = สวอทช์สีต่อหมวด + สัดส่วน + คำแนะนำ
 - A2 Wardrobe mode ("จากตู้ของฉัน"): carousel การ์ด = ชิ้นจริง/บล็อกสี + สัดส่วน + คำแนะนำ
 - A3 Insufficient (wardrobe แต่ตู้ไม่พอ): การ์ดแทนที่ด้วย prompt "ขาด [หมวด]" + ปุ่มเพิ่ม + ชี้ให้ลองโหมดไอเดีย
-- A4 No-match (constraint): ข้อความ + เสนอผ่อนเงื่อนไข/สลับโหมด
+- A4 No-match (fallback เชิงป้องกัน): ข้อความ + เสนอสลับไปโหมดไอเดีย (ไม่มีเงื่อนไขตายตัวให้ผ่อน)
 - A5 Generating/transition: pan animation ระหว่างการ์ด (skip เมื่อ reduced-motion)
 
 ### View B: Wardrobe (ตู้) [P1]

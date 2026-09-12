@@ -1159,8 +1159,12 @@ function buildAdvice(rule, roleRows){
   return out.slice(0,3);
 }
 
-/* --- ประกอบ outfit หนึ่งชุดจากรายการชิ้น --- */
-function buildOutfit(items, mode, occasion){
+/* --- ประกอบ outfit หนึ่งชุดจากรายการชิ้น ---
+   forcedRule (ไม่บังคับ): โหมดไอเดียสร้างสีตาม rule ที่เลือกไว้แล้ว จึงส่ง rule นั้นมาใช้เป็น
+   ป้าย ruleUsed ตรงๆ แทนให้ detectHarmony เดาใหม่ ไม่งั้น Accent (ที่อยู่ห่าง Primary มากทุกลุค)
+   จะทำให้ detectHarmony ตีเป็น triadic/neutral-accent เกือบหมด บดบัง rule อื่น (พบจาก /code-review)
+   detectHarmony ยังถูกเรียกเพื่อวัด clarity ให้คะแนน จึงไม่แตะโหมดตู้ (ที่ไม่ส่ง forcedRule) */
+function buildOutfit(items, mode, occasion, forcedRule){
   var entries = [], byCat = {};
   CATEGORY_ORDER.forEach(function(cat){
     var it = items[cat];
@@ -1169,6 +1173,7 @@ function buildOutfit(items, mode, occasion){
   if(!entries.length) return null;
   var breakdown = computeProportion(entries);
   var harmony   = detectHarmony(breakdown.map(function(b){ return b.hex; }));
+  if(forcedRule) harmony = { rule:forcedRule, clarity:harmony.clarity };
   var roleRows  = assignRoles(breakdown, entries);
   var outfit = {
     sourceMode: mode,
@@ -1317,18 +1322,23 @@ function generateIdeaBatch(occasion, avoidKeys){
       shoes:    { id:"i-sho-"+n, name:colorNameTH(neutral),   category:"shoes",     shapeId:DEFAULT_SHAPE.shoes,     color:neutral,   isIdea:true },
       accessory:{ id:"i-acc-"+n, name:colorNameTH(accent),    category:"accessory", shapeId:DEFAULT_SHAPE.accessory, color:accent,    isIdea:true }
     };
-    var o = buildOutfit(items, "idea", occasion);
+    var o = buildOutfit(items, "idea", occasion, rule);   /* ใช้ rule ที่เลือกไว้ ไม่ให้ detectHarmony เดาใหม่ */
     if(o) pool.push(o);
   }
   pool.sort(function(a,b){ return scoreOf(b) - scoreOf(a); });
-  /* ไม่ dedupe ด้วย id (สุ่มใหม่ทุกครั้งอยู่แล้ว) แต่ตัดชุดที่สีหลักซ้ำกันเกินไป */
-  var out = [], usedHue = [];
-  pool.forEach(function(o){
-    if(out.length >= BATCH_MAX) return;
+  /* ไม่ dedupe ด้วย id (สุ่มใหม่ทุกครั้งอยู่แล้ว) แต่ตัดชุดที่สีหลักซ้ำกันเกินไป
+     รอบแรกคัด "ชุดคะแนนดีสุดของแต่ละ rule" ก่อน เพื่อให้แต่ละแบตช์เห็น rule หลากหลาย
+     ไม่กระจุกที่ triadic/neutral-accent ที่คะแนนนำเสมอ (พบจาก /code-review) แล้วรอบสองค่อยเติมที่เหลือ */
+  var out = [], usedHue = [], usedRule = {};
+  function consider(o, enforceRule){
+    if(out.length >= BATCH_MAX || out.indexOf(o) !== -1) return;
+    if(enforceRule && usedRule[o.ruleUsed]) return;
     var h = hexToHsl(o.colorBreakdown[0].hex).h;
     if(usedHue.some(function(u){ return hueDist(u,h) < 25; })) return;
-    usedHue.push(h); out.push(o);
-  });
+    usedHue.push(h); usedRule[o.ruleUsed] = 1; out.push(o);
+  }
+  pool.forEach(function(o){ consider(o, true); });    /* รอบแรก: rule ละหนึ่ง (คะแนนดีสุด) */
+  pool.forEach(function(o){ consider(o, false); });   /* รอบสอง: เติมที่ว่างด้วยชุดคะแนนถัดไป */
   while(out.length < BATCH_MIN && pool.length > out.length){
     var next = pool.find(function(o){ return out.indexOf(o) === -1; });
     if(!next) break;
