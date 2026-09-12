@@ -129,7 +129,10 @@
 - **นอกโปรเจกต์นี้:** PR #2 ของ repo `artitthesun14-ux/skills` **merge เข้า main แล้ว** (10 ก.ย. 2026) งานต่อจากนี้ต้องเริ่มบรานช์ใหม่จาก main ไม่ต่อท้ายประวัติที่ merge ไปแล้ว
 
 ## 6. สเตจ
-- **สเตจปัจจุบัน (กำลังทำ): เฟส 3** **FR-4 วิเคราะห์ตู้ (V11) + FR-5 Color-first (V12) เสร็จแล้ว** เหลือ FR-6 Generator
+- **สเตจปัจจุบัน (จบแล้ว): เฟส 3 ปิดครบทั้ง 3 ข้อ (FR-4 + FR-5 + FR-6)**
+  - **FR-6 Generator:** ผู้ใช้ตัดสินใจ (2026-09-12) ให้ถือว่าจบแล้วโดยไม่มีโค้ดใหม่ เพราะสองส่วนจริงของ FR-6
+    (Color filter + สวิตช์ Use my wardrobe) มีอยู่แล้วจากโหมดเดิม (4.6) + FR-5; ส่วน "Style" ไม่เคยถูก define
+    ในสเปกหรือ data model มาก่อน เลยตัดออกจากขอบเขตแทนที่จะเดาเพิ่ม (ดู spec §5 FR-6 สำหรับ 3 ทางเลือกที่เคยเสนอ)
   - **FR-4 (V11):** ฟังก์ชัน `analyzeWardrobe()` (บล็อก engine, เทสต์ได้ด้วย engine-test) + เซกชัน `#sec-analysis`
     + แท็บ "วิเคราะห์" ครบ AC1-AC5: สัดส่วนรายสีนับเป็นชิ้น (largest remainder ให้รวม 100), 4 กลุ่มไม่ทับกัน
     (neutral > accent > cool/warm), insight 1-3 ข้อจาก threshold+template, สีที่ช่วยเพิ่มการจับคู่อิงสีฐานเด่นสุด
@@ -148,10 +151,10 @@
     และหด L clamp เป็น [26,74] (จาก [16,86]) เพิ่มเทสต์ regression ใน `engine-test.js` ล็อกพฤติกรรมนี้ไว้
   - แก้จากผลทดสอบ 3 จุด (เฟส 2): ข้อความหลังแก้ไขชิ้นบอกผิดว่า "เพิ่มเข้าตู้" · สวอทช์พรีเซ็ตสี 34px ไม่ถึงเกณฑ์แตะ 44px · `.pbar__seg` เป็น `<button>` อยู่ใน `role="img"` ทำให้ tab เข้าไปในสิ่งที่ AT บอกว่าเป็นภาพ
   - รายละเอียดงาน implement กติกาสี ดู §4 delta `-5` ด้านบน
-- **สเตจถัดไป: เฟส 3** (FR-4 วิเคราะห์ตู้ + FR-5 เลือกสีก่อน + FR-6 Generator) เริ่มเมื่อผู้ใช้สั่ง
+- **สเตจถัดไป: ไม่มีเฟสค้าง** เฟส 1-3 ปิดครบแล้ว งานต่อไปรอผู้ใช้สั่งใหม่ (feature ใหม่/backlog ตาม spec §11)
 
 ## 7. ลำดับเฟสที่ตกลงไว้
-- **เฟส 1:** FR-0 Wardrobe + Engine (4.1-4.7) + FR-1 Today Outfit (2 โหมด, carousel, batch 3-4) + seed ตัวอย่าง + ดีไซน์ฐาน
-- **เฟส 2:** FR-2 Swap One Item + FR-3 Favorites
-- **เฟส 3:** FR-4 Wardrobe Analysis + FR-5 Color-first + FR-6 Outfit Generator
+- **เฟส 1 (จบแล้ว):** FR-0 Wardrobe + Engine (4.1-4.7) + FR-1 Today Outfit (2 โหมด, carousel, batch 3-4) + seed ตัวอย่าง + ดีไซน์ฐาน
+- **เฟส 2 (จบแล้ว):** FR-2 Swap One Item + FR-3 Favorites
+- **เฟส 3 (จบแล้ว):** FR-4 Wardrobe Analysis + FR-5 Color-first + FR-6 Outfit Generator (ปิดโดยไม่มีโค้ดใหม่ ดู §6/§4 delta `-7`)
 - **Backlog:** ตาม spec §11 (thumbnail favorite, แท็กโอกาส/ฤดู, worn log, undo ลบ, รูปคมขึ้น ฯลฯ)

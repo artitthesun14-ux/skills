@@ -1,7 +1,7 @@
 # Handoff: Outfit Color Matcher
 
-> อัปเดต 2026-09-11 · หลัง `/implement` กติกาสีโหมดไอเดีย (spec §4.1/4.7/9) + `/code-review` เจอบั๊กจริง
-> แก้แล้ว + `/to-tickets` + `/implement` ปิด 4 open item publish เป็น V10 · ผู้ใช้สื่อสารเป็นภาษาไทย ตอบไทยเสมอ
+> อัปเดต 2026-09-12 · เฟส 3 ปิดครบทั้ง FR-4/FR-5/FR-6 แล้ว publish เป็น V12 · ผู้ใช้สื่อสารเป็นภาษาไทย ตอบไทยเสมอ
+> **ไม่มีเฟสค้าง** งานต่อไปรอผู้ใช้สั่งใหม่ (feature ใหม่/backlog ตาม spec §11)
 
 ## เอกสารและโค้ดอยู่ที่ไหน
 
@@ -21,8 +21,19 @@ repo `artitthesun14-ux/skills` โฟลเดอร์ `outfit-color-matcher/` 
 
 ## สถานะปัจจุบัน
 
-**ปิด 4 open item (rule variety + threshold + dog-ear + No-match) + กติกาสีโหมดไอเดีย + เฟส 2 เสร็จ ทดสอบผ่าน 247 ข้อในเทสต์ 7 ชุด publish เป็น Version 10 แล้ว**
+**เฟส 1-3 จบครบทุกข้อ (FR-0..FR-6) ทดสอบผ่าน 284 ข้อในเทสต์ 7 ชุด publish เป็น Version 12 แล้ว**
 artifact: `https://claude.ai/code/artifact/ee952a4d-7525-4446-a827-548546fe68b0`
+
+### งานล่าสุด: เฟส 3 (V11-V12)
+
+- **FR-4 วิเคราะห์ตู้ (V11):** `analyzeWardrobe()` + เซกชัน `#sec-analysis` + แท็บ "วิเคราะห์"
+- **FR-5 Color-first (V12):** ล็อกสีจากแถว "วันนี้อยากใส่สีอะไร?" ทำให้สถานะ A4 No-match เกิดจริงได้เป็นครั้งแรก
+  (ก่อนหน้านี้ไปไม่ถึงเพราะมีบน+ล่างก็ได้ชุดเสมอ) ปุ่ม "เอาสีที่ล็อกออก" คือ "ผ่อนเงื่อนไข" ตัวจริงที่สเปกพูดถึง
+- **FR-6 Generator: ปิดโดยไม่มีโค้ดใหม่** ผู้ใช้ตัดสินใจ (2026-09-12) ว่าสองส่วนจริง (Color filter + สวิตช์
+  wardrobe/idea) มีอยู่แล้ว ส่วน "Style" ไม่เคย define ในสเปกเลยตัดออกจากขอบเขต (ดู spec §5 FR-6)
+- ระหว่างทำเจอบั๊กจริง 1 จุด (แก้แล้ว): `.preset` ไม่มี `flex:0 0 auto` ถูกบีบเหลือ 13x44px ในแถวเลื่อนแนวนอน
+- แก้ ac-test ที่ flaky มานาน (ไม่ใช่บั๊กแอป): click แล้ว `waitForTimeout` สั้นๆ ก่อน `reload` ถ้า `persist()`
+  เขียน localStorage ไม่ทัน ค่าจะหาย เพิ่ม helper `waitPersisted()` รอค่าจริงก่อน reload
 
 - publish ทับลิงก์เดิมเสมอ (localStorage ของผู้ใช้ไม่หาย) และต้อง `action:"read"` ก่อน publish ทุกครั้ง
   (อ่านให้ครบทุกบรรทัดของไฟล์ที่ระบบเก็บไว้ ไม่ใช่แค่ head ที่โชว์มา ไม่งั้น publish จะถูกปฏิเสธ ถ้าถูกปฏิเสธซ้ำว่า
@@ -87,8 +98,8 @@ artifact (ซึ่งมี skeleton ห่ออยู่) แทนไฟล�
 
 ## รอผู้ใช้ตัดสินใจ
 
-1. **เริ่มเฟส 3 เมื่อไหร่** FR-4 วิเคราะห์ตู้ + FR-5 เลือกสีก่อน + FR-6 Outfit Generator
-2. **เปิด PR ใหม่ไหม** บรานช์ `claude/ready-to-use-qhe3ak` push ต่อเนื่อง ยังไม่ได้เปิด PR ของงานหลัง merge #2
+1. **เปิด PR ใหม่ไหม** บรานช์ `claude/ready-to-use-qhe3ak` push ต่อเนื่อง ยังไม่ได้เปิด PR ของงานหลัง merge #2
+2. **feature ใหม่หลังเฟส 3** เฟส 1-3 จบครบแล้ว (FR-0..FR-6) ยังไม่มีลำดับงานถัดไปที่ตกลงไว้ ดู spec §11 backlog เป็นไอเดีย
 
 ## กฎการทำงานที่ผู้ใช้ยึด (เขาแก้มาแล้วหลายรอบ ระวังให้มาก)
 
@@ -134,11 +145,13 @@ artifact (ซึ่งมี skeleton ห่ออยู่) แทนไฟล�
 | ถ้าเจอบั๊กยาก | `diagnosing-bugs` |
 | ถ้าจะตรวจซ้ำอีกรอบ | `code-review` (fixed point ใหม่ = HEAD ปัจจุบันของบรานช์นี้) |
 
-## ถ้าผู้ใช้สั่งให้เริ่มเฟส 3 (FR-4/5/6)
+## เฟส 1-3 จบครบแล้ว (FR-0..FR-6) แพทเทิร์นสำหรับ feature ถัดไป
 
-1. อ่าน FR-4/5/6 พร้อม AC ในสเปก; FR-4 มีกราฟ = โหลด skill `dataviz` ก่อนเขียนโค้ดกราฟ
-2. เฟส 2 ทำเสร็จแล้วเป็นตัวอย่างแพทเทิร์น: Swap ใน `swapItem()` (ring บน `o._swap`), Favorites
-   ใน `toggleFav/favFromLook/renderFavorites` (snapshot ใน `state.favorites`), เซกชันใหม่แบบ `#sec-favorites`
-3. FR-4 วิเคราะห์ตู้: สัดส่วนสีจาก garment จริง + กลุ่ม Neutral/Cool/Warm/Accent + insight template; ข้อมูลน้อย = บอกตรงๆ
-4. เพิ่มเคสลง `tests/ac-test.js` รันครบ 7 ชุดให้เขียว แล้ว `./build.sh` + publish ทับลิงก์เดิม
+ถ้าผู้ใช้สั่ง feature ใหม่ (นอกเหนือจากที่ตกลงไว้เดิม) ให้ทำตามแพทเทิร์นเดียวกับที่ผ่านมา:
+1. เขียนเทสต์ก่อน (`tests/engine-test.js` สำหรับ logic ล้วน, `tests/ac-test.js` สำหรับพฤติกรรมในเบราว์เซอร์)
+2. ดูตัวอย่างแพทเทิร์นที่มีอยู่แล้ว: Swap ใน `swapItem()` (ring บน `o._swap`), Favorites ใน
+   `toggleFav/favFromLook/renderFavorites` (snapshot ใน `state.favorites`), วิเคราะห์ตู้ใน `analyzeWardrobe()`
+   (อ่านอย่างเดียว ไม่ยุ่งกับ engine จัดชุด), ล็อกสีใน `state.lockedColor` (ส่งเข้า generator ทั้งสอง)
+3. ถ้ามีกราฟ = โหลด skill `dataviz` ก่อนเขียนโค้ดกราฟ (FR-4 วิเคราะห์ตู้ไม่ต้องใช้ เพราะใช้แค่แถบ CSS ธรรมดา)
+4. รันครบ 7 ชุดให้เขียว แล้ว `./build.sh` + publish ทับลิงก์เดิม
 5. อัปเดต `PROJECT_STATE.md` §4 §6 ให้ตรงกับของจริง
