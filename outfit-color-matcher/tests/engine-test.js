@@ -189,5 +189,49 @@ console.log('\n== 10. §4.7 กฎสีโหมด "สีที่เรา�
   t('แต่ละแบตช์เห็น rule หลากหลาย (เฉลี่ย >= 3.5 แบบ)', avgDistinct>=3.5, 'เฉลี่ย '+avgDistinct.toFixed(2)+' แบบ/แบตช์');
 }
 
+console.log('\n== 11. FR-4 วิเคราะห์ตู้ (analyzeWardrobe) ==');
+{
+  const g=(id,cat,color)=>({id,name:'ชิ้น'+id,category:cat,shapeId:null,color});
+  // AC5: ข้อมูลน้อยเกินไป -> บอกตรงๆ ไม่วิเคราะห์มั่ว
+  t('AC5 ตู้ว่าง -> enough=false', analyzeWardrobe([]).enough===false);
+  t('AC5 ตู้ 2 ชิ้น (น้อยกว่าเกณฑ์) -> enough=false',
+    analyzeWardrobe([g('a','top','#FFFFFF'),g('b','bottom','#17161A')]).enough===false);
+
+  // AC1: สัดส่วน % คิดจาก garment จริงในตู้
+  const ward=[g('1','top','#FFFFFF'),g('2','top','#FFFFFF'),g('3','bottom','#2B3A67'),g('4','shoes','#C0392B')];
+  const a=analyzeWardrobe(ward);
+  t('AC1 ตู้ 4 ชิ้น -> enough=true + total ถูก', a.enough===true && a.total===4, 'total='+a.total);
+  const white=a.colors.find(c=>c.hex==='#FFFFFF');
+  t('AC1 สีที่ซ้ำถูกรวมเป็นก้อนเดียว + % ถูก (ขาว 2/4 = 50%)', white && white.count===2 && white.pct===50,
+    white?('count='+white.count+' pct='+white.pct):'ไม่เจอขาว');
+  t('AC1 % ของทุกสีรวมได้ 100 พอดี', a.colors.reduce((s,c)=>s+c.pct,0)===100,
+    'รวม '+a.colors.reduce((s,c)=>s+c.pct,0));
+  t('AC1 เรียงจากมากไปน้อย', a.colors.every((c,i)=>i===0||a.colors[i-1].pct>=c.pct));
+
+  // AC2: แยกกลุ่ม Neutral/Cool/Warm/Accent ตามนิยาม 4.1 และต้องไม่ทับกัน
+  const byKey={}; a.groups.forEach(x=>byKey[x.key]=x);
+  t('AC2 มีครบ 4 กลุ่ม Neutral/Cool/Warm/Accent',
+    ['neutral','cool','warm','accent'].every(k=>byKey[k]), Object.keys(byKey).join(','));
+  t('AC2 จำนวนรวมทุกกลุ่ม = จำนวนชิ้นในตู้ (กลุ่มไม่ทับกัน)',
+    a.groups.reduce((s,x)=>s+x.count,0)===4, 'รวม '+a.groups.reduce((s,x)=>s+x.count,0));
+  t('AC2 ขาว+กรมท่าเข้ากลุ่มถูก (ขาว=neutral)', byKey.neutral.count>=2, 'neutral='+byKey.neutral.count);
+
+  // AC3: insight 1-3 ข้อ และตู้ neutral จัด ต้องชวนเพิ่ม accent
+  t('AC3 insight มี 1-3 ข้อเสมอ', a.insights.length>=1 && a.insights.length<=3, 'ได้ '+a.insights.length);
+  const allNeutral=analyzeWardrobe([g('1','top','#FFFFFF'),g('2','top','#F2F0EB'),g('3','bottom','#17161A'),g('4','bottom','#8A8A8A')]);
+  t('AC3 ตู้สีกลางล้วน -> มี insight ชวนเพิ่มสีเน้น',
+    allNeutral.insights.some(s=>/สีเน้น|accent/i.test(s)), JSON.stringify(allNeutral.insights));
+
+  // AC4: สีที่แนะนำต้องยังไม่มีในตู้ และเขียนเชิงเพิ่มตัวเลือกการจับคู่ ไม่ใช่สั่งให้ซื้อ
+  const haveHues=ward.map(x=>hexToHsl(x.color).h);
+  t('AC4 สีที่แนะนำไม่ซ้ำสีที่มีอยู่แล้วในตู้',
+    a.suggestions.every(s=>!ward.some(w=>normHex(w.color)===normHex(s.hex))),
+    JSON.stringify(a.suggestions.map(s=>s.hex)));
+  t('AC4 สีที่แนะนำมีชื่อไทยกำกับ (ไม่สื่อด้วยสีอย่างเดียว)',
+    a.suggestions.length>0 && a.suggestions.every(s=>typeof s.name==='string' && s.name.length>0));
+  t('AC4 ไม่มีคำสั่งให้ซื้อในข้อความ',
+    a.suggestions.concat(a.insights.map(x=>({reason:x}))).every(s=>!/ซื้อ|ลูกค้า/.test(s.reason||'')));
+}
+
 console.log(fails? `\n### ${fails} ข้อไม่ผ่าน\n` : '\n### ผ่านทั้งหมด\n');
 process.exit(fails?1:0);

@@ -463,6 +463,51 @@ const H = require("./helper.js");
     allErrs.push(...errs); await ctx.close();
   }
 
+  /* ============ AN. FR-4 วิเคราะห์ตู้ (เฟส 3, View E) ============ */
+  {   /* AC5 ข้อมูลน้อยเกินไป -> E0 บอกตรงๆ ไม่โชว์กราฟมั่ว */
+    const seed = [H.g("t1","top","tee-crew","#2B3A67"), H.g("b1","bottom","chino","#C8B79B")];
+    const { ctx, page, errs } = await H.open(browser, H.store(seed, { mode:"wardrobe" }));
+    R.ok(await page.locator('.nav__btn[data-jump="sec-analysis"]').count() === 1,
+      "AN1 · มีแท็บ 'วิเคราะห์' ในเนวิเกชัน");
+    R.ok(await page.locator("#analysisSlot .empty").count() === 1 &&
+         await page.locator("#analysisSlot .abar").count() === 0,
+      "AN2 · FR-4 AC5: ตู้ 2 ชิ้น -> E0 ไม่วิเคราะห์มั่ว");
+    allErrs.push(...errs); await ctx.close();
+  }
+  {   /* AC1/AC2/AC3: ตู้พอวิเคราะห์ได้ -> แถบสัดส่วน + 4 กลุ่ม + insight */
+    const seed = [
+      H.g("t1","top","tee-crew","#FFFFFF"), H.g("t2","top","polo","#FFFFFF"),
+      H.g("b1","bottom","chino","#2B3A67"), H.g("s1","shoes","sneaker","#C0392B")
+    ];
+    const { ctx, page, errs } = await H.open(browser, H.store(seed, { mode:"wardrobe" }));
+    const bars = await page.locator("#analysisSlot .abar").count();
+    const plain = await page.locator("#analysisSlot .abar__fill--plain").count();
+    R.ok(bars === 3 + 4 && plain === 4,
+      "AN3 · FR-4 AC1/AC2: แถบรายสี 3 + กลุ่ม 4 แถบ (DiversityBar สีเดียว)", "bars="+bars+" plain="+plain);
+    R.ok(await page.locator("#analysisSlot .banner").count() >= 1,
+      "AN4 · FR-4 AC3: มี insight อย่างน้อย 1 ข้อ");
+    const labs = await page.locator("#analysisSlot .abar__lab").allTextContents();
+    R.ok(labs.slice(0,3).every(s => /#[0-9A-F]{6}/.test(s)),
+      "AN5 · ux §9: ป้ายรายสีมี hex กำกับ ไม่แยกแถวด้วยสีอย่างเดียว", labs[0]);
+    /* AC1: ขาว 2 ชิ้นจาก 4 = 50% ต้องโผล่ในป้าย */
+    R.ok(labs.some(s => /50%/.test(s)), "AN6 · FR-4 AC1: % คิดจาก garment จริง (ขาว 2/4 = 50%)", labs.join(" | "));
+    allErrs.push(...errs); await ctx.close();
+  }
+  {   /* วิเคราะห์ต้องอัปเดตตามตู้ ไม่ค้างค่าเก่า หลังลบชิ้น */
+    const seed = [
+      H.g("t1","top","tee-crew","#FFFFFF"), H.g("t2","top","polo","#2B3A67"),
+      H.g("b1","bottom","chino","#C8B79B"), H.g("s1","shoes","sneaker","#C0392B")
+    ];
+    const { ctx, page, errs } = await H.open(browser, H.store(seed, { mode:"wardrobe" }));
+    const before = await page.locator("#analysisSlot .abar").count();
+    await page.click('[data-more="s1"]'); await page.waitForTimeout(80);
+    await page.click('[data-del="s1"]'); await page.waitForTimeout(100);
+    await page.click("#dlgOk"); await page.waitForTimeout(200);
+    const after = await page.locator("#analysisSlot .abar").count();
+    R.ok(after === before - 1, "AN7 · ลบเสื้อผ้าแล้วผลวิเคราะห์อัปเดตทันที ไม่ค้างค่าเก่า", before+" -> "+after);
+    allErrs.push(...errs); await ctx.close();
+  }
+
   await browser.close();
   R.finish(allErrs);
 })();

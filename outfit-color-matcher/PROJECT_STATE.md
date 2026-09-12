@@ -62,6 +62,15 @@
 - ProportionBar: ช่องว่าง 2px ระหว่าง segment, legend เสมอ, direct label เฉพาะ >=12%
 
 ## 4. การเปลี่ยนแปลงจากสเปก/ดีไซน์ก่อนหน้า (delta ของสเตจนี้)
+-6. **(V11, เฟส 3) FR-4 วิเคราะห์ตู้:** เพิ่ม `analyzeWardrobe()` ในบล็อก engine (เทสต์ด้วย `engine-test.js`
+   ได้โดยไม่ต้องเปิดเบราว์เซอร์) + เซกชัน `#sec-analysis` + แท็บ "วิเคราะห์" เป็นแท็บที่ 4
+   - สัดส่วนรายสีนับ **เป็นชิ้น** เท่ากันทุกชิ้น (ตู้คือคลังของ ไม่ใช่พื้นที่บนตัว จึงไม่ใช้ `CATEGORY_WEIGHT`
+     แบบตอนคิดสัดส่วนในลุค) ใช้ largest remainder ให้รวมได้ 100 พอดีเหมือน `computeProportion`
+   - 4 กลุ่มต้องไม่ทับกัน จึงไล่ลำดับ neutral -> accent(vivid) -> cool/warm (สีแดงสดเป็นทั้งอุ่นและสด ต้องเลือกทางเดียว)
+   - **ป้าย ColorShareBar ต้องมี hex ด้วย** ไม่ใช่แค่ `ชื่อสี · %` ตามที่ ui doc เขียนไว้เดิม เพราะสองสีที่ต่างกัน
+     ได้ชื่อไทยเดียวกันบ่อย (`#FFFFFF` กับ `#F2F0EB` ต่างก็ "ขาว") ถ้าเหลือแค่ชื่อ สองแถวจะอ่านเหมือนกันเป๊ะ
+     และแยกได้ด้วยสีอย่างเดียว ผิด ux §9 (แก้ ui doc ให้ตรงแล้ว)
+   - DiversityBar ใช้สีเดียว (`--ink` opacity .85) ทุกแถบตาม ui doc ไม่ประดิษฐ์พาเลตต์ 4 สีใหม่
 -5. **(V8, `/implement`) กติกาสี §4.1/§4.7/§9 จากงานวิจัย color palette: implement โค้ดแล้ว ไม่ใช่แค่สเปก**
    แก้ `generateIdeaBatch()`/`ideaColor()` ใน `app.html` ตามกติกา 3 ข้อที่ -4 สรุปไว้: (ก) เอา `wantAccent`
    ที่เป็นความน่าจะเป็นออก accessory (accent) ใส่ทุกลุคเสมอ โอกาสปรับแค่ความสด (`tone.s`) ไม่ปรับว่ามีหรือไม่
@@ -107,11 +116,18 @@
 - **นอกโปรเจกต์นี้:** PR #2 ของ repo `artitthesun14-ux/skills` **merge เข้า main แล้ว** (10 ก.ย. 2026) งานต่อจากนี้ต้องเริ่มบรานช์ใหม่จาก main ไม่ต่อท้ายประวัติที่ merge ไปแล้ว
 
 ## 6. สเตจ
-- **สเตจปัจจุบัน (จบแล้ว): ปิด 4 open item (rule variety + threshold + dog-ear + No-match) + กติกาสีโหมดไอเดีย (spec §4.1/4.7/9) + เฟส 2 (Swap + Favorites)**
-  - artifact: `https://claude.ai/code/artifact/ee952a4d-7525-4446-a827-548546fe68b0` (Version 10, ลิงก์เดิม localStorage ไม่หาย)
+- **สเตจปัจจุบัน (กำลังทำ): เฟส 3** เริ่มแล้ว **FR-4 วิเคราะห์ตู้ เสร็จ (V11)** เหลือ FR-5 Color-first + FR-6 Generator
+  - **FR-4 (V11):** ฟังก์ชัน `analyzeWardrobe()` (บล็อก engine, เทสต์ได้ด้วย engine-test) + เซกชัน `#sec-analysis`
+    + แท็บ "วิเคราะห์" ครบ AC1-AC5: สัดส่วนรายสีนับเป็นชิ้น (largest remainder ให้รวม 100), 4 กลุ่มไม่ทับกัน
+    (neutral > accent > cool/warm), insight 1-3 ข้อจาก threshold+template, สีที่ช่วยเพิ่มการจับคู่อิงสีฐานเด่นสุด
+    (ไม่นับ neutral/accent) เสนอมุมที่ยังขาด, ตู้ < 3 ชิ้น = E0 บอกตรงๆ
+  - **ตัดสินใจระหว่างทำ:** ป้าย ColorShareBar ต้องมี hex ด้วย ไม่ใช่แค่ `ชื่อสี · %` เพราะสองสีต่างกันได้ชื่อไทย
+    เดียวกัน (`#FFFFFF`/`#F2F0EB` = "ขาว") ถ้าเหลือแค่ชื่อ แถวจะแยกกันได้ด้วยสีอย่างเดียว ผิด ux §9 (แก้ ui doc แล้ว)
+- **สเตจก่อนหน้า (จบแล้ว): ปิด 4 open item (rule variety + threshold + dog-ear + No-match) + กติกาสีโหมดไอเดีย (spec §4.1/4.7/9) + เฟส 2 (Swap + Favorites)**
+  - artifact: `https://claude.ai/code/artifact/ee952a4d-7525-4446-a827-548546fe68b0` (Version 11, ลิงก์เดิม localStorage ไม่หาย)
   - แหล่งความจริงของโค้ด: `app.html` (รูปแบบ artifact) รัน `./build.sh` ได้ `outfit-color-matcher.html` ที่เปิดตรงๆ ได้
   - แผนที่ใช้: `docs/plan-phase1-shape-migration.md`
-  - ผลตรวจ (Version 10) รวม 247 ข้อ ผ่านหมด: engine 52 · browser 74 · shape 17 · migration 10 · `tests/ac-test.js` 72 (FR-0/FR-1/FR-2/FR-3 AC + §4.7 + §7C + เคสขอบจาก /test) · a11y 20 · regress 2 · ไม่มี JS error · ไม่มี external request
+  - ผลตรวจ (Version 11) รวม 268 ข้อ ผ่านหมด: engine 66 · browser 74 · shape 17 · migration 10 · `tests/ac-test.js` 79 (FR-0/FR-1/FR-2/FR-3 AC + §4.7 + §7C + เคสขอบจาก /test) · a11y 20 · regress 2 · ไม่มี JS error · ไม่มี external request
   - **[V10 ปิด 4 open item]** rule variety (forcedRule ผ่าน `buildOutfit` + คัดเลือก rule ละหนึ่ง), threshold ยืนยันจากผลวัด (spec §9), dog-ear ตัดทิ้ง (docs), No-match "ผ่อนเงื่อนไข" แก้ docs ให้ตรงของจริง ตั๋วงานที่ `.scratch/outfit-color-matcher/issues/`
   - **[แก้แล้วจาก /code-review]** floor S ของ Secondary ใน `generateIdeaBatch()` (branch monochrome/default)
     เคยต่ำกว่า `NEUTRAL_MAX_S=20` ทำให้ Secondary หลุดไปเป็น role "neutral" เอง ~64% ของทุกลุคที่ rule

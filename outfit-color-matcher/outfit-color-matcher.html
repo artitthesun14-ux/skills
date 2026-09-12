@@ -271,6 +271,22 @@ body{padding-bottom:calc(var(--nav-h) + env(safe-area-inset-bottom))}
 .favcard__rename{display:flex;gap:var(--sp-2);margin-bottom:var(--sp-3)}
 .favcard__rename .input{flex:1;min-width:0}
 @media (min-width:640px){ .favgrid{grid-template-columns:repeat(2,1fr)} }
+/* เฟส 3: วิเคราะห์ตู้ (ui doc View E) แถบเป็นภาพประกอบ ป้ายข้อความข้างๆ เป็นตัวสื่อจริง */
+.analysis{display:flex;flex-direction:column;gap:var(--sp-6)}
+.analysis__h{font-size:var(--fs-h3);font-weight:700;margin-bottom:var(--sp-3)}
+.abars{display:flex;flex-direction:column;gap:var(--sp-2)}
+.abar{display:flex;align-items:center;gap:var(--sp-3)}
+.abar__track{flex:1;min-width:0;height:20px;border-radius:var(--r-sm);background:var(--surface-sunken)}
+.abar__fill{display:block;height:100%;border-radius:var(--r-sm);min-width:4px;
+  box-shadow:inset 0 0 0 1px var(--data-ring)}
+/* DiversityBar เทียบ "ขนาด" ไม่ได้บอกตัวตน จึงสีเดียวทุกแถบ ไม่ประดิษฐ์พาเลตต์ใหม่ (ui doc §View E) */
+.abar__fill--plain{background:var(--ink);opacity:.85;box-shadow:none}
+.abar__lab{flex:0 0 auto;font-size:var(--fs-sm);color:var(--ink);white-space:nowrap}
+.abar__lab .tnum{color:var(--ink-muted)}
+.sugg{display:flex;flex-direction:column;gap:var(--sp-3)}
+.sugg li{display:flex;align-items:flex-start;gap:var(--sp-3);font-size:var(--fs-sm);color:var(--ink-muted)}
+.sugg b{color:var(--ink);font-weight:600}
+.sugg .swatch{margin-top:2px}
 .tile--empty .tile__box{border-style:dashed;display:flex;align-items:center;justify-content:center;color:var(--ink-muted);font-size:var(--fs-sm)}
 
 /* --- 4.4 สีเป็นข้อมูล (ui doc §3.4) --- */
@@ -703,6 +719,7 @@ body{padding-bottom:calc(var(--nav-h) + env(safe-area-inset-bottom))}
     <li style="display:contents"><button class="nav__btn" data-jump="sec-suggest" aria-current="true"><span class="nav__icon" aria-hidden="true">✨</span>แนะนำ</button></li>
     <li style="display:contents"><button class="nav__btn" data-jump="sec-wardrobe"><span class="nav__icon" aria-hidden="true">👕</span>ตู้เสื้อผ้า</button></li>
     <li style="display:contents"><button class="nav__btn" data-jump="sec-favorites"><span class="nav__icon" aria-hidden="true">♥</span>บันทึกไว้</button></li>
+    <li style="display:contents"><button class="nav__btn" data-jump="sec-analysis"><span class="nav__icon" aria-hidden="true">◔</span>วิเคราะห์</button></li>
     <li style="display:contents"><button class="nav__btn" id="themeBtn"><span class="nav__icon" aria-hidden="true">◐</span><span id="themeLabel">ธีม</span></button></li>
   </ul>
 </nav>
@@ -768,6 +785,15 @@ body{padding-bottom:calc(var(--nav-h) + env(safe-area-inset-bottom))}
     </div>
     <div id="favoritesSlot"></div>
     <p class="feedback" id="favFeedback" aria-live="polite"></p>
+  </section>
+
+  <!-- ============ SECTION D · วิเคราะห์ตู้ (เฟส 3 FR-4) ============ -->
+  <section class="section" id="sec-analysis" aria-labelledby="anaTitle">
+    <div class="section__head">
+      <h2 class="section__title" id="anaTitle">วิเคราะห์ตู้ของฉัน</h2>
+      <span class="section__count" id="anaCount"></span>
+    </div>
+    <div id="analysisSlot"></div>
   </section>
 
   <footer class="section" style="padding-block:var(--sp-6)">
@@ -1198,6 +1224,99 @@ function buildOutfit(items, mode, occasion, forcedRule){
 }
 var SCORES = new WeakMap();
 function scoreOf(o){ return SCORES.get(o) || 0; }
+
+/* ============================================================
+   FR-4 วิเคราะห์ตู้: อ่านอย่างเดียว ไม่ยุ่งกับ engine จัดชุด
+   ข้อมูลน้อยกว่าเกณฑ์ = บอกตรงๆ ไม่เดาสุ่ม (AC5)
+   ============================================================ */
+var MIN_ANALYSIS_GARMENTS = 3;
+var GROUP_TH = { neutral:"สีกลาง", cool:"โทนเย็น", warm:"โทนอุ่น", accent:"สีเน้น" };
+
+/* 4 กลุ่มต้องไม่ทับกัน: neutral ก่อน แล้ว accent (สด) ที่เหลือแยกอุ่น/เย็น (นิยาม §4.1) */
+function wardrobeGroupOf(hex){
+  var c = classifyColor(hex);
+  if(c.isNeutral) return "neutral";
+  if(c.isVivid)   return "accent";
+  return c.temp === "cool" ? "cool" : "warm";
+}
+/* ให้ % รวมได้ 100 พอดี (largest remainder แบบเดียวกับ computeProportion) */
+function pctRows(rows, total){
+  var floors = rows.map(function(r){ return Math.floor(r.count/total*100); });
+  var rest = 100 - floors.reduce(function(a,b){ return a+b; }, 0);
+  rows.map(function(r,i){ return { i:i, frac:(r.count/total*100) - floors[i] }; })
+      .sort(function(a,b){ return b.frac - a.frac; })
+      .slice(0, Math.max(0,rest))
+      .forEach(function(x){ floors[x.i] += 1; });
+  return floors;
+}
+function analyzeWardrobe(wardrobe){
+  var list = (wardrobe || []).filter(function(g){ return g && g.color; });
+  if(list.length < MIN_ANALYSIS_GARMENTS) return { enough:false, total:list.length };
+
+  /* AC1 สัดส่วนรายสี: นับเป็น "ชิ้น" เท่ากันทุกชิ้น (ตู้คือคลังของ ไม่ใช่พื้นที่บนตัว) */
+  var byHex = {};
+  list.forEach(function(g){ var k = normHex(g.color); byHex[k] = (byHex[k] || 0) + 1; });
+  var rows = Object.keys(byHex).map(function(k){ return { hex:k, count:byHex[k] }; })
+                  .sort(function(a,b){ return b.count - a.count; });
+  var floors = pctRows(rows, list.length);
+  var colors = rows.map(function(r,i){
+    return { hex:r.hex, name:colorNameTH(r.hex), count:r.count, pct:floors[i] };
+  });
+
+  /* AC2 กลุ่ม 4 แบบ */
+  var gc = { neutral:0, cool:0, warm:0, accent:0 };
+  list.forEach(function(g){ gc[wardrobeGroupOf(normHex(g.color))]++; });
+  var groups = ["neutral","cool","warm","accent"].map(function(k){
+    return { key:k, label:GROUP_TH[k], count:gc[k], pct:Math.round(gc[k]/list.length*100) };
+  });
+  var neutralPct = Math.round(gc.neutral/list.length*100);
+
+  /* AC3 insight จาก threshold + template ล้วน บอกลักษณะ ไม่ตัดสิน */
+  var insights = [];
+  if(neutralPct >= 70)
+    insights.push("ตู้นี้เป็นสีกลางราว " + neutralPct + "% จับคู่ง่ายอยู่แล้ว ถ้าอยากให้ลุคสะดุดตาขึ้น ของชิ้นเล็กที่เป็นสีเน้นจะเพิ่มตัวเลือกได้อีกเยอะ");
+  if(gc.accent === 0 && insights.length < 3)
+    insights.push("ยังไม่มีชิ้นที่เป็นสีเน้นในตู้ ลุคที่จัดได้จึงออกมาเรียบเป็นหลัก");
+  if(colors[0].pct >= 40 && insights.length < 3)
+    insights.push("สีที่มีมากสุดคือ <b>" + colors[0].name + "</b> ราว " + colors[0].pct + "% ของตู้ เป็นตัวยืนพื้นให้ชิ้นอื่นเกาะได้");
+  if(gc.warm && !gc.cool && insights.length < 3)
+    insights.push("สีมีสีในตู้เอนไปทางโทนอุ่นทั้งหมด การเพิ่มโทนเย็นสักชิ้นจะเปิดคู่จับใหม่ให้อีกแบบ");
+  if(gc.cool && !gc.warm && insights.length < 3)
+    insights.push("สีมีสีในตู้เอนไปทางโทนเย็นทั้งหมด การเพิ่มโทนอุ่นสักชิ้นจะเปิดคู่จับใหม่ให้อีกแบบ");
+  if(colors.length <= 2 && insights.length < 3)
+    insights.push("ตอนนี้ตู้มี " + colors.length + " สี ยิ่งมีสีหลากหลายขึ้น ชุดที่จัดได้ก็ยิ่งมีทางเลือกมากขึ้น");
+  if(!insights.length)
+    insights.push("ตู้มีทั้งสีกลางและสีมีสีผสมกันอยู่ จัดชุดได้หลายแนวโดยไม่ต้องเพิ่มอะไรเป็นพิเศษ");
+  insights = insights.slice(0,3);
+
+  /* AC4 สีที่ช่วยเพิ่มการจับคู่: อิงสีฐานเด่นสุด (ไม่นับ neutral และไม่นับสีเน้น) แล้วเสนอมุมที่ยังขาด
+     เขียนเชิง "เพิ่มตัวเลือกการจับคู่" ไม่ใช่บอกให้ซื้อ */
+  var suggestions = [];
+  var base = colors.filter(function(c){ return wardrobeGroupOf(c.hex) === "cool" || wardrobeGroupOf(c.hex) === "warm"; })[0];
+  if(base){
+    var bh = hexToHsl(base.hex).h;
+    var haveHues = colors.filter(function(c){ return !classifyColor(c.hex).isNeutral; })
+                         .map(function(c){ return hexToHsl(c.hex).h; });
+    var targets = [
+      { h:bh + 180, why:"ตรงข้ามกับ" },
+      { h:bh + 30,  why:"ใกล้เคียงกับ" },
+      { h:bh + 120, why:"สามเหลี่ยมสีกับ" }
+    ];
+    targets.forEach(function(tg){
+      if(suggestions.length >= 2) return;
+      if(haveHues.some(function(u){ return hueDist(u, ((tg.h%360)+360)%360) < 25; })) return;
+      var hex = hslToHex(tg.h, 38, 45);       /* โทนใส่ได้จริง ไม่สดจนกลายเป็นสีเน้น */
+      if(colors.some(function(c){ return c.hex === hex; })) return;
+      suggestions.push({
+        hex: hex, name: colorNameTH(hex),
+        reason: "เป็นสี" + tg.why + base.name + " เพิ่มเข้าไปจะได้คู่จับใหม่โดยไม่ต้องเปลี่ยนของเดิม"
+      });
+    });
+  }
+
+  return { enough:true, total:list.length, colors:colors, groups:groups, neutralPct:neutralPct,
+           insights:insights, suggestions:suggestions };
+}
 </script>
 
 <script>
@@ -1468,6 +1587,7 @@ function init(){
   regenerate(true);
   renderWardrobe();
   renderFavorites();
+  renderAnalysis();
   renderBanners();
   renderMode();
   observeSections();
@@ -1857,7 +1977,7 @@ function saveGarment(){
   }
   var res = persist();
   if(!res.ok && res.quota){ state.quotaWarned = true; }
-  closeForm(); renderWardrobe(); renderBanners();
+  closeForm(); renderWardrobe(); renderAnalysis(); renderBanners();
   if(!autoSwitchIfNeeded()) regenerate(true);
   say("#wardFeedback", wasEdit ? "บันทึกการแก้ไข " + name + " แล้ว" : "เพิ่ม " + name + " เข้าตู้แล้ว");
 }
@@ -1873,7 +1993,7 @@ function deleteGarment(id){
     dlg.removeEventListener("close", onc);
     if(dlg.returnValue !== "ok") return;
     state.wardrobe = state.wardrobe.filter(function(x){ return x.id !== id; });
-    persist(); renderWardrobe(); renderBanners();
+    persist(); renderWardrobe(); renderAnalysis(); renderBanners();
     if(!autoSwitchIfNeeded()) regenerate(true);
     say("#wardFeedback", "ลบ " + g.name + " แล้ว");
   }, false);
@@ -2028,6 +2148,58 @@ function favCardHTML(f){
   '</article>';
 }
 
+/* ---------- เฟส 3: วิเคราะห์ตู้ (FR-4, ui doc View E) ----------
+   แถบทั้งสองชุดเป็นภาพประกอบ (aria-hidden) ป้ายข้อความข้างแถบเป็นตัวสื่อค่าจริง
+   ข้อความ insight/reason สร้างจาก template ในโค้ดล้วน ไม่มีข้อความผู้ใช้ปน */
+function abarHTML(pct, label, plain, hex){
+  return '<div class="abar">'+
+    '<span class="abar__track" aria-hidden="true"><span class="abar__fill'+(plain?" abar__fill--plain":"")+'" '+
+      'style="width:'+Math.max(pct,1)+'%'+(hex?";background:"+hex:"")+'"></span></span>'+
+    '<span class="abar__lab">'+label+'</span></div>';
+}
+function renderAnalysis(){
+  var slot = $("#analysisSlot"); if(!slot) return;
+  var a = analyzeWardrobe(state.wardrobe);
+  var cnt = $("#anaCount");
+
+  if(!a.enough){                                   /* E0 ข้อมูลน้อยเกินไป (AC5) */
+    if(cnt) cnt.textContent = "";
+    slot.innerHTML = '<div class="empty"><h3 class="empty__title">ข้อมูลยังน้อยเกินไปจะสรุปได้</h3>'+
+      '<p class="empty__body">ตอนนี้มี '+a.total+' ชิ้น ถ้ามีอย่างน้อย '+MIN_ANALYSIS_GARMENTS+
+      ' ชิ้นจะสรุปสัดส่วนสีทั้งตู้ให้ได้ตรงกว่านี้</p>'+
+      '<div class="empty__actions"><button class="btn btn--primary" data-jump="sec-wardrobe">ไปเพิ่มเสื้อผ้า</button></div></div>';
+    return;
+  }
+  if(cnt) cnt.textContent = a.total + " ชิ้น · " + a.colors.length + " สี";
+
+  /* ต้องมี hex กำกับด้วย ไม่ใช่แค่ชื่อสี+% เพราะสองสีที่ต่างกันอาจได้ชื่อไทยเดียวกัน
+     (เช่น #FFFFFF กับ #F2F0EB ต่างก็ชื่อ "ขาว") ถ้าเหลือแค่ชื่อ แถวจะแยกจากกันได้ด้วยสีอย่างเดียว (ux §9) */
+  var colorBars = a.colors.map(function(c){
+    return abarHTML(c.pct, esc(c.name)+' <span class="tnum">'+esc(c.hex)+' · '+c.pct+'%</span>', false, c.hex);
+  }).join("");
+  var groupBars = a.groups.map(function(g){
+    return abarHTML(g.pct, esc(g.label)+' <span class="tnum">'+g.count+' ชิ้น</span>', true);
+  }).join("");
+  var insights = a.insights.map(function(s){
+    return '<div class="banner"><span class="banner__ico" aria-hidden="true">ⓘ</span>'+
+      '<span class="banner__body">'+s+'</span></div>';
+  }).join("");
+  var sugg = a.suggestions.length
+    ? '<div><h3 class="analysis__h">สีที่จะช่วยเพิ่มตัวเลือกการจับคู่</h3><ul class="sugg">'+
+      a.suggestions.map(function(s){
+        return '<li><span class="swatch swatch--sm" style="background:'+s.hex+'"></span>'+
+          '<span><b>'+esc(s.name)+'</b> <span class="tnum">'+esc(s.hex)+'</span><br>'+esc(s.reason)+'</span></li>';
+      }).join("")+'</ul></div>'
+    : '';
+
+  slot.innerHTML = '<div class="analysis">'+
+    '<div><h3 class="analysis__h">สัดส่วนสีในตู้</h3><div class="abars">'+colorBars+'</div></div>'+
+    '<div><h3 class="analysis__h">กลุ่มสี</h3><div class="abars">'+groupBars+'</div></div>'+
+    '<div>'+insights+'</div>'+
+    sugg+
+  '</div>';
+}
+
 /* ---------- events ---------- */
 document.addEventListener("click", function(e){
   var t = e.target.closest("[data-jump],[data-mode],[data-occ],[data-nav],[data-gen],[data-setmode],"+
@@ -2087,7 +2259,7 @@ document.addEventListener("click", function(e){
   if(t.dataset.notedone){ state.seenStorageNote = true; persist(); return; }
   if(t.dataset.clearsample){
     state.wardrobe = state.wardrobe.filter(function(g){ return !g.isExample; });
-    persist(); renderWardrobe(); renderBanners();
+    persist(); renderWardrobe(); renderAnalysis(); renderBanners();
     if(!autoSwitchIfNeeded()) regenerate(true);
     say("#wardFeedback", "ล้างชุดตัวอย่างแล้ว"); return;
   }
@@ -2201,7 +2373,7 @@ $("#addBtn").addEventListener("click", function(){ openForm(null); });
 
 /* nav active ตาม section ที่อยู่ในจอ */
 function observeSections(){
-  var ids = ["sec-suggest","sec-wardrobe","sec-favorites"];
+  var ids = ["sec-suggest","sec-wardrobe","sec-favorites","sec-analysis"];
   if(!("IntersectionObserver" in window)) return;
   var io = new IntersectionObserver(function(entries){
     entries.forEach(function(en){
