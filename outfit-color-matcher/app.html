@@ -406,10 +406,11 @@ body{padding-bottom:calc(var(--nav-h) + env(safe-area-inset-bottom))}
 
 .presets{display:flex;flex-wrap:wrap;gap:var(--sp-2);margin-bottom:var(--sp-3)}
 .preset{
+  flex:0 0 auto;   /* อยู่ในแถว .chips ที่เลื่อนแนวนอนได้ ถ้าไม่ล็อกจะโดนบีบจนแคบกว่า 44px */
   width:44px;height:44px;border-radius:var(--r-sm);padding:0;   /* ux §9: touch target >= 44 */
   border:1px solid var(--data-ring)   /* วงแหวนกันกลืน: สีขาว/ดำต้องยังเห็นขอบ */
 }
-.preset[aria-pressed="true"]{box-shadow:0 0 0 2px var(--accent)}
+.preset[aria-pressed="true"],.preset[aria-checked="true"]{box-shadow:0 0 0 2px var(--accent)}
 .previewrow{display:flex;align-items:center;gap:var(--sp-3);margin-bottom:var(--sp-3)}
 .previewrow__box{width:64px;height:64px;flex:0 0 64px;border:1px solid var(--data-ring);border-radius:var(--r-sm);background:var(--surface-sunken)}
 .previewrow__txt{font-size:var(--fs-sm);color:var(--ink-muted);min-width:0}
@@ -748,6 +749,8 @@ body{padding-bottom:calc(var(--nav-h) + env(safe-area-inset-bottom))}
     </div>
 
     <div role="radiogroup" aria-label="โอกาส" class="chips" id="occasionChips"></div>
+    <p class="field__label" style="margin-top:var(--sp-3)">วันนี้อยากใส่สีอะไร?</p>
+    <div role="radiogroup" aria-label="สีที่อยากใส่" class="chips" id="colorLockChips"></div>
 
     <div id="resultsSlot" style="margin-top:var(--sp-5)"></div>
 
@@ -1331,8 +1334,11 @@ function outfitKey(o){
   return CATEGORY_ORDER.map(function(c){ return o.items[c] ? o.items[c].id : "-"; }).join("|");
 }
 
-/* --- โหมด "จากตู้ของฉัน": จับคู่จาก garment จริง --- */
-function generateWardrobeBatch(wardrobe, occasion, avoidKeys){
+/* --- โหมด "จากตู้ของฉัน": จับคู่จาก garment จริง ---
+   lockedHex (FR-5 ไม่บังคับ): ชุดที่ได้ต้องมี "ชิ้นหลัก" (บนหรือล่าง) เป็นสีนั้น
+   นิยาม "องค์ประกอบหลัก" ยึดตามสเปกเดิมของโปรเจกต์: ชุดครบ = บน+ล่าง ที่เหลือเป็นของเสริม
+   ถ้าตู้ไม่มีชิ้นบน/ล่างสีนั้นเลย = No-match จริง (constraint แรกที่ทำให้สถานะ A4 เกิดได้ spec §7C) */
+function generateWardrobeBatch(wardrobe, occasion, avoidKeys, lockedHex){
   var g = groupByCategory(wardrobe);
   var missing = [];
   if(!g.top.length)    missing.push("top");
@@ -1341,6 +1347,13 @@ function generateWardrobeBatch(wardrobe, occasion, avoidKeys){
 
   var pairs = [];
   g.top.forEach(function(t){ g.bottom.forEach(function(b){ pairs.push([t,b]); }); });
+  if(lockedHex){
+    var lock = normHex(lockedHex);
+    pairs = pairs.filter(function(p){
+      return normHex(p[0].color) === lock || normHex(p[1].color) === lock;
+    });
+    if(!pairs.length) return { noMatch:true, lockedHex:lock };
+  }
   shuffle(pairs);
   if(pairs.length > COMBO_CAP) pairs = pairs.slice(0, COMBO_CAP);   /* spec §7C กันหน้าค้าง */
 
@@ -1390,21 +1403,25 @@ function selectDiverse(candidates, avoidKeys){
 /* --- โหมด "สีที่เราแนะนำ": สุ่มไล่ตาม role (spec §4.7) ไม่ใช่สุ่มสีแล้วค่อยจัด role --- */
 var IDEA_RULES = ["analogous","complementary","triadic","monochrome","neutral-accent"];
 function ideaColor(h, s, l){ return hslToHex(h, s, l); }
-function generateIdeaBatch(occasion, avoidKeys){
+function generateIdeaBatch(occasion, avoidKeys, lockedHex){
   var tone = OCCASION_TONE[occasion] || OCCASION_TONE.unspecified;
   var sMid = clamp((IDEA_S_RANGE[0]+IDEA_S_RANGE[1])/2 + tone.s*28, 24, 52);
   var lMid = clamp((IDEA_L_RANGE[0]+IDEA_L_RANGE[1])/2 + tone.l*22, 24, 74);
+  /* FR-5: ล็อกสีแล้ว Primary คือสีนั้นเป๊ะๆ (ไม่ใช่สีใกล้เคียง) สีที่เหลือไล่จากค่า H/S/L ของมัน
+     ตามกฎเดิมทุกข้อ จึงยังได้ Secondary ที่เป็นเฉดเดียวกันและ Accent หนึ่งจุดเหมือนเดิม */
+  var lock = lockedHex ? normHex(lockedHex) : null;
+  var lockHsl = lock ? hexToHsl(lock) : null;
   var pool = [];
   for(var n=0; n<24; n++){
     var rule = pick(IDEA_RULES);
-    var hP = Math.random()*360;
+    var hP = lockHsl ? lockHsl.h : Math.random()*360;
     /* clamp แคบกว่า NEUTRAL_MAX_S..VIVID_MIN_S เพื่อไม่ให้ Primary หลุดเข้าเขต neutral/vivid
        โดยไม่ตั้งใจ (spec §4.7, §9): Primary/Secondary/Neutral ต้องอยู่ต่ำกว่า Accent เป็นส่วนใหญ่ */
-    var sP = clamp(sMid + (Math.random()*18-9), 26, 50);
-    var lP = clamp(lMid + (Math.random()*16-8), 20, 78);
+    var sP = lockHsl ? lockHsl.s : clamp(sMid + (Math.random()*18-9), 26, 50);
+    var lP = lockHsl ? lockHsl.l : clamp(lMid + (Math.random()*16-8), 20, 78);
 
     /* 1) Primary */
-    var primary = ideaColor(hP, sP, lP);
+    var primary = lock ? lock : ideaColor(hP, sP, lP);
     /* 2) Secondary ตาม rule: hue ขยับตาม rule (เหมือนเดิม) แต่ S/L ต้องเป็น "เฉดเดียวกับ Primary"
        คือชิฟต์ทิศทางเดียว (tint/shade ของ Itten) จากค่า sP/lP ที่สุ่มได้แล้ว ไม่ใช่สุ่มค่าใหม่อิสระ
        (spec §4.7; research film-and-fashion-color-palette-principles.md ส่วน 6 ข้อ 2)
@@ -1539,7 +1556,7 @@ function shapeNameOf(shapeId, category){ return resolveShape(shapeId, category).
 
 var state = {
   mode:null,                         /* null = ยังไม่เคยเลือก -> ให้ความพร้อมของตู้ตัดสิน (spec §4.6) */
-  occasion:"unspecified", theme:"system",
+  occasion:"unspecified", theme:"system", lockedColor:null,   /* FR-5 สีที่ล็อกไว้ (hex) หรือ null */
   wardrobe:[], favorites:[], batch:[], index:0, result:null,
   autoSwitchedTo:null, quotaWarned:false, seenStorageNote:false, migrated:false,
   formOpen:false, editingId:null, formDraft:null, openMenuId:null, favEditId:null
@@ -1556,6 +1573,7 @@ function init(){
     state.theme          = st.theme || "system";
     state.seenStorageNote= !!st.seenStorageNote;
     state.mode           = st.mode === "wardrobe" || st.mode === "idea" ? st.mode : null;
+    state.lockedColor    = isValidHex(st.lockedColor || "") ? normHex(st.lockedColor) : null;
   }else{
     state.wardrobe = seedWardrobe();
   }
@@ -1580,6 +1598,7 @@ function init(){
   renderWardrobe();
   renderFavorites();
   renderAnalysis();
+  renderColorLock();
   renderBanners();
   renderMode();
   observeSections();
@@ -1595,7 +1614,7 @@ function persist(opts){
     favorites: state.favorites,
     settings: {
       mode:state.mode, occasion:state.occasion, theme:state.theme,
-      seenStorageNote:state.seenStorageNote
+      lockedColor:state.lockedColor, seenStorageNote:state.seenStorageNote
     }
   });
   if(!res.ok && res.quota && opts && opts.onQuota) opts.onQuota();
@@ -1614,6 +1633,28 @@ function renderMode(){
     ? '<p class="notice"><span aria-hidden="true">ⓘ</span><span>ตู้ยังมีของไม่พอจัดชุด เลยแสดง <b>สีที่เราแนะนำ</b> ให้ก่อน เพิ่มเสื้อกับกางเกงอย่างน้อยอย่างละชิ้นแล้วจะสลับไปโหมด <b>จากตู้ของฉัน</b> ได้</span></p>'
     : "";
 }
+/* FR-5: ตัวเลือกสีที่อยากใส่ = สีจริงในตู้ก่อน (โหมดตู้ต้องมีของจริงถึงจัดได้) แล้วต่อด้วยพรีเซ็ต
+   ทุกปุ่มมี aria-label เป็นชื่อสี+hex เพราะสวอตช์ล้วนสื่อด้วยสีอย่างเดียวไม่ได้ (ux §9) */
+function lockColorOptions(){
+  var seen = {}, out = [];
+  state.wardrobe.forEach(function(g){
+    var h = normHex(g.color);
+    if(!seen[h]){ seen[h] = 1; out.push(h); }
+  });
+  PRESET_COLORS.forEach(function(p){
+    var h = normHex(p);
+    if(!seen[h]){ seen[h] = 1; out.push(h); }
+  });
+  return out;
+}
+function renderColorLock(){
+  var slot = $("#colorLockChips"); if(!slot) return;
+  var none = '<button class="chip" role="radio" data-lock="" aria-checked="'+(!state.lockedColor)+'">ไม่ระบุ</button>';
+  slot.innerHTML = none + lockColorOptions().map(function(h){
+    return '<button class="preset" role="radio" data-lock="'+h+'" aria-checked="'+(state.lockedColor === h)+'" '+
+      'style="background:'+h+'" aria-label="'+esc(colorNameTH(h)+" "+h)+'"></button>';
+  }).join("");
+}
 function renderOccasion(){
   $("#occasionChips").innerHTML = OCCASIONS.map(function(o){
     return '<button class="chip" role="radio" data-occ="'+o.id+'" aria-checked="'+
@@ -1626,8 +1667,8 @@ function regenerate(silent){
   var avoid = {};
   state.batch.forEach(function(o){ avoid[outfitKey(o)] = 1; });
   var res = (state.mode === "wardrobe")
-    ? generateWardrobeBatch(state.wardrobe, state.occasion, avoid)
-    : generateIdeaBatch(state.occasion, avoid);
+    ? generateWardrobeBatch(state.wardrobe, state.occasion, avoid, state.lockedColor)
+    : generateIdeaBatch(state.occasion, avoid, state.lockedColor);
 
   if(res.insufficient && state.mode === "wardrobe"){
     state.result = res; state.batch = []; state.index = 0;
@@ -1740,9 +1781,19 @@ function renderResults(){
     return;
   }
   if(state.result && state.result.noMatch){               /* A4 */
+    /* FR-5 ทำให้สถานะนี้เกิดจริงได้ครั้งแรก: ล็อกสีที่ไม่มีชิ้นบน/ล่างรองรับ
+       "ผ่อนเงื่อนไข" ที่สเปกพูดถึงจึงมีความหมายจริงตรงนี้ = เอาสีที่ล็อกออก */
+    var lockHex = state.result.lockedHex;
+    var lockTxt = lockHex
+      ? 'ตอนนี้ล็อกสี <b>'+esc(colorNameTH(lockHex))+'</b> (<span class="tnum">'+esc(lockHex)+'</span>) ไว้ '+
+        'แต่ในตู้ยังไม่มีเสื้อหรือกางเกง/กระโปรงสีนี้ให้ใช้เป็นชิ้นหลัก'
+      : 'ลองเพิ่มเสื้อผ้าอีกสักชิ้น หรือดูไอเดียสีเพื่อหาแนวทางก่อน';
     slot.innerHTML = '<div class="empty"><h3 class="empty__title">ยังจับคู่ไม่ได้</h3>'+
-      '<p class="empty__body">ลองเพิ่มเสื้อผ้าอีกสักชิ้น หรือดูไอเดียสีเพื่อหาแนวทางก่อน</p>'+
-      '<div class="empty__actions"><button class="btn btn--ghost" data-setmode="idea">สลับไปโหมดไอเดีย</button></div></div>';
+      '<p class="empty__body">'+lockTxt+'</p>'+
+      '<div class="empty__actions">'+
+        (lockHex ? '<button class="btn btn--primary" data-lock="">เอาสีที่ล็อกออก</button>' : '')+
+        '<button class="btn btn--ghost" data-setmode="idea">สลับไปโหมดไอเดีย</button>'+
+      '</div></div>';
     return;
   }
   if(!state.batch.length){
@@ -1969,7 +2020,7 @@ function saveGarment(){
   }
   var res = persist();
   if(!res.ok && res.quota){ state.quotaWarned = true; }
-  closeForm(); renderWardrobe(); renderAnalysis(); renderBanners();
+  closeForm(); renderWardrobe(); renderAnalysis(); renderColorLock(); renderBanners();
   if(!autoSwitchIfNeeded()) regenerate(true);
   say("#wardFeedback", wasEdit ? "บันทึกการแก้ไข " + name + " แล้ว" : "เพิ่ม " + name + " เข้าตู้แล้ว");
 }
@@ -1985,7 +2036,7 @@ function deleteGarment(id){
     dlg.removeEventListener("close", onc);
     if(dlg.returnValue !== "ok") return;
     state.wardrobe = state.wardrobe.filter(function(x){ return x.id !== id; });
-    persist(); renderWardrobe(); renderAnalysis(); renderBanners();
+    persist(); renderWardrobe(); renderAnalysis(); renderColorLock(); renderBanners();
     if(!autoSwitchIfNeeded()) regenerate(true);
     say("#wardFeedback", "ลบ " + g.name + " แล้ว");
   }, false);
@@ -2196,7 +2247,7 @@ function renderAnalysis(){
 document.addEventListener("click", function(e){
   var t = e.target.closest("[data-jump],[data-mode],[data-occ],[data-nav],[data-gen],[data-setmode],"+
     "[data-add],[data-edit],[data-del],[data-more],[data-cat],[data-shape],[data-preset],[data-cancel],"+
-    "[data-clearsample],[data-notedone],[data-migdone],[data-swap],[data-fav],"+
+    "[data-clearsample],[data-notedone],[data-migdone],[data-swap],[data-fav],[data-lock],"+
     "[data-favmore],[data-favedit],[data-favdup],[data-favdel],.pbar__seg");
   /* คลิกที่อื่น = ปิดเมนูของชิ้นเสื้อผ้า */
   if(state.openMenuId && (!t || (!t.dataset.more && !t.dataset.edit && !t.dataset.del
@@ -2242,6 +2293,15 @@ document.addEventListener("click", function(e){
   if(t.dataset.setmode) { setMode(t.dataset.setmode, false); return; }
   if(t.dataset.occ)     { state.occasion = t.dataset.occ; renderOccasion(); persist(); regenerate(true);
                           say("#liveFeedback", "ปรับโทนตามโอกาสให้แล้ว"); return; }
+  if(t.dataset.lock !== undefined){        /* FR-5 ล็อก/ปลดล็อกสี ต้องมีข้อความกำกับเสมอ (ux §7B) */
+    var lockVal = t.dataset.lock;
+    state.lockedColor = isValidHex(lockVal) ? normHex(lockVal) : null;
+    renderColorLock(); persist(); regenerate(true);
+    say("#liveFeedback", state.lockedColor
+      ? "จัดชุดรอบสี" + colorNameTH(state.lockedColor) + "ให้แล้ว"
+      : "เอาสีที่ล็อกออกแล้ว กลับไปแนะนำจากทุกสี");
+    return;
+  }
   if(t.dataset.nav)     { goTo(parseInt(t.dataset.nav,10)); return; }
   if(t.dataset.gen)     { regenerate(false); return; }
   if(t.dataset.add)     { openForm(null); return; }
@@ -2251,7 +2311,7 @@ document.addEventListener("click", function(e){
   if(t.dataset.notedone){ state.seenStorageNote = true; persist(); return; }
   if(t.dataset.clearsample){
     state.wardrobe = state.wardrobe.filter(function(g){ return !g.isExample; });
-    persist(); renderWardrobe(); renderAnalysis(); renderBanners();
+    persist(); renderWardrobe(); renderAnalysis(); renderColorLock(); renderBanners();
     if(!autoSwitchIfNeeded()) regenerate(true);
     say("#wardFeedback", "ล้างชุดตัวอย่างแล้ว"); return;
   }

@@ -1,6 +1,10 @@
 /* ไล่ acceptance criteria ของ FR-0 / FR-1 และสถานะใน spec §7C */
 const H = require("./helper.js");
 
+/* reload แล้วค่าหาย = เขียน localStorage ยังไม่ทันตอนสั่ง reload ไม่ใช่บั๊กของแอป
+   รอให้ค่าที่คาดว่าจะถูกบันทึกโผล่ใน localStorage จริงก่อน แล้วค่อย reload */
+const waitPersisted = (page, check) => page.waitForFunction(check, null, { timeout: 4000 });
+
 (async () => {
   const browser = await H.launch();
   const R = H.reporter();
@@ -43,6 +47,10 @@ const H = require("./helper.js");
     R.ok(before.wardrobe.length === 1 && before.wardrobe[0].shapeId === "polo" && before.wardrobe[0].color === "#3F6B4F",
       "A1a · FR-0 AC1: ชิ้นใหม่เข้าตู้พร้อมทรงและสีที่เลือก");
     const shownBefore = await page.locator('#wardrobeSlot use[href="#sh-polo"]').count();
+    await waitPersisted(page, () => {
+      try { return (JSON.parse(localStorage.getItem("outfit-color-matcher.v1")||"{}").wardrobe||[]).length === 1; }
+      catch(e){ return false; }
+    });
     await page.reload(); await page.waitForTimeout(450);
     const after = await snap(page);
     const shownAfter = await page.locator('#wardrobeSlot use[href="#sh-polo"]').count();
@@ -212,7 +220,11 @@ const H = require("./helper.js");
     R.ok(s.mode === "idea" && s.n >= 3, "B7a · FR-1 AC8: ตู้ว่างแต่โหมดไอเดียยังโชว์ชุดได้ + ค่าเริ่มต้นเลือกให้เอง");
     const checked = await page.getAttribute('[data-mode="idea"]', "aria-checked");
     R.ok(checked === "true", "B7b · ux §7B: ตัวสลับแสดงสถานะโหมดที่ใช้อยู่ชัด");
-    await page.click('[data-mode="wardrobe"]'); await page.waitForTimeout(120);
+    await page.click('[data-mode="wardrobe"]');
+    await waitPersisted(page, () => {
+      try { return (JSON.parse(localStorage.getItem("outfit-color-matcher.v1")||"{}").settings||{}).mode === "wardrobe"; }
+      catch(e){ return false; }
+    });
     await page.reload(); await page.waitForTimeout(450);
     s = await snap(page);
     R.ok(s.mode === "wardrobe", "B7c · ux §7: โหมดที่เลือกถูกจำหลังรีเฟรช", "ได้ " + s.mode);
@@ -336,7 +348,11 @@ const H = require("./helper.js");
       "FV1 · กดหัวใจ = บันทึก + ปุ่มเป็น pressed");
     await page.click('.card--focused .card__fav'); await page.waitForTimeout(120);
     R.ok(await favN() === 0, "FV2 · ux §7: กดหัวใจซ้ำ = เอาออก (toggle)");
-    await page.click('.card--focused .card__fav'); await page.waitForTimeout(120);
+    await page.click('.card--focused .card__fav');
+    await waitPersisted(page, () => {
+      try { return (JSON.parse(localStorage.getItem("outfit-color-matcher.v1")||"{}").favorites||[]).length === 1; }
+      catch(e){ return false; }
+    });
     await page.reload(); await page.waitForTimeout(450);
     R.ok(await favN() === 1, "FV3 · FR-3 AC1: ชุดที่บันทึกอยู่รอดหลังรีเฟรช");
     R.ok(await page.locator('#sec-favorites .favcard').count() === 1, "FV4 · เซกชัน 'บันทึกไว้' โชว์ 1 ชุด");
@@ -505,6 +521,56 @@ const H = require("./helper.js");
     await page.click("#dlgOk"); await page.waitForTimeout(200);
     const after = await page.locator("#analysisSlot .abar").count();
     R.ok(after === before - 1, "AN7 · ลบเสื้อผ้าแล้วผลวิเคราะห์อัปเดตทันที ไม่ค้างค่าเก่า", before+" -> "+after);
+    allErrs.push(...errs); await ctx.close();
+  }
+
+  /* ============ CF. FR-5 Color-first (เฟส 3) ============ */
+  {
+    const seed = [
+      H.g("t1","top","tee-crew","#2B3A67"), H.g("t2","top","polo","#FFFFFF"),
+      H.g("b1","bottom","chino","#C8B79B"), H.g("a1","accessory","belt","#C0392B")
+    ];
+    const { ctx, page, errs } = await H.open(browser, H.store(seed, { mode:"wardrobe" }));
+    R.ok(await page.locator("#colorLockChips [data-lock]").count() > 1,
+      "CF1 · มีตัวเลือก 'วันนี้อยากใส่สีอะไร' พร้อมสวอตช์");
+    R.ok(await page.locator('#colorLockChips [data-lock="#2B3A67"]').getAttribute("aria-label") !== null,
+      "CF2 · ux §9: สวอตช์สีมี aria-label ชื่อสี+hex ไม่สื่อด้วยสีอย่างเดียว");
+
+    await page.click('#colorLockChips [data-lock="#2B3A67"]'); await page.waitForTimeout(300);
+    const locked = await page.evaluate(() => ({
+      lock: state.lockedColor, n: state.batch.length,
+      all: state.batch.every(o => ["top","bottom"].some(c => o.items[c] && o.items[c].color.toUpperCase() === "#2B3A67"))
+    }));
+    R.ok(locked.lock === "#2B3A67" && locked.n > 0 && locked.all,
+      "CF3 · FR-5 AC1: ล็อกสีแล้วทุกชุดมีสีนั้นเป็นชิ้นหลัก", JSON.stringify(locked));
+    R.ok((await page.locator("#liveFeedback").textContent()).trim().length > 0,
+      "CF4 · ux §7B: ล็อกสีแล้วมีข้อความกำกับ ไม่เงียบ");
+    R.ok(await page.locator("#resultsSlot .pbar").count() > 0 && await page.locator("#resultsSlot .advice li").count() > 0,
+      "CF5 · FR-5 AC2: ยังโชว์สัดส่วนสี + คำแนะนำ");
+
+    /* ล็อกสีที่มีแค่ในแอกเซสซอรี -> A4 No-match จริง + ทางออกคือเอาสีที่ล็อกออก */
+    await page.click('#colorLockChips [data-lock="#C0392B"]'); await page.waitForTimeout(300);
+    R.ok(await page.locator("#resultsSlot .empty").count() === 1 &&
+         await page.locator('#resultsSlot [data-lock=""]').count() === 1,
+      "CF6 · FR-5 + §7C: ไม่มีชิ้นหลักสีนั้น -> A4 No-match พร้อมปุ่มเอาสีที่ล็อกออก");
+    await page.click('#resultsSlot [data-lock=""]'); await page.waitForTimeout(300);
+    R.ok(await page.evaluate(() => state.lockedColor === null && state.batch.length > 0),
+      "CF7 · กดเอาสีที่ล็อกออกแล้วกลับมาแนะนำได้ตามปกติ");
+
+    /* ล็อกสีต้องอยู่รอดหลังรีเฟรช (เก็บใน settings เหมือน occasion) */
+    await page.click('#colorLockChips [data-lock="#2B3A67"]'); await page.waitForTimeout(250);
+    await page.reload(); await page.waitForTimeout(450);
+    R.ok(await page.evaluate(() => state.lockedColor) === "#2B3A67",
+      "CF8 · สีที่ล็อกถูกจำหลังรีเฟรช");
+    allErrs.push(...errs); await ctx.close();
+  }
+  {   /* โหมดไอเดียล็อกสีได้โดยไม่ต้องมีของจริงในตู้ */
+    const { ctx, page, errs } = await H.open(browser, H.store([], { mode:"idea" }));
+    await page.click('#colorLockChips [data-lock="#3F6B4F"]'); await page.waitForTimeout(300);
+    R.ok(await page.evaluate(() =>
+      state.batch.length > 0 && state.batch.every(o =>
+        ["top","bottom"].some(c => o.items[c] && o.items[c].color.toUpperCase() === "#3F6B4F"))),
+      "CF9 · FR-5 AC1: โหมดไอเดียล็อกสีได้ ทุกชุดมีสีนั้นเป็นชิ้นหลัก");
     allErrs.push(...errs); await ctx.close();
   }
 

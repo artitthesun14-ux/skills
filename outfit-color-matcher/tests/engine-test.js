@@ -233,5 +233,38 @@ console.log('\n== 11. FR-4 วิเคราะห์ตู้ (analyzeWardrobe
     a.suggestions.concat(a.insights.map(x=>({reason:x}))).every(s=>!/ซื้อ|ลูกค้า/.test(s.reason||'')));
 }
 
+console.log('\n== 12. FR-5 Color-first (ล็อกสีแล้วจัดชุดรอบสีนั้น) ==');
+{
+  const g=(id,cat,color)=>({id,name:'ชิ้น'+id,category:cat,shapeId:null,color});
+  const LOCK='#2B3A67';
+  // โหมดไอเดีย: สีที่ล็อกต้องเป็นองค์ประกอบหลักของทุกชุด (AC1)
+  const idea=generateIdeaBatch('unspecified',{},LOCK);
+  t('AC1 idea: ทุกชุดมีสีที่ล็อกอยู่จริง',
+    idea.outfits.length>0 && idea.outfits.every(o=>CATEGORY_ORDER.some(c=>o.items[c]&&normHex(o.items[c].color)===LOCK)),
+    'ได้ '+idea.outfits.length+' ชุด');
+  t('AC1 idea: สีที่ล็อกอยู่บนชิ้นหลัก (บนหรือล่าง)',
+    idea.outfits.every(o=>(o.items.top&&normHex(o.items.top.color)===LOCK)||(o.items.bottom&&normHex(o.items.bottom.color)===LOCK)));
+  t('AC2 idea: ยังมีสัดส่วนสี + คำแนะนำครบทุกชุด',
+    idea.outfits.every(o=>o.colorBreakdown.length>0 && o.advice.length>0));
+
+  // โหมดตู้: ต้องมีชิ้นบน/ล่างสีนั้นจริงถึงจะจัดได้ (AC1)
+  const ward=[g('1','top',LOCK),g('2','top','#FFFFFF'),g('3','bottom','#C8B79B'),g('4','shoes','#F2F0EB')];
+  const wb=generateWardrobeBatch(ward,'unspecified',{},LOCK);
+  t('AC1 wardrobe: ทุกชุดมีชิ้นบน/ล่างเป็นสีที่ล็อก',
+    wb.outfits && wb.outfits.length>0 &&
+    wb.outfits.every(o=>(o.items.top&&normHex(o.items.top.color)===LOCK)||(o.items.bottom&&normHex(o.items.bottom.color)===LOCK)),
+    JSON.stringify(wb.insufficient||wb.noMatch||('ได้ '+(wb.outfits||[]).length+' ชุด')));
+
+  // ตู้ไม่มีชิ้นหลักสีนั้น -> No-match จริง (นี่คือ constraint แรกที่ทำให้ A4 เกิดได้ ตาม spec §7C)
+  const noLock=generateWardrobeBatch(
+    [g('1','top','#FFFFFF'),g('2','bottom','#C8B79B'),g('3','accessory',LOCK)],'unspecified',{},LOCK);
+  t('A4 No-match เกิดจริงเมื่อไม่มีชิ้นบน/ล่างสีที่ล็อก', noLock.noMatch===true, JSON.stringify(Object.keys(noLock)));
+
+  // ไม่ล็อกสี = พฤติกรรมเดิมทุกอย่าง (regression)
+  const plain=generateWardrobeBatch(ward,'unspecified',{});
+  t('ไม่ล็อกสี: โหมดตู้ยังทำงานเหมือนเดิม', plain.outfits && plain.outfits.length>=1, JSON.stringify(Object.keys(plain)));
+  t('ไม่ล็อกสี: โหมดไอเดียยังทำงานเหมือนเดิม', generateIdeaBatch('unspecified',{}).outfits.length>=BATCH_MIN);
+}
+
 console.log(fails? `\n### ${fails} ข้อไม่ผ่าน\n` : '\n### ผ่านทั้งหมด\n');
 process.exit(fails?1:0);

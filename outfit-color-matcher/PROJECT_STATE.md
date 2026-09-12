@@ -62,6 +62,19 @@
 - ProportionBar: ช่องว่าง 2px ระหว่าง segment, legend เสมอ, direct label เฉพาะ >=12%
 
 ## 4. การเปลี่ยนแปลงจากสเปก/ดีไซน์ก่อนหน้า (delta ของสเตจนี้)
+-7. **(V12, เฟส 3) FR-5 Color-first:** แถว "วันนี้อยากใส่สีอะไร?" ใต้ชิปโอกาส (สวอตช์ = สีจริงในตู้ก่อน
+   แล้วต่อด้วย `PRESET_COLORS`) ล็อกแล้ว `state.lockedColor` ส่งเข้าทั้งสอง generator
+   - **นิยาม "องค์ประกอบหลัก" ของ AC1** ยึดตามสเปกเดิม: ชุดครบ = บน+ล่าง จึงบังคับว่าสีที่ล็อกต้องอยู่บน
+     **เสื้อหรือกางเกง/กระโปรง** ไม่ใช่แค่โผล่ที่ไหนก็ได้ในลุค (รองเท้า/แอกเซสเป็นของเสริม ไม่ใช่ชิ้นหลัก)
+   - โหมดไอเดีย: สีที่ล็อกเป็น Primary เป๊ะๆ (ไม่ใช่สีใกล้เคียง) สีที่เหลือไล่จาก H/S/L ของมันตามกฎเดิม
+   - โหมดตู้: กรองคู่บน-ล่างให้เหลือเฉพาะคู่ที่มีสีนั้น ถ้าไม่เหลือคู่เลย = **No-match จริง**
+   - **FR-5 ทำให้สถานะ A4 No-match เกิดได้เป็นครั้งแรก** (ก่อนหน้านี้เป็นโค้ดที่ไปไม่ถึง เพราะมีบน+ล่างก็ได้ชุดเสมอ)
+     และทำให้ "ผ่อนเงื่อนไข" ที่สเปกพูดถึงมีความหมายรูปธรรมเสียที = ปุ่ม "เอาสีที่ล็อกออก" แก้ spec §7C + ux §4/§6 แล้ว
+   - **แก้บั๊กที่เทสต์ a11y จับได้:** `.preset` ไม่มี `flex:0 0 auto` พอเอาไปวางในแถว `.chips` ที่เลื่อนแนวนอน
+     สวอตช์ถูกบีบเหลือ 13x44px ต่ำกว่าเกณฑ์แตะ 44px (D4) เติม `flex:0 0 auto` แล้ว
+   - **แก้เทสต์ flaky (ไม่ใช่บั๊กแอป):** ac-test หลายจุด click แล้ว `waitForTimeout` สั้นๆ ก่อน `reload`
+     ถ้า `persist()` ยังเขียน localStorage ไม่ทัน ค่าจะหายหลัง reload (เคยหลุดเป็น A1b/B7c/FV3 สลับกันไป)
+     เพิ่ม helper `waitPersisted()` รอให้ค่าโผล่ใน localStorage จริงก่อนค่อย reload
 -6. **(V11, เฟส 3) FR-4 วิเคราะห์ตู้:** เพิ่ม `analyzeWardrobe()` ในบล็อก engine (เทสต์ด้วย `engine-test.js`
    ได้โดยไม่ต้องเปิดเบราว์เซอร์) + เซกชัน `#sec-analysis` + แท็บ "วิเคราะห์" เป็นแท็บที่ 4
    - สัดส่วนรายสีนับ **เป็นชิ้น** เท่ากันทุกชิ้น (ตู้คือคลังของ ไม่ใช่พื้นที่บนตัว จึงไม่ใช้ `CATEGORY_WEIGHT`
@@ -116,7 +129,7 @@
 - **นอกโปรเจกต์นี้:** PR #2 ของ repo `artitthesun14-ux/skills` **merge เข้า main แล้ว** (10 ก.ย. 2026) งานต่อจากนี้ต้องเริ่มบรานช์ใหม่จาก main ไม่ต่อท้ายประวัติที่ merge ไปแล้ว
 
 ## 6. สเตจ
-- **สเตจปัจจุบัน (กำลังทำ): เฟส 3** เริ่มแล้ว **FR-4 วิเคราะห์ตู้ เสร็จ (V11)** เหลือ FR-5 Color-first + FR-6 Generator
+- **สเตจปัจจุบัน (กำลังทำ): เฟส 3** **FR-4 วิเคราะห์ตู้ (V11) + FR-5 Color-first (V12) เสร็จแล้ว** เหลือ FR-6 Generator
   - **FR-4 (V11):** ฟังก์ชัน `analyzeWardrobe()` (บล็อก engine, เทสต์ได้ด้วย engine-test) + เซกชัน `#sec-analysis`
     + แท็บ "วิเคราะห์" ครบ AC1-AC5: สัดส่วนรายสีนับเป็นชิ้น (largest remainder ให้รวม 100), 4 กลุ่มไม่ทับกัน
     (neutral > accent > cool/warm), insight 1-3 ข้อจาก threshold+template, สีที่ช่วยเพิ่มการจับคู่อิงสีฐานเด่นสุด
@@ -124,10 +137,10 @@
   - **ตัดสินใจระหว่างทำ:** ป้าย ColorShareBar ต้องมี hex ด้วย ไม่ใช่แค่ `ชื่อสี · %` เพราะสองสีต่างกันได้ชื่อไทย
     เดียวกัน (`#FFFFFF`/`#F2F0EB` = "ขาว") ถ้าเหลือแค่ชื่อ แถวจะแยกกันได้ด้วยสีอย่างเดียว ผิด ux §9 (แก้ ui doc แล้ว)
 - **สเตจก่อนหน้า (จบแล้ว): ปิด 4 open item (rule variety + threshold + dog-ear + No-match) + กติกาสีโหมดไอเดีย (spec §4.1/4.7/9) + เฟส 2 (Swap + Favorites)**
-  - artifact: `https://claude.ai/code/artifact/ee952a4d-7525-4446-a827-548546fe68b0` (Version 11, ลิงก์เดิม localStorage ไม่หาย)
+  - artifact: `https://claude.ai/code/artifact/ee952a4d-7525-4446-a827-548546fe68b0` (Version 12, ลิงก์เดิม localStorage ไม่หาย)
   - แหล่งความจริงของโค้ด: `app.html` (รูปแบบ artifact) รัน `./build.sh` ได้ `outfit-color-matcher.html` ที่เปิดตรงๆ ได้
   - แผนที่ใช้: `docs/plan-phase1-shape-migration.md`
-  - ผลตรวจ (Version 11) รวม 268 ข้อ ผ่านหมด: engine 66 · browser 74 · shape 17 · migration 10 · `tests/ac-test.js` 79 (FR-0/FR-1/FR-2/FR-3 AC + §4.7 + §7C + เคสขอบจาก /test) · a11y 20 · regress 2 · ไม่มี JS error · ไม่มี external request
+  - ผลตรวจ (Version 12) รวม 284 ข้อ ผ่านหมด: engine 73 · browser 74 · shape 17 · migration 10 · `tests/ac-test.js` 88 (FR-0/FR-1/FR-2/FR-3 AC + §4.7 + §7C + เคสขอบจาก /test) · a11y 20 · regress 2 · ไม่มี JS error · ไม่มี external request
   - **[V10 ปิด 4 open item]** rule variety (forcedRule ผ่าน `buildOutfit` + คัดเลือก rule ละหนึ่ง), threshold ยืนยันจากผลวัด (spec §9), dog-ear ตัดทิ้ง (docs), No-match "ผ่อนเงื่อนไข" แก้ docs ให้ตรงของจริง ตั๋วงานที่ `.scratch/outfit-color-matcher/issues/`
   - **[แก้แล้วจาก /code-review]** floor S ของ Secondary ใน `generateIdeaBatch()` (branch monochrome/default)
     เคยต่ำกว่า `NEUTRAL_MAX_S=20` ทำให้ Secondary หลุดไปเป็น role "neutral" เอง ~64% ของทุกลุคที่ rule
