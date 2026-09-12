@@ -114,6 +114,34 @@ Status: ready-for-agent
   - `tests/browser-test.js`: screenshot-based acceptance for the new visual system (Collage Art Style cards, dynamic-background states, redesigned wardrobe tiles); prior art for this exact pattern is the phase 1-3 screenshot verification already in this file.
 - **Prior art:** this mirrors exactly how FR-4/FR-5 were built this project (TDD in `engine-test.js` first, then real-browser verification via Playwright-core at `/opt/pw-browsers/chromium`, full 7-suite green before any publish). No new test tooling or pattern is being introduced.
 
+## แผนเฟส (Delivery Phases)
+
+ยึดหลักเดิมของโปรเจกต์ (main spec §8): ส่งมอบทีละเฟส แต่ละเฟสใช้งานได้จริงด้วยตัวเอง ไม่ต้องรอเฟสถัดไปมาต่อ
+
+### เฟส A: Flexible Outfit Generation (รากฐาน engine)
+- **ขอบเขต:** Implementation Decisions หัวข้อ 2 ทั้งหมด (เลิกกฎบน+ล่าง, ขยายนิยาม FR-5 core item, ขยาย Insufficient Data/No-Match, ปรับ invariant ใน `regress.js`)
+- **ทำไมอยู่เฟสแรก:** เป็นการเปลี่ยน engine ที่ลึกและกระทบวงกว้างที่สุด (กระทบ FR-1/FR-5 ที่มีอยู่แล้ว) ทำให้เสร็จและเขียวก่อน เพื่อให้ทุกเฟสหลังจากนี้ build บนพฤติกรรม engine ใหม่ตั้งแต่ต้น ไม่ต้อง retrofit ทีหลัง (ตามที่ระบุใน Further Notes)
+- **ใช้งานได้จริงทันทีที่จบเฟส:** คนที่มีของไม่ครบบน+ล่างเริ่มได้คำแนะนำ โดยยังไม่ต้องรอ UI ใหม่ใดๆ
+- **เทสต์หลัก:** `engine-test.js`, `regress.js`, ส่วน AC ที่เกี่ยวกับ Insufficient Data/No-Match ใน `ac-test.js`
+
+### เฟส B: Swap One Item Expansion
+- **ขอบเขต:** Implementation Decisions หัวข้อ 1 ทั้งหมด (badge แนะนำ, สีแนะนำเมื่อวนของในตู้หมด, ใช้ได้ทุกการ์ดในแบตช์)
+- **ทำไมอยู่หลังเฟส A:** swap ใช้ `buildOutfit()`/ตู้จริงชุดเดียวกับ engine ที่เพิ่งยืดหยุ่นขึ้น เอาไปต่อยอดตอนพฤติกรรม generation คงที่แล้วจะชัวร์กว่า และยังเป็นงาน logic-heavy เหมือนเฟส A จึงจัดกลุ่มไว้ด้วยกันก่อนเข้าเฟสที่เป็นภาพ
+- **ใช้งานได้จริงทันทีที่จบเฟส:** ปุ่ม 🔄 ฉลาดขึ้นและใช้ได้ทุกการ์ด โดยยังเป็นดีไซน์เดิม
+- **เทสต์หลัก:** `ac-test.js` (swap AC ใหม่), `a11y-test.js` (touch target ของปุ่มที่โผล่เพิ่มทุกการ์ด)
+
+### เฟส C: Visual & Theme System
+- **ขอบเขต:** Implementation Decisions หัวข้อ 3 ทั้งหมด (ทิศทาง Collage Art Style, เอา role vocabulary ออกจาก UI copy, เลิก dark mode, ธีมพื้นหลังไดนามิก + ปุ่มล็อก)
+- **ทำไมอยู่เฟสนี้:** เป็นงาน visual-system-level ที่หัวข้อ 5 (garment redesign) ต้องพึ่งพา จึงต้องปิดทิศทาง/โทเคนให้นิ่งก่อน (งานย่อยของ `ui-design`/`design-system` ตามที่ระบุใน Implementation Decisions หัวข้อ 3)
+- **ใช้งานได้จริงทันทีที่จบเฟส:** แอปทั้งตัวเปลี่ยนหน้าตาเป็น Collage Art Style ครบ, dark mode หายไป, ธีมขยับ/ล็อกได้ แม้ garment tile ยังเป็นเลย์เอาต์เดิม
+- **เทสต์หลัก:** `a11y-test.js` (คอนทราสต์ของธีมไดนามิก, ลบเทสต์ dark mode เดิมทิ้ง), `browser-test.js` (สกรีนช็อตยืนยันภาพใหม่)
+
+### เฟส D: Color Selection UI + Garment Display Redesign
+- **ขอบเขต:** Implementation Decisions หัวข้อ 4 และ 5 ทั้งหมด (ปุ่ม "ดูสีเพิ่มเติม" + มุมมองจัดกลุ่มตามโทนสี, รีดีไซน์การ์ด/ตู้เสื้อผ้าทุกหมวด)
+- **ทำไมอยู่เฟสสุดท้าย:** หัวข้อ 5 ประกาศไว้ชัดเจนว่าใช้ระบบภาพเดียวกับเฟส C จึงต้องรอโทเคน/ทิศทางจากเฟส C นิ่งก่อน ส่วนหัวข้อ 4 ไม่ผูกกับ C โดยตรง แต่รวมไว้เฟสเดียวกันเพราะเป็นงาน UI ล้วนเหมือนกัน ไม่มี engine เปลี่ยนแล้วในจุดนี้ และควรสร้างด้วยภาษาภาพของเฟส C ไปเลยรอบเดียว ไม่ต้องทำสองรอบ
+- **ใช้งานได้จริงทันทีที่จบเฟส:** ครบทุกข้อในคำขอเดิม ระบบภาพสอดคล้องกันทั้งแอป
+- **เทสต์หลัก:** `ac-test.js` (modal flow ทั้งสองทางเข้า), `browser-test.js` (สกรีนช็อต garment tile ทุกหมวด), `a11y-test.js` (ป้ายชื่อสี/hex ยังอยู่ครบตามกฎ "ไม่สื่อด้วยสีอย่างเดียว")
+
 ## Out of Scope
 
 - **Idea mode does not gain a swap control.** Only the wardrobe-mode swap is being expanded (per-card, recommendation badge); idea mode still has no owned items to cycle through and this spec does not introduce an "idea reroll" concept (that was explicitly declined in the phase 2 plan and nothing here changes that reasoning).
