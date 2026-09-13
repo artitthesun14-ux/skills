@@ -212,8 +212,16 @@ body{padding-bottom:calc(var(--nav-h) + env(safe-area-inset-bottom))}
   transition:transform var(--dur-pan) var(--ease);
   transform:translateX(calc(-1 * var(--i,0) * (var(--card-w) + var(--sp-3))))
 }
+/* เฟส 4-B (ตั๋ว 06): การ์ดข้างๆ เป็น inert เพื่อ a11y จึงคลิกตัวมันไม่ได้
+   ใส่ปุ่มโปร่งทับไว้ใน slot แทน แตะแล้วเลื่อนการ์ดนั้นมาโฟกัส (ไม่ใช่สลับชิ้นข้ามการ์ด) */
+.cardslot{position:relative;flex:0 0 var(--card-w);width:var(--card-w)}
+.cardslot__focus{
+  position:absolute;inset:0;border:0;background:transparent;cursor:pointer;
+  border-radius:var(--r-lg)
+}
+.cardslot__focus:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
 .card{
-  flex:0 0 var(--card-w);width:var(--card-w);
+  width:100%;
   background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);
   padding:var(--sp-5);box-shadow:var(--shadow-card);
   transition:transform var(--dur-pan) var(--ease),opacity var(--dur-pan) var(--ease);
@@ -1836,13 +1844,17 @@ function pbarHTML(breakdown, cardId){
 function cardHTML(o, i, focused){
   var isSample = CATEGORY_ORDER.some(function(c){ return o.items[c] && o.items[c].isExample; });
   var cardId = "c"+i;
-  var canSwap = focused && o.sourceMode === "wardrobe";
+  /* เรนเดอร์ปุ่มสลับให้ทุกการ์ดในโหมดตู้ แล้วให้ CSS ซ่อนบนการ์ดที่ยังไม่โฟกัส
+     (ตั๋ว 06) เดิมผูกกับ focused ตอนเรนเดอร์ พอเลื่อนไปการ์ดอื่นด้วย < > หรือแตะ
+     updateCarousel() สลับแค่คลาส ไม่ได้เรนเดอร์ใหม่ การ์ดนั้นจึงไม่มีปุ่มสลับเลย */
+  var canSwap = o.sourceMode === "wardrobe";
   /* เฟส 4-A: ไม่มีหมวดที่ถูกบังคับแล้ว หมวดที่ชุดนี้ไม่มีของก็ไม่ต้องกันช่องว่างไว้ */
   var tiles = CATEGORY_ORDER
     .filter(function(c){ return o.items[c]; })
     .map(function(c){ return tileHTML(o.items[c], c, { swap:canSwap, i:i, look:o }); }).join("");
   var faved = hasFav(favKey(o));
-  return '<article class="card '+(focused ? "card--focused" : "card--adjacent")+'" '+
+  return '<div class="cardslot">'+
+    '<article class="card '+(focused ? "card--focused" : "card--adjacent")+'" '+
       'role="group" aria-roledescription="ชุดแนะนำ" aria-label="ชุดที่ '+(i+1)+' จาก '+state.batch.length+'" '+
       (focused ? '' : 'aria-hidden="true" inert')+'>'+
     '<div class="card__head">'+
@@ -1856,7 +1868,12 @@ function cardHTML(o, i, focused){
     (canSwap ? suggsHTML(o) : "")+
     pbarHTML(o.colorBreakdown, cardId)+
     '<ul class="advice">'+o.advice.map(function(a){ return "<li>"+a+"</li>"; }).join("")+'</ul>'+
-  '</article>';
+    '</article>'+
+    /* ปุ่มนี้เป็น pointer-only (tabindex -1) เพราะคีย์บอร์ดมี < > กับลูกศรซ้าย-ขวาอยู่แล้ว
+       ไม่ต้องเพิ่ม tab stop ให้ทุกการ์ดในแบตช์ */
+    '<button class="cardslot__focus" data-goto="'+i+'" tabindex="-1" '+
+      'aria-label="ดูชุดที่ '+(i+1)+'"'+(focused ? ' hidden' : '')+'></button>'+
+  '</div>';
 }
 function renderResults(){
   var slot = $("#resultsSlot");
@@ -2070,6 +2087,8 @@ function updateCarousel(){
     if(on){ c.removeAttribute("aria-hidden"); c.removeAttribute("inert"); c.inert = false; }
     else  { c.setAttribute("aria-hidden","true"); c.setAttribute("inert",""); c.inert = true; }
     c.setAttribute("aria-label", "ชุดที่ "+(i+1)+" จาก "+state.batch.length);
+    var jump = c.parentNode && c.parentNode.querySelector(".cardslot__focus");
+    if(jump) jump.hidden = on;
   });
   var pos = document.querySelector(".navrow__pos");
   if(pos) pos.textContent = "ชุดที่ " + (state.index+1) + " จาก " + state.batch.length;
@@ -2347,7 +2366,7 @@ function renderAnalysis(){
 document.addEventListener("click", function(e){
   var t = e.target.closest("[data-jump],[data-mode],[data-occ],[data-nav],[data-gen],[data-setmode],"+
     "[data-add],[data-edit],[data-del],[data-more],[data-cat],[data-shape],[data-preset],[data-cancel],"+
-    "[data-clearsample],[data-notedone],[data-migdone],[data-swap],[data-fav],[data-lock],"+
+    "[data-clearsample],[data-notedone],[data-migdone],[data-swap],[data-fav],[data-lock],[data-goto],"+
     "[data-favmore],[data-favedit],[data-favdup],[data-favdel],.pbar__seg");
   /* คลิกที่อื่น = ปิดเมนูของชิ้นเสื้อผ้า */
   if(state.openMenuId && (!t || (!t.dataset.more && !t.dataset.edit && !t.dataset.del
@@ -2372,6 +2391,13 @@ document.addEventListener("click", function(e){
     state.openMenuId = (state.openMenuId === "fav-"+t.dataset.favmore) ? null : "fav-"+t.dataset.favmore;
     renderFavorites();
     var rf = document.querySelector('[data-favmore="'+t.dataset.favmore+'"]'); if(rf) rf.focus();
+    return;
+  }
+  /* แตะการ์ดข้างๆ = เลื่อนการ์ดนั้นมาโฟกัส (ตั๋ว 06) ปัดแล้ว click ที่ตามมาไม่นับ */
+  if(t.dataset.goto !== undefined){
+    if(swiped){ swiped = false; return; }
+    state.index = parseInt(t.dataset.goto, 10);
+    updateCarousel();
     return;
   }
   if(t.dataset.swap){ var pr = t.dataset.swap.split(":"); swapItem(parseInt(pr[0],10), pr[1]); return; }
@@ -2506,10 +2532,12 @@ document.addEventListener("touchstart", function(e){
   var c = e.target.closest && e.target.closest("#carousel");
   tx = c ? e.touches[0].clientX : null;
 }, { passive:true });
+var swiped = false;
 document.addEventListener("touchend", function(e){
   if(tx === null) return;
   var dx = e.changedTouches[0].clientX - tx; tx = null;
-  if(Math.abs(dx) > 45) goTo(dx < 0 ? 1 : -1);
+  /* ปัดแล้วเบราว์เซอร์ยังยิง click ตามมา ถ้าไม่กันไว้ จะทั้งปัดและกระโดดการ์ดในทีเดียว */
+  if(Math.abs(dx) > 45){ swiped = true; goTo(dx < 0 ? 1 : -1); }
 }, { passive:true });
 
 $("#heroGen").addEventListener("click", function(){

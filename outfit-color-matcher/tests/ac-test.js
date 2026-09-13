@@ -215,6 +215,32 @@ const waitPersisted = (page, check) => page.waitForFunction(check, null, { timeo
     R.ok(s.mode === "idea" && s.n >= 3, "B6c · FR-1 AC7: สลับไปโหมดไอเดียแล้วดูชุดได้", "ได้ " + s.n + " ชุด");
     allErrs.push(...errs); await ctx.close();
   }
+  {   /* TF: เฟส 4-B ตั๋ว 06 แตะการ์ดข้างๆ = เลื่อนมาโฟกัส */
+    const seed = [
+      H.g("f1","top","tee-crew","#2B3A67"), H.g("f2","top","polo","#FFFFFF"),
+      H.g("f3","bottom","chino","#C8B79B"), H.g("f4","bottom","jeans-straight","#17161A"),
+      H.g("f5","shoes","sneaker","#F2F0EB")
+    ];
+    const { ctx, page, errs } = await H.open(browser, H.store(seed, { mode:"wardrobe" }));
+    const before = await page.evaluate(() => ({ i: state.index, n: state.batch.length }));
+    R.ok(await page.locator(".cardslot__focus:not([hidden])").count() === before.n - 1,
+      "TF1 · ตั๋ว 06: การ์ดที่ยังไม่โฟกัสทุกใบมีปุ่มแตะเพื่อเลื่อนมาโฟกัส", "แบตช์ " + before.n + " ชุด");
+    await page.locator(".cardslot__focus:not([hidden])").first().click();
+    await page.waitForTimeout(400);
+    const after = await page.evaluate(() => state.index);
+    R.ok(after !== before.i && await page.locator(".card--focused").count() === 1,
+      "TF2 · ตั๋ว 06: แตะแล้วการ์ดนั้นเลื่อนมาโฟกัสจริง", before.i + " -> " + after);
+    R.ok(await page.locator(".card--focused .tile__swap").count() > 0,
+      "TF3 · ตั๋ว 06: พอโฟกัสแล้วสลับชิ้นในชุดนั้นได้ทันที (เป้าหมายจริงของตั๋วนี้)");
+    R.ok(await page.locator(".cardslot__focus:not([hidden])[tabindex='-1']").count() ===
+         await page.locator(".cardslot__focus:not([hidden])").count(),
+      "TF4 · a11y: ปุ่มทับการ์ดเป็น pointer-only ไม่เพิ่ม tab stop (คีย์บอร์ดใช้ < > กับลูกศรเหมือนเดิม)");
+    R.ok(await page.evaluate(() => {
+      const c = document.querySelector(".card--adjacent");
+      return c ? c.hasAttribute("inert") && c.getAttribute("aria-hidden") === "true" : false;
+    }), "TF5 · a11y: การ์ดข้างๆ ยังเป็น inert + aria-hidden เหมือนเดิม (ไม่รื้อโมเดล carousel)");
+    allErrs.push(...errs); await ctx.close();
+  }
   {   /* SW: เฟส 4-B Swap ฉลาดขึ้น (ป้ายแนะนำ + สีที่น่าจะเข้ากันตอนของหมด) */
     const seed = [
       H.g("s1","top","tee-crew","#2B3A67"), H.g("s2","top","polo","#FFFFFF"), H.g("s3","top","hoodie","#C0392B"),
