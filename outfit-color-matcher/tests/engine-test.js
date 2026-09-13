@@ -82,11 +82,12 @@ t('scoreOf() ยังอ่านค่าได้จาก WeakMap (ใช้
 console.log('\n== 6. FR-1 acceptance ==');
 t('AC1 ตู้มีบน+ล่าง -> ได้ >=1 ชุด', b.outfits.length>=1, b.outfits.length);
 t('AC6 แบตช์ 3-4 ชุด', b.outfits.length>=3&&b.outfits.length<=4, b.outfits.length);
-t('AC2 ทุกชุดมีบน+ล่างครบ', b.outfits.every(o=>o.items.top&&o.items.bottom));
+t('AC2 ทุกชุดมีอย่างน้อย 2 ชิ้นจากหมวดต่างกัน', b.outfits.every(o=>Object.keys(o.items).length>=2));
 t('AC4 ทุกชุดมีสัดส่วน + คำแนะนำ >=1', b.outfits.every(o=>o.colorBreakdown.length&&o.advice.length>=1));
 t('AC3 ทุกชิ้นมาจากตู้จริง', b.outfits.every(o=>Object.values(o.items).every(it=>wd.some(g=>g.id===it.id))));
 const ins=generateWardrobeBatch(wd.filter(g=>g.category!=='bottom'),'unspecified',{});
-t('AC7 ตู้ขาดล่าง -> insufficient ระบุหมวด', ins.insufficient&&ins.insufficient.includes('bottom'), JSON.stringify(ins.insufficient));
+t('AC7 ตู้ขาดล่างแต่มีหมวดอื่นพอ -> ยังจัดชุดได้ (ไม่ใช่ insufficient อีกแล้ว)',
+  !ins.insufficient && ins.outfits && ins.outfits.length>=1, JSON.stringify(ins.insufficient||('ได้ '+(ins.outfits||[]).length+' ชุด')));
 const idea=generateIdeaBatch('unspecified',{});
 t('AC8 โหมด idea ได้ผลแม้ตู้ว่าง', idea.outfits.length>=3, idea.outfits.length);
 t('AC8 idea ทุกชุดมีบน+ล่าง', idea.outfits.every(o=>o.items.top&&o.items.bottom));
@@ -247,23 +248,65 @@ console.log('\n== 12. FR-5 Color-first (ล็อกสีแล้วจัด�
   t('AC2 idea: ยังมีสัดส่วนสี + คำแนะนำครบทุกชุด',
     idea.outfits.every(o=>o.colorBreakdown.length>0 && o.advice.length>0));
 
-  // โหมดตู้: ต้องมีชิ้นบน/ล่างสีนั้นจริงถึงจะจัดได้ (AC1)
+  // โหมดตู้: ต้องมีชิ้นสีนั้นจริงอย่างน้อยหนึ่งชิ้น หมวดไหนก็ได้ (AC1 ฉบับขยายในเฟส 4)
   const ward=[g('1','top',LOCK),g('2','top','#FFFFFF'),g('3','bottom','#C8B79B'),g('4','shoes','#F2F0EB')];
   const wb=generateWardrobeBatch(ward,'unspecified',{},LOCK);
-  t('AC1 wardrobe: ทุกชุดมีชิ้นบน/ล่างเป็นสีที่ล็อก',
+  t('AC1 wardrobe: ทุกชุดมีชิ้นสีที่ล็อก (หมวดไหนก็ได้)',
     wb.outfits && wb.outfits.length>0 &&
-    wb.outfits.every(o=>(o.items.top&&normHex(o.items.top.color)===LOCK)||(o.items.bottom&&normHex(o.items.bottom.color)===LOCK)),
+    wb.outfits.every(o=>CATEGORY_ORDER.some(c=>o.items[c]&&normHex(o.items[c].color)===LOCK)),
     JSON.stringify(wb.insufficient||wb.noMatch||('ได้ '+(wb.outfits||[]).length+' ชุด')));
 
-  // ตู้ไม่มีชิ้นหลักสีนั้น -> No-match จริง (นี่คือ constraint แรกที่ทำให้ A4 เกิดได้ ตาม spec §7C)
+  // ตู้ไม่มีชิ้นสีนั้นเลยสักหมวด -> No-match จริง (spec §7C, เกณฑ์ใหม่เฟส 4)
   const noLock=generateWardrobeBatch(
-    [g('1','top','#FFFFFF'),g('2','bottom','#C8B79B'),g('3','accessory',LOCK)],'unspecified',{},LOCK);
-  t('A4 No-match เกิดจริงเมื่อไม่มีชิ้นบน/ล่างสีที่ล็อก', noLock.noMatch===true, JSON.stringify(Object.keys(noLock)));
+    [g('1','top','#FFFFFF'),g('2','bottom','#C8B79B'),g('3','accessory','#3F6B4F')],'unspecified',{},LOCK);
+  t('A4 No-match เกิดจริงเมื่อตู้ไม่มีชิ้นสีที่ล็อกเลย', noLock.noMatch===true, JSON.stringify(Object.keys(noLock)));
 
   // ไม่ล็อกสี = พฤติกรรมเดิมทุกอย่าง (regression)
   const plain=generateWardrobeBatch(ward,'unspecified',{});
   t('ไม่ล็อกสี: โหมดตู้ยังทำงานเหมือนเดิม', plain.outfits && plain.outfits.length>=1, JSON.stringify(Object.keys(plain)));
   t('ไม่ล็อกสี: โหมดไอเดียยังทำงานเหมือนเดิม', generateIdeaBatch('unspecified',{}).outfits.length>=BATCH_MIN);
+}
+
+console.log('\n== 13. เฟส 4-A: Flexible Outfit Generation (เลิกบังคับบน+ล่าง) ==');
+{
+  const g=(id,cat,color)=>({id,name:'ชิ้น'+id,category:cat,shapeId:null,color});
+  const nItems=o=>Object.keys(o.items).length;
+
+  // แกนหลัก: ตู้ที่ไม่มีทั้งบนและล่างเลย ก็ยังต้องจัดชุดได้
+  const odd=generateWardrobeBatch([g('1','outer','#4A5D8A'),g('2','shoes','#F2F0EB')],'unspecified',{});
+  t('ตู้ที่มีแค่เสื้อนอก+รองเท้า -> ยังได้ชุดแนะนำ',
+    odd.outfits && odd.outfits.length>=1, JSON.stringify(odd.insufficient||odd.noMatch||('ได้ '+(odd.outfits||[]).length+' ชุด')));
+  t('ชุดจากตู้แบบนั้นมีครบ 2 ชิ้นจริง', odd.outfits && odd.outfits.every(o=>nItems(o)===2));
+  t('ชุดที่ไม่มีบน/ล่างยังมีสัดส่วนสีรวม 100 + คำแนะนำ',
+    odd.outfits && odd.outfits.every(o=>o.colorBreakdown.reduce((a,b)=>a+b.pct,0)===100 && o.advice.length>=1));
+
+  // เกณฑ์ขั้นต่ำ: อย่างน้อย 2 ชิ้น จาก 2 หมวดต่างกัน
+  const one=generateWardrobeBatch([g('1','top','#FFFFFF')],'unspecified',{});
+  t('ตู้มีชิ้นเดียว -> insufficient (ไม่เสกชุดขึ้นมา)', !!one.insufficient, JSON.stringify(Object.keys(one)));
+  const sameCat=generateWardrobeBatch([g('1','top','#FFFFFF'),g('2','top','#2B3A67'),g('3','top','#C0392B')],'unspecified',{});
+  t('ตู้มีหลายชิ้นแต่หมวดเดียว -> insufficient (ชุดต้องมี 2 หมวดต่างกัน)',
+    !!sameCat.insufficient, JSON.stringify(Object.keys(sameCat)));
+  t('ตู้ว่าง -> insufficient', !!generateWardrobeBatch([],'unspecified',{}).insufficient);
+
+  // ทุกชุดยังมีได้ไม่เกิน 1 ชิ้นต่อหมวด (data model ไม่เปลี่ยน)
+  const mixed=[g('1','top','#FFFFFF'),g('2','bottom','#C8B79B'),g('3','outer','#4A5D8A'),
+               g('4','shoes','#F2F0EB'),g('5','accessory','#3F6B4F')];
+  const mb=generateWardrobeBatch(mixed,'unspecified',{});
+  t('1 ชิ้นต่อ 1 หมวดเสมอ (ไม่แตะ data model)',
+    mb.outfits.every(o=>Object.keys(o.items).every(c=>!Array.isArray(o.items[c]))));
+  t('ตู้ครบหมวด -> ยังได้แบตช์ 3-4 ชุดเหมือนเดิม', mb.outfits.length>=3&&mb.outfits.length<=4, mb.outfits.length);
+  t('ตู้ครบหมวด -> ส่วนใหญ่ยังได้บน+ล่างเป็นแกน (ไม่ใช่สุ่มทิ้งหมวดหลัก)',
+    mb.outfits.filter(o=>o.items.top&&o.items.bottom).length >= Math.ceil(mb.outfits.length/2),
+    mb.outfits.filter(o=>o.items.top&&o.items.bottom).length+'/'+mb.outfits.length);
+
+  // ล็อกสีบนหมวดที่ไม่ใช่บน/ล่าง ต้องใช้ได้แล้ว (เคยเป็น No-match)
+  const LOCK='#3F6B4F';
+  const accLock=generateWardrobeBatch(
+    [g('1','top','#FFFFFF'),g('2','bottom','#C8B79B'),g('3','accessory',LOCK)],'unspecified',{},LOCK);
+  t('ล็อกสีที่มีแค่ในแอกเซสซอรี -> ได้ชุดที่มีสีนั้น (เดิมเป็น No-match)',
+    accLock.outfits && accLock.outfits.length>=1 &&
+    accLock.outfits.every(o=>CATEGORY_ORDER.some(c=>o.items[c]&&normHex(o.items[c].color)===LOCK)),
+    JSON.stringify(accLock.noMatch?'noMatch':('ได้ '+(accLock.outfits||[]).length+' ชุด')));
 }
 
 console.log(fails? `\n### ${fails} ข้อไม่ผ่าน\n` : '\n### ผ่านทั้งหมด\n');

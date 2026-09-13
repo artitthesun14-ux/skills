@@ -32,7 +32,7 @@ const H = require("./helper.js");
             if(bd.filter(b => b.role === "primary").length !== 1) bad.push(mode+"/"+occ+": primary ไม่ใช่ 1");
             if(bd.filter(b => b.role === "accent").length > 1) bad.push(mode+"/"+occ+": accent เกิน 1");
             if(!o.advice.length) bad.push(mode+"/"+occ+": ไม่มีคำแนะนำ");
-            if(!o.items.top || !o.items.bottom) bad.push(mode+"/"+occ+": ขาดบนหรือล่าง");
+            if(Object.keys(o.items).length < 2) bad.push(mode+"/"+occ+": ชุดมีชิ้นเดียว");
             Object.keys(o.items).forEach(c => {
               const it = o.items[c];
               if(!it.shapeId || !SHAPE_BY_ID[it.shapeId]) bad.push(mode+"/"+occ+": shapeId ไม่รู้จัก "+it.shapeId);
@@ -44,7 +44,7 @@ const H = require("./helper.js");
     });
     return { bad: bad.slice(0,8), n: bad.length, looks, batches };
   });
-  R.ok(res.n === 0, "E1 · invariant ครบทุกชุด (% รวม 100, primary 1, accent <=1, บน+ล่างครบ, ทรงถูกหมวด)",
+  R.ok(res.n === 0, "E1 · invariant ครบทุกชุด (% รวม 100, primary 1, accent <=1, >=2 ชิ้น, ทรงถูกหมวด)",
     res.batches + " แบตช์ / " + res.looks + " ชุด" + (res.n ? " · ตัวอย่างที่พัง: " + res.bad.join(" ; ") : ""));
   R.ok(errs.length === 0, "E2 · ไม่มี JS error สะสมหลังยิงซ้ำ " + res.batches + " แบตช์", errs.join(" | "));
   await ctx.close();

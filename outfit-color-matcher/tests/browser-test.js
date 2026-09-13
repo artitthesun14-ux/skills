@@ -151,7 +151,7 @@ t('และมีข้อความอธิบายการสลับ �
 t('โหมดไอเดียยังใช้ได้แม้ตู้ว่าง (AC8)', (await page.locator('.card').count())>=3);
 await page.locator('[data-mode="wardrobe"]').click(); await page.waitForTimeout(250);
 const insTxt=await page.locator('#resultsSlot').textContent();
-t('เลือกโหมดตู้เองทั้งที่ของไม่พอ -> บอกว่าขาดอะไร ไม่แนะนำมั่ว', /ยังขาด/.test(insTxt), insTxt.slice(0,60));
+t('เลือกโหมดตู้เองทั้งที่ของไม่พอ -> บอกเกณฑ์จริง ไม่แนะนำมั่ว', /เพิ่มอีกอย่างน้อย 1 ชิ้น/.test(insTxt), insTxt.slice(0,60));
 t('และมีทางออกให้กลับไปโหมดไอเดีย', (await page.locator('[data-setmode="idea"]').count())>0);
 
 // ---------- 7. ไม่มี horizontal scroll ----------

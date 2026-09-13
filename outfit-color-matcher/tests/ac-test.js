@@ -205,13 +205,55 @@ const waitPersisted = (page, check) => page.waitForFunction(check, null, { timeo
   {   /* B6: ตู้ไม่พอ (AC7) */
     const { ctx, page, errs } = await H.open(browser, H.store([H.g("o1","top","polo","#2B3A67")], { mode:"wardrobe" }));
     const txt = await page.locator("#resultsSlot").textContent();
-    R.ok(/ยังขาด/.test(txt) && /กางเกง/.test(txt), "B6a · FR-1 AC7: ตู้ขาดหมวด -> บอกว่าขาดอะไร แทนการแนะนำมั่ว");
+    R.ok(/เพิ่มอีกอย่างน้อย 1 ชิ้น/.test(txt) && !/ยังขาดเสื้อ|ยังขาดกางเกง/.test(txt),
+      "B6a · FR-1 AC7 (เฟส 4-A): ตู้ไม่พอ -> บอกเกณฑ์จริง (อย่างน้อย 2 ชิ้น 2 หมวด) ไม่เอ่ยหมวดที่ถูกบังคับอีกแล้ว");
     R.ok(await page.locator('#resultsSlot [data-jump="sec-wardrobe"]').count() > 0 &&
          await page.locator('#resultsSlot [data-setmode="idea"]').count() > 0,
       "B6b · FR-1 AC7: มีทางออกทั้งเพิ่มของและสลับไปโหมดไอเดีย");
     await page.click('#resultsSlot [data-setmode="idea"]'); await page.waitForTimeout(150);
     const s = await snap(page);
     R.ok(s.mode === "idea" && s.n >= 3, "B6c · FR-1 AC7: สลับไปโหมดไอเดียแล้วดูชุดได้", "ได้ " + s.n + " ชุด");
+    allErrs.push(...errs); await ctx.close();
+  }
+  {   /* SW: เฟส 4-B Swap ฉลาดขึ้น (ป้ายแนะนำ + สีที่น่าจะเข้ากันตอนของหมด) */
+    const seed = [
+      H.g("s1","top","tee-crew","#2B3A67"), H.g("s2","top","polo","#FFFFFF"), H.g("s3","top","hoodie","#C0392B"),
+      H.g("s4","bottom","chino","#C8B79B")
+    ];
+    const { ctx, page, errs } = await H.open(browser, H.store(seed, { mode:"wardrobe" }));
+    const topSwap = '.card--focused .tile__swap:not([disabled])';
+    await page.waitForSelector(topSwap);
+    R.ok(await page.locator(".card--focused .tile__reco").count() === 0,
+      "SR1 · เฟส 4-B: ยังไม่กดสลับ = ยังไม่มีป้ายแนะนำ (ไม่ใช่ UI แยกถาวร)");
+
+    /* วนจนครบทุกตัวในหมวดบน (3 ชิ้น) ต้องเจอป้าย "แนะนำ" อย่างน้อยหนึ่งครั้ง */
+    let sawReco = false;
+    for(let i = 0; i < 3; i++){
+      await page.locator('.card--focused .tile__swap[data-swap$=":top"]').click();
+      await page.waitForTimeout(120);
+      if(await page.locator(".card--focused .tile__reco").count() > 0) sawReco = true;
+    }
+    R.ok(sawReco, "SR2 · เฟส 4-B: วนสลับจนเจอตัวอันดับ 1 แล้วมีป้าย 'แนะนำ'");
+    R.ok(/แนะนำ/.test(await page.locator('.card--focused .tile__swap[data-swap$=":top"]').getAttribute("aria-label") || "") ||
+         !sawReco,
+      "SR3 · ux §9: ป้ายแนะนำประกาศผ่าน aria-label ของปุ่มด้วย ไม่ใช่เห็นด้วยตาอย่างเดียว");
+
+    const suggTxt = await page.locator(".card--focused .suggs").textContent().catch(() => "");
+    R.ok(/ยังไม่มีในตู้/.test(suggTxt) && /#[0-9A-F]{6}/.test(suggTxt),
+      "SR4 · เฟส 4-B: วนของในตู้ครบรอบแล้ว -> เสนอสีที่น่าจะเข้ากัน พร้อมชื่อสี+hex", suggTxt.slice(0, 80));
+    R.ok(/เสื้อ/.test(suggTxt) && !/กางเกง/.test(suggTxt),
+      "SR5 · เฟส 4-B: เสนอเฉพาะหมวดที่ผู้ใช้วนจนครบจริง ไม่ขึ้นลอยๆ ให้หมวดที่ยังไม่ได้แตะ", suggTxt.slice(0, 60));
+    allErrs.push(...errs); await ctx.close();
+  }
+  {   /* B6X: เฟส 4-A ตู้ที่ไม่มีบน/ล่างเลยก็ต้องได้ชุดจริง */
+    const { ctx, page, errs } = await H.open(browser, H.store(
+      [H.g("x1","outer","jacket","#4A5D8A"), H.g("x2","shoes","sneaker","#F2F0EB")], { mode:"wardrobe" }));
+    const s = await snap(page);
+    R.ok(s.mode === "wardrobe" && s.n >= 1,
+      "B6d · เฟส 4-A: ตู้ที่มีแค่เสื้อนอก+รองเท้า ยังได้ชุดแนะนำจากตู้จริง", "โหมด " + s.mode + " ได้ " + s.n + " ชุด");
+    const cats = await page.locator(".card--focused .tile .tile__cat").allTextContents();
+    R.ok(cats.length === 2 && !cats.join("").includes("เสื้อ ") ,
+      "B6e · เฟส 4-A: การ์ดโชว์เฉพาะหมวดที่มีของจริง ไม่กันช่องว่างของหมวดที่ขาด", cats.join(" / "));
     allErrs.push(...errs); await ctx.close();
   }
   {   /* B7: ตู้ว่าง + จำโหมด (AC8): ยังไม่เคยเลือกโหมด ระบบต้องเลือกตามความพร้อมตู้ */
@@ -539,20 +581,30 @@ const waitPersisted = (page, check) => page.waitForFunction(check, null, { timeo
     await page.click('#colorLockChips [data-lock="#2B3A67"]'); await page.waitForTimeout(300);
     const locked = await page.evaluate(() => ({
       lock: state.lockedColor, n: state.batch.length,
-      all: state.batch.every(o => ["top","bottom"].some(c => o.items[c] && o.items[c].color.toUpperCase() === "#2B3A67"))
+      all: state.batch.every(o => CATEGORY_ORDER.some(c => o.items[c] && o.items[c].color.toUpperCase() === "#2B3A67"))
     }));
     R.ok(locked.lock === "#2B3A67" && locked.n > 0 && locked.all,
-      "CF3 · FR-5 AC1: ล็อกสีแล้วทุกชุดมีสีนั้นเป็นชิ้นหลัก", JSON.stringify(locked));
+      "CF3 · FR-5 AC1 (เฟส 4-A): ล็อกสีแล้วทุกชุดมีสีนั้นอยู่ หมวดไหนก็ได้", JSON.stringify(locked));
     R.ok((await page.locator("#liveFeedback").textContent()).trim().length > 0,
       "CF4 · ux §7B: ล็อกสีแล้วมีข้อความกำกับ ไม่เงียบ");
     R.ok(await page.locator("#resultsSlot .pbar").count() > 0 && await page.locator("#resultsSlot .advice li").count() > 0,
       "CF5 · FR-5 AC2: ยังโชว์สัดส่วนสี + คำแนะนำ");
 
-    /* ล็อกสีที่มีแค่ในแอกเซสซอรี -> A4 No-match จริง + ทางออกคือเอาสีที่ล็อกออก */
+    /* เฟส 4-A: ล็อกสีที่มีแค่ในแอกเซสซอรี ใช้ได้แล้ว (เดิมเป็น A4 No-match) */
     await page.click('#colorLockChips [data-lock="#C0392B"]'); await page.waitForTimeout(300);
+    const accLock = await page.evaluate(() => ({
+      n: state.batch.length,
+      all: state.batch.every(o => CATEGORY_ORDER.some(c => o.items[c] && o.items[c].color.toUpperCase() === "#C0392B"))
+    }));
+    R.ok(accLock.n > 0 && accLock.all,
+      "CF6 · เฟส 4-A: ล็อกสีที่มีแค่ในแอกเซสซอรี -> ยังจัดชุดได้ (เดิมเป็น No-match)", JSON.stringify(accLock));
+
+    /* A4 No-match เหลือเฉพาะตอนตู้ไม่มีสีนั้นเลยสักชิ้น */
+    await page.evaluate(() => { state.lockedColor = "#3F6B4F"; persist(); regenerate(true); });
+    await page.waitForTimeout(250);
     R.ok(await page.locator("#resultsSlot .empty").count() === 1 &&
          await page.locator('#resultsSlot [data-lock=""]').count() === 1,
-      "CF6 · FR-5 + §7C: ไม่มีชิ้นหลักสีนั้น -> A4 No-match พร้อมปุ่มเอาสีที่ล็อกออก");
+      "CF6b · §7C: ล็อกสีที่ตู้ไม่มีเลย -> A4 No-match พร้อมปุ่มเอาสีที่ล็อกออก");
     await page.click('#resultsSlot [data-lock=""]'); await page.waitForTimeout(300);
     R.ok(await page.evaluate(() => state.lockedColor === null && state.batch.length > 0),
       "CF7 · กดเอาสีที่ล็อกออกแล้วกลับมาแนะนำได้ตามปกติ");

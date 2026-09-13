@@ -241,11 +241,20 @@ body{padding-bottom:calc(var(--nav-h) + env(safe-area-inset-bottom))}
 .tile__name{font-size:var(--fs-sm);color:var(--ink);white-space:nowrap;text-overflow:ellipsis}
 /* บรรทัดสีต้องอ่านครบเสมอ ห้ามตัด: ยอมขึ้นบรรทัดใหม่ดีกว่าเสียข้อมูล a11y */
 .tile__color{font-size:var(--fs-xs);color:var(--ink-muted);overflow-wrap:anywhere}
+/* เฟส 4-B: ป้าย "แนะนำ" บนหมวดที่วงวนมาหยุดที่ตัวคะแนนดีที่สุด (ความหมายอยู่ที่ aria-label ของปุ่มสลับ) */
+.tile__reco{margin-inline-start:var(--sp-2)}
+/* สีที่น่าจะเข้ากันเพิ่ม: แถวใต้กลุ่มไทล์ สวอตช์เส้นประ = ยังไม่ใช่ของจริงในตู้ */
+.suggs{list-style:none;margin:var(--sp-3) 0 0;padding:0;display:flex;flex-direction:column;gap:var(--sp-2)}
+.sugg{display:flex;flex-direction:column;gap:2px;padding:var(--sp-2) var(--sp-3);
+  background:var(--surface-sunken);border-radius:var(--r-sm)}
+.sugg__head{font-size:var(--fs-xs);color:var(--ink-muted)}
+.sugg__item{display:flex;align-items:center;gap:var(--sp-2);font-size:var(--fs-xs);color:var(--ink)}
+.sugg__sw{flex:0 0 auto;width:14px;height:14px;border-radius:4px;
+  border:1px dashed var(--ink-muted);box-shadow:0 0 0 1px var(--data-ring) inset}
 .tile__chip{flex:0 0 auto;width:44px;height:44px;border-radius:var(--r-sm);
   border:1px solid var(--data-ring);align-self:center}
 /* สีล้ำ ไม่บังคับผ่านคอนทราสต์ (คือค่าจริงของเสื้อผ้า) กันกลืนด้วย --data-ring;
    ข้อความ ชื่อสี+hex ข้างกันเป็นตัวสื่อ chip นี้จึง aria-hidden ไม่สื่อด้วยสีเดี่ยว (ux §9) */
-.tile__chip--empty{background:var(--surface-sunken);border-style:dashed}
 /* เฟส 2: ปุ่มสลับทีละชิ้น + หัวใจบันทึก (ui View C) */
 .tile__swap{flex:0 0 auto;width:44px;height:44px;border-radius:var(--r-sm);
   border:1px solid var(--line);color:var(--ink-muted);font-size:16px;line-height:1;
@@ -287,7 +296,6 @@ body{padding-bottom:calc(var(--nav-h) + env(safe-area-inset-bottom))}
 .sugg li{display:flex;align-items:flex-start;gap:var(--sp-3);font-size:var(--fs-sm);color:var(--ink-muted)}
 .sugg b{color:var(--ink);font-weight:600}
 .sugg .swatch{margin-top:2px}
-.tile--empty .tile__box{border-style:dashed;display:flex;align-items:center;justify-content:center;color:var(--ink-muted);font-size:var(--fs-sm)}
 
 /* --- 4.4 สีเป็นข้อมูล (ui doc §3.4) --- */
 .swatch{
@@ -1343,68 +1351,100 @@ function outfitKey(o){
 }
 
 /* --- โหมด "จากตู้ของฉัน": จับคู่จาก garment จริง ---
-   lockedHex (FR-5 ไม่บังคับ): ชุดที่ได้ต้องมี "ชิ้นหลัก" (บนหรือล่าง) เป็นสีนั้น
-   นิยาม "องค์ประกอบหลัก" ยึดตามสเปกเดิมของโปรเจกต์: ชุดครบ = บน+ล่าง ที่เหลือเป็นของเสริม
-   ถ้าตู้ไม่มีชิ้นบน/ล่างสีนั้นเลย = No-match จริง (constraint แรกที่ทำให้สถานะ A4 เกิดได้ spec §7C) */
+   เฟส 4-A: เลิกบังคับโครงสร้าง "บน+ล่าง" ชุดที่ใช้ได้ = มีอย่างน้อย 2 ชิ้นจาก 2 หมวดต่างกัน
+   (1 ชิ้นต่อหมวดเหมือนเดิม data model ไม่เปลี่ยน) จึงสุ่มแยกทีละหมวดแทน cross-product บน x ล่าง
+   lockedHex (FR-5 ไม่บังคับ): ชุดที่ได้ต้องมีชิ้นสีนั้น "หมวดไหนก็ได้" (เดิมจำกัดแค่บน/ล่าง)
+   ถ้าตู้ไม่มีชิ้นสีนั้นเลยสักหมวด = No-match จริง (spec §7C) */
+var MIN_OUTFIT_ITEMS = 2;
+/* โอกาสที่แต่ละหมวดจะติดมาในชุด: บน/ล่างสูงเพราะเป็นแกนของลุคจริงและกินพื้นที่มากสุด
+   (CATEGORY_WEIGHT) แต่ไม่ใช่ข้อบังคับอีกแล้ว ตู้ที่ไม่มีสองหมวดนี้ก็ยังจัดชุดได้ */
+var CATEGORY_PICK_P = { top:0.95, bottom:0.95, outer:0.35, shoes:0.85, accessory:0.40 };
+
 function generateWardrobeBatch(wardrobe, occasion, avoidKeys, lockedHex){
   var g = groupByCategory(wardrobe);
-  var missing = [];
-  if(!g.top.length)    missing.push("top");
-  if(!g.bottom.length) missing.push("bottom");
-  if(missing.length)   return { insufficient:missing };
+  var present = CATEGORY_ORDER.filter(function(c){ return g[c].length; });
+  /* ต่ำกว่า 2 หมวด = ประกอบชุดไม่ได้จริง บอกตรงๆ ไม่เสกชุดขึ้นมา (spec §7C) */
+  if(present.length < MIN_OUTFIT_ITEMS)
+    return { insufficient:{ total:wardrobe.length, categories:present.length } };
 
-  var pairs = [];
-  g.top.forEach(function(t){ g.bottom.forEach(function(b){ pairs.push([t,b]); }); });
-  if(lockedHex){
-    var lock = normHex(lockedHex);
-    pairs = pairs.filter(function(p){
-      return normHex(p[0].color) === lock || normHex(p[1].color) === lock;
-    });
-    if(!pairs.length) return { noMatch:true, lockedHex:lock };
+  var lock = lockedHex ? normHex(lockedHex) : null;
+  var lockCats = lock ? present.filter(function(c){
+    return g[c].some(function(it){ return normHex(it.color) === lock; });
+  }) : [];
+  if(lock && !lockCats.length) return { noMatch:true, lockedHex:lock };
+
+  /* เติมหมวดจนครบขั้นต่ำ โดยเลือกหมวดที่กินพื้นที่มากก่อน ให้ยังอ่านเป็นชุดจริง */
+  function topUp(chosen){
+    var rest = present.filter(function(c){ return chosen.indexOf(c) === -1; });
+    rest.sort(function(a,b){ return (CATEGORY_WEIGHT[b]||0) - (CATEGORY_WEIGHT[a]||0); });
+    while(chosen.length < MIN_OUTFIT_ITEMS && rest.length) chosen.push(rest.shift());
+    return chosen;
   }
-  shuffle(pairs);
-  if(pairs.length > COMBO_CAP) pairs = pairs.slice(0, COMBO_CAP);   /* spec §7C กันหน้าค้าง */
 
-  var perPair = pairs.length > 60 ? 1 : pairs.length > 20 ? 2 : 3;
+  var tries = Math.min(COMBO_CAP, Math.max(48, wardrobe.length * 8));   /* spec §7C กันหน้าค้าง */
   var seen = {}, candidates = [];
-  pairs.forEach(function(p){
-    for(var v=0; v<perPair; v++){
-      var items = { top:p[0], bottom:p[1] };
-      if(g.shoes.length     && Math.random() < 0.85) items.shoes     = pick(g.shoes);
-      if(g.outer.length     && Math.random() < 0.35) items.outer     = pick(g.outer);
-      if(g.accessory.length && Math.random() < 0.40) items.accessory = pick(g.accessory);
-      var o = buildOutfit(items, "wardrobe", occasion);
-      if(!o) continue;
-      var k = outfitKey(o);
-      if(seen[k]) continue;
-      seen[k] = 1;
-      candidates.push(o);
+  for(var i = 0; i < tries; i++){
+    var chosen = topUp(present.filter(function(c){ return Math.random() < CATEGORY_PICK_P[c]; }));
+    if(chosen.length < MIN_OUTFIT_ITEMS) continue;
+    var items = {};
+    chosen.forEach(function(c){ items[c] = pick(g[c]); });
+    /* FR-5: ถ้าสุ่มมาแล้วยังไม่มีสีที่ล็อก บังคับหนึ่งหมวดที่มีสีนั้นให้เป็นชิ้นสีล็อก */
+    if(lock && !chosen.some(function(c){ return normHex(items[c].color) === lock; })){
+      var lc = pick(lockCats);
+      items[lc] = pick(g[lc].filter(function(it){ return normHex(it.color) === lock; }));
     }
-  });
-  if(!candidates.length) return { noMatch:true };
+    var o = buildOutfit(items, "wardrobe", occasion);
+    if(!o) continue;
+    var k = outfitKey(o);
+    if(seen[k]) continue;
+    seen[k] = 1;
+    candidates.push(o);
+  }
+  if(!candidates.length) return { noMatch:true, lockedHex:lock || undefined };
 
   candidates.sort(function(a,b){ return scoreOf(b) - scoreOf(a); });
   return { outfits: selectDiverse(candidates, avoidKeys) };
 }
 
-/* คัดชุดที่จะโชว์: คะแนนนำ แต่ไม่ให้ซ้ำคู่บน-ล่าง และพยายามเลี่ยงแบตช์เดิม */
+/* แกนของชุด = สองหมวดที่กินพื้นที่มากสุดเท่าที่ชุดนั้นมี (เดิมคือคู่บน-ล่างเสมอ)
+   ใช้กันไม่ให้แบตช์เดียวมีชุดที่แกนซ้ำกันแล้วต่างแค่ของเสริม */
+function coreKey(o){
+  return CATEGORY_ORDER.filter(function(c){ return o.items[c]; })
+    .sort(function(a,b){ return (CATEGORY_WEIGHT[b]||0) - (CATEGORY_WEIGHT[a]||0); })
+    .slice(0, MIN_OUTFIT_ITEMS)
+    .map(function(c){ return c + ":" + o.items[c].id; }).join("|");
+}
+/* คัดชุดที่จะโชว์: คะแนนนำ แต่ไม่ให้แกนซ้ำ และพยายามเลี่ยงแบตช์เดิม
+   ชุดที่ใช้หมวดหลักของตู้ครบมาก่อนชุดที่ขาดหมวดหลัก: ตู้ที่มีทั้งเสื้อและกางเกงจึงยังได้
+   ข้อเสนอที่ใส่ทั้งคู่เป็นหลัก แม้ตอนนี้ชุดที่ขาดหมวดจะถูกกฎอนุญาตแล้วก็ตาม (เฟส 4-A) */
 function selectDiverse(candidates, avoidKeys){
   var avoid = avoidKeys || {};
+  /* หมวดหลักของแบตช์นี้ = สองหมวดที่กินพื้นที่มากสุดเท่าที่ candidate ทั้งกองมี */
+  var poolCats = {};
+  candidates.forEach(function(o){ CATEGORY_ORDER.forEach(function(c){ if(o.items[c]) poolCats[c] = 1; }); });
+  var coreCats = Object.keys(poolCats)
+    .sort(function(a,b){ return (CATEGORY_WEIGHT[b]||0) - (CATEGORY_WEIGHT[a]||0); })
+    .slice(0, MIN_OUTFIT_ITEMS);
+  function hasCore(o){ return coreCats.every(function(c){ return !!o.items[c]; }); }
+
   var out = [], usedPair = {};
-  function tryFill(allowRepeatPair, allowAvoided){
+  function tryFill(requireCore, allowRepeatPair, allowAvoided){
     candidates.forEach(function(o){
       if(out.length >= BATCH_MAX) return;
+      if(requireCore && !hasCore(o)) return;
       var k = outfitKey(o);
       if(!allowAvoided && avoid[k]) return;
-      var pk = (o.items.top ? o.items.top.id : "-") + "|" + (o.items.bottom ? o.items.bottom.id : "-");
+      var pk = coreKey(o);
       if(!allowRepeatPair && usedPair[pk]) return;
       if(out.indexOf(o) !== -1) return;
       usedPair[pk] = 1; out.push(o);
     });
   }
-  tryFill(false, false);
-  if(out.length < BATCH_MIN) tryFill(true, false);
-  if(out.length < BATCH_MIN) tryFill(true, true);
+  tryFill(true, false, false);
+  if(out.length < BATCH_MIN) tryFill(true, true, false);    /* แกนเดิมแต่ของเสริมต่างกัน ดีกว่าชุดที่ขาดหมวดหลัก */
+  if(out.length < BATCH_MIN) tryFill(false, false, false);
+  if(out.length < BATCH_MIN) tryFill(false, true, false);
+  if(out.length < BATCH_MIN) tryFill(false, true, true);
   return out.slice(0, Math.max(BATCH_MIN, Math.min(BATCH_MAX, out.length)));
 }
 
@@ -1612,9 +1652,10 @@ function init(){
   observeSections();
   if(migrated) persist();   /* เขียนผลการย้ายข้อมูลกลับลงเครื่องครั้งเดียว */
 }
+/* พร้อมจัดชุดจากตู้จริง = มีของอย่างน้อย 2 หมวดต่างกัน (เฟส 4-A เลิกบังคับบน+ล่าง) */
 function wardrobeReady(){
   var g = groupByCategory(state.wardrobe);
-  return g.top.length > 0 && g.bottom.length > 0;
+  return CATEGORY_ORDER.filter(function(c){ return g[c].length; }).length >= MIN_OUTFIT_ITEMS;
 }
 function persist(opts){
   var res = saveStore({
@@ -1638,7 +1679,7 @@ function renderMode(){
   var slot = $("#autoNoticeSlot");
   /* no silent state change (ux §7B): ระบบสลับโหมดให้เอง = ต้องมีข้อความบอก */
   slot.innerHTML = state.autoSwitchedTo
-    ? '<p class="notice"><span aria-hidden="true">ⓘ</span><span>ตู้ยังมีของไม่พอจัดชุด เลยแสดง <b>สีที่เราแนะนำ</b> ให้ก่อน เพิ่มเสื้อกับกางเกงอย่างน้อยอย่างละชิ้นแล้วจะสลับไปโหมด <b>จากตู้ของฉัน</b> ได้</span></p>'
+    ? '<p class="notice"><span aria-hidden="true">ⓘ</span><span>ตู้ยังมีของไม่พอจัดชุด เลยแสดง <b>สีที่เราแนะนำ</b> ให้ก่อน เพิ่มของให้ครบ 2 หมวดต่างกันแล้วจะสลับไปโหมด <b>จากตู้ของฉัน</b> ได้</span></p>'
     : "";
 }
 /* FR-5: ตัวเลือกสีที่อยากใส่ = สีจริงในตู้ก่อน (โหมดตู้ต้องมีของจริงถึงจัดได้) แล้วต่อด้วยพรีเซ็ต
@@ -1696,29 +1737,71 @@ function say(sel, msg){
 }
 
 /* ---------- การ์ดชุด ---------- */
+/* เฟส 4-B: สีที่น่าจะเข้ากับ "ชิ้นอื่นในชุดนี้" ไม่ใช่สีเด่นของทั้งตู้แบบ analyzeWardrobe (FR-4)
+   ใช้หลักคิด harmony เดียวกัน แต่ input แคบกว่าให้ตรงกับสิ่งที่ผู้ใช้กำลังตัดสินใจอยู่ตรงหน้า */
+function outfitColorSuggestions(look, cat){
+  var others = CATEGORY_ORDER.filter(function(c){ return c !== cat && look.items[c]; })
+    .map(function(c){ return normHex(look.items[c].color); });
+  if(!others.length) return [];
+  var colored = others.filter(function(h){ return !classifyColor(h).isNeutral; });
+  var base = colored[0] || others[0];
+  var baseH = hexToHsl(base).h, baseName = colorNameTH(base);
+  var haveHues = colored.map(function(h){ return hexToHsl(h).h; });
+  var out = [];
+  [ { h:baseH + 180, why:"ตรงข้ามกับ" },
+    { h:baseH + 30,  why:"ใกล้เคียงกับ" },
+    { h:baseH + 120, why:"สามเหลี่ยมสีกับ" } ].forEach(function(tg){
+    if(out.length >= 2) return;
+    var h = ((tg.h % 360) + 360) % 360;
+    if(haveHues.some(function(u){ return hueDist(u, h) < 25; })) return;
+    var hex = hslToHex(h, 38, 45);          /* โทนใส่ได้จริง ไม่สดจนกลายเป็นสีเน้น (เท่ากับ FR-4) */
+    out.push({ hex:hex, name:colorNameTH(hex), why:"เป็นสี" + tg.why + baseName });
+  });
+  return out;
+}
+/* แถวสีแนะนำ: อยู่ใต้กลุ่มไทล์ ไม่ยัดในไทล์ (ลองแล้วไทล์สูงผิดส่วนและการ์ดรก)
+   โผล่เฉพาะหมวดที่ผู้ใช้กดวนจนครบของในตู้แล้วเท่านั้น = ตอบตอนผู้ใช้ถามจริง ไม่ใช่ขึ้นลอยๆ */
+function suggsHTML(look){
+  if(!look._swap || !look._swapN) return "";
+  var rows = CATEGORY_ORDER.filter(function(c){
+    return look.items[c] && look._swap[c] && look._swapN[c] >= look._swap[c].length;
+  }).map(function(c){
+    var list = outfitColorSuggestions(look, c);
+    if(!list.length) return "";
+    /* สวอตช์เส้นประ = ยังไม่ใช่ของจริงในตู้ (ยืมภาษาเดียวกับทรงแบบ outline)
+       ชื่อสี+hex เป็นข้อความเสมอ ไม่สื่อด้วยสีอย่างเดียว (ux §9) */
+    return '<li class="sugg"><span class="sugg__head">วน'+esc(CATEGORY_TH[c]||c)+
+      'ในตู้ครบแล้ว ลองมองหาสีนี้เพิ่ม (ยังไม่มีในตู้)</span>'+
+      list.map(function(s){
+        return '<span class="sugg__item"><span class="sugg__sw" style="background:'+s.hex+'"></span>'+
+          '<span>'+esc(s.name)+' <span class="tnum">'+esc(s.hex)+'</span> · '+esc(s.why)+'</span></span>';
+      }).join("")+'</li>';
+  }).filter(Boolean).join("");
+  return rows ? '<ul class="suggs">'+rows+'</ul>' : "";
+}
 function tileHTML(item, cat, opts){
-  if(!item){
-    return '<li class="tile tile--empty"><span class="tile__box">ไม่มี</span>'+
-      '<span class="tile__label"><span class="tile__cat">'+esc(CATEGORY_TH[cat])+'</span>'+
-      '<span class="tile__color">ไม่ได้ใส่ในชุดนี้</span></span>'+
-      '<span class="tile__chip tile__chip--empty" aria-hidden="true"></span></li>';
-  }
   var hex = normHex(item.color), name = colorNameTH(hex);
   /* โหมดไอเดียไม่มีชื่อชิ้นจริง จึงแสดง "ชื่อทรง" แทน
      ต้องมีข้อความเสมอ ไม่งั้นสื่อด้วยรูปทรง/สีอย่างเดียว (ux §9) */
   var label = item.isIdea ? shapeNameOf(item.shapeId, cat) : item.name;
   /* ปุ่มสลับทีละชิ้น (FR-2) เฉพาะการ์ดโฟกัส + โหมดจากตู้ของฉัน
      หมวดที่มีชิ้นเดียวในตู้ = ไม่มีตัวถัดไปให้สลับ จึง disabled + hint (spec §7C) */
-  var swapBtn = "";
+  var swapBtn = "", reco = "";
   if(opts && opts.swap){
     var many = (groupByCategory(state.wardrobe)[cat] || []).length >= 2;
+    var look = opts.look;
+    /* เฟส 4-B: ป้าย "แนะนำ" โผล่เฉพาะตอนวงวนมาหยุดที่ตัวอันดับ 1 ของหมวดนั้น ไม่ใช่ UI แยกถาวร
+       ring ถูกสร้างตอนกดสลับครั้งแรก จึงไม่ต้องคิดคะแนนทุกชิ้นทุกหมวดใหม่ทุกครั้งที่เรนเดอร์ */
+    var ring = look && look._swap && look._swap[cat];
+    var isTop = !!(ring && ring.length && ring[0].id === item.id);
+    if(isTop) reco = '<span class="badge tile__reco" aria-hidden="true">แนะนำ</span>';
     swapBtn = '<button class="tile__swap" data-swap="'+opts.i+':'+cat+'" '+
-      'aria-label="เปลี่ยน'+esc(CATEGORY_TH[cat]||cat)+'"'+
+      'aria-label="เปลี่ยน'+esc(CATEGORY_TH[cat]||cat)+(isTop ? " (ตอนนี้คือตัวที่แนะนำ เข้ากับชุดนี้ดีที่สุด)" : "")+'"'+
       (many ? '' : ' disabled title="มีชิ้นเดียวในหมวดนี้"')+'>🔄</button>';
   }
   return '<li class="tile"><span class="tile__box">'+shapeSVG(item.shapeId, hex, cat)+'</span>'+
     '<span class="tile__label">'+
-      '<span class="tile__cat">'+esc(CATEGORY_TH[cat])+'</span>'+
+      '<span class="tile__cat">'+esc(CATEGORY_TH[cat])+reco+'</span>'+
       '<span class="tile__name" title="'+esc(label)+'">'+esc(label)+'</span>'+
       '<span class="tile__color">'+esc(name)+' · <span class="tnum">'+esc(hex)+'</span></span>'+
     '</span>'+
@@ -1756,9 +1839,10 @@ function cardHTML(o, i, focused){
   var isSample = CATEGORY_ORDER.some(function(c){ return o.items[c] && o.items[c].isExample; });
   var cardId = "c"+i;
   var canSwap = focused && o.sourceMode === "wardrobe";
+  /* เฟส 4-A: ไม่มีหมวดที่ถูกบังคับแล้ว หมวดที่ชุดนี้ไม่มีของก็ไม่ต้องกันช่องว่างไว้ */
   var tiles = CATEGORY_ORDER
-    .filter(function(c){ return o.items[c] || c === "top" || c === "bottom"; })
-    .map(function(c){ return tileHTML(o.items[c], c, { swap:canSwap, i:i }); }).join("");
+    .filter(function(c){ return o.items[c]; })
+    .map(function(c){ return tileHTML(o.items[c], c, { swap:canSwap, i:i, look:o }); }).join("");
   var faved = hasFav(favKey(o));
   return '<article class="card '+(focused ? "card--focused" : "card--adjacent")+'" '+
       'role="group" aria-roledescription="ชุดแนะนำ" aria-label="ชุดที่ '+(i+1)+' จาก '+state.batch.length+'" '+
@@ -1771,6 +1855,7 @@ function cardHTML(o, i, focused){
         'aria-label="'+(faved ? "เอาชุดนี้ออกจากที่บันทึก" : "บันทึกชุดนี้")+'">'+(faved ? "♥" : "♡")+'</button>'+
     '</div>'+
     '<ul class="tiles">'+tiles+'</ul>'+
+    (canSwap ? suggsHTML(o) : "")+
     pbarHTML(o.colorBreakdown, cardId)+
     '<ul class="advice">'+o.advice.map(function(a){ return "<li>"+a+"</li>"; }).join("")+'</ul>'+
   '</article>';
@@ -1779,22 +1864,28 @@ function renderResults(){
   var slot = $("#resultsSlot");
 
   if(state.result && state.result.insufficient){          /* A3 */
-    var miss = state.result.insufficient.map(function(c){ return CATEGORY_TH[c]; }).join(" และ ");
-    slot.innerHTML = '<div class="empty"><h3 class="empty__title">ยังขาด'+esc(miss)+'</h3>'+
-      '<p class="empty__body">โหมดนี้จัดชุดจากเสื้อผ้าจริงในตู้ ต้องมีอย่างน้อยเสื้อหนึ่งชิ้นและกางเกงหรือกระโปรงหนึ่งชิ้น</p>'+
+    /* เฟส 4-A: ไม่มีหมวดที่ถูกบังคับอีกแล้ว เกณฑ์เหลือ "ต้องมีของ 2 หมวดต่างกัน"
+       ข้อความจึงบอกสถานการณ์จริงแทนการเอ่ยชื่อหมวดที่ขาด */
+    var ins = state.result.insufficient;
+    var body = ins.total < MIN_OUTFIT_ITEMS
+      ? 'โหมดนี้จัดชุดจากเสื้อผ้าจริงในตู้ ต้องมีอย่างน้อย 2 ชิ้นถึงจะจับคู่สีให้ได้'
+      : 'ตอนนี้ของในตู้อยู่หมวดเดียวกันทั้งหมด ชุดหนึ่งใส่ได้หมวดละชิ้น เลยต้องมีของอีกหมวดอย่างน้อยหนึ่งชิ้น';
+    slot.innerHTML = '<div class="empty"><h3 class="empty__title">เพิ่มอีกอย่างน้อย 1 ชิ้นเพื่อเริ่มจับคู่</h3>'+
+      '<p class="empty__body">'+body+'</p>'+
       '<div class="empty__actions">'+
-        '<button class="btn btn--primary" data-jump="sec-wardrobe">เพิ่ม'+esc(miss)+'</button>'+
+        '<button class="btn btn--primary" data-jump="sec-wardrobe">เพิ่มเสื้อผ้า</button>'+
         '<button class="btn btn--ghost" data-setmode="idea">ดูไอเดียสีแทน</button>'+
       '</div></div>';
     return;
   }
   if(state.result && state.result.noMatch){               /* A4 */
-    /* FR-5 ทำให้สถานะนี้เกิดจริงได้ครั้งแรก: ล็อกสีที่ไม่มีชิ้นบน/ล่างรองรับ
-       "ผ่อนเงื่อนไข" ที่สเปกพูดถึงจึงมีความหมายจริงตรงนี้ = เอาสีที่ล็อกออก */
+    /* FR-5 ทำให้สถานะนี้เกิดจริงได้ครั้งแรก: ล็อกสีที่ตู้ไม่มีเลย
+       "ผ่อนเงื่อนไข" ที่สเปกพูดถึงจึงมีความหมายจริงตรงนี้ = เอาสีที่ล็อกออก
+       เฟส 4-A: สีที่ล็อกอยู่หมวดไหนก็ใช้ได้แล้ว สถานะนี้จึงเหลือเฉพาะตอนตู้ไม่มีสีนั้นเลยสักชิ้น */
     var lockHex = state.result.lockedHex;
     var lockTxt = lockHex
       ? 'ตอนนี้ล็อกสี <b>'+esc(colorNameTH(lockHex))+'</b> (<span class="tnum">'+esc(lockHex)+'</span>) ไว้ '+
-        'แต่ในตู้ยังไม่มีเสื้อหรือกางเกง/กระโปรงสีนี้ให้ใช้เป็นชิ้นหลัก'
+        'แต่ในตู้ยังไม่มีเสื้อผ้าสีนี้เลยสักชิ้น'
       : 'ลองเพิ่มเสื้อผ้าอีกสักชิ้น หรือดูไอเดียสีเพื่อหาแนวทางก่อน';
     slot.innerHTML = '<div class="empty"><h3 class="empty__title">ยังจับคู่ไม่ได้</h3>'+
       '<p class="empty__body">'+lockTxt+'</p>'+
@@ -2073,6 +2164,9 @@ function swapItem(cardIdx, cat){
   var curId = o.items[cat] ? o.items[cat].id : null;
   var idx = ring.findIndex(function(g){ return g.id === curId; });
   o.items[cat] = ring[(idx + 1 + ring.length) % ring.length];   /* กดซ้ำวนตัวถัดไป */
+  /* นับรอบไว้ดูว่าวนครบของในตู้หรือยัง (ครบแล้วค่อยเสนอสีที่น่าจะเข้ากันเพิ่ม เฟส 4-B) */
+  o._swapN = o._swapN || {};
+  o._swapN[cat] = (o._swapN[cat] || 0) + 1;
   /* รีบิลด์ฟิลด์อนุพันธ์: สัดส่วน/rule/คำแนะนำ อัปเดตตามชุดใหม่ (AC3) คง items + _swap */
   var f = buildOutfit(o.items, o.sourceMode, state.occasion);
   o.ruleUsed = f.ruleUsed; o.colorBreakdown = f.colorBreakdown; o.advice = f.advice;
