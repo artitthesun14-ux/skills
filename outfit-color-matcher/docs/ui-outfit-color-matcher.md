@@ -369,4 +369,155 @@ L = relative luminance ของ --garment-fill
 **เลื่อนไปเฟสหลัง:** FavoriteButton/SwapControl [P2] · ColorShareBar/DiversityBar [P3]
 
 ---
+
+## 9. เฟส 4: System Overhaul [P4-A..D, ยังไม่ implement]
+
+> ต่อยอดจาก `docs/ux-outfit-color-matcher.md` §1-11 (แท็ก [P4-A..D]) และ `.scratch/outfit-color-matcher/spec.md`
+> §1-8 ข้างบนคือระบบภาพที่ **shipped จริงตอนนี้** (เฟส 1-3) ส่วนนี้คือของใหม่ที่ **ยังไม่ implement**
+
+### 9.0 ภาพรวม: อะไรถูกแทนที่ อะไรยังอยู่
+
+**ถูกแทนที่ (superseded):**
+- §7A สเปกหลัก + §0/§1.1/§3.3 ของเอกสารนี้ (สไตล์ Rand แบน+คอนทราสต์จัด) → **Collage Art Style**
+- โทเคนสี dark mode ทั้งชุดใน §1.1 (คอลัมน์ Dark) → ลบทิ้ง เหลือโหมดเดียว + พื้นหลังไดนามิก
+- Legend ของ `ProportionBar` (§3.4) ที่โชว์คำว่า role (สีหลัก/สีรอง/สีกลาง/สีเน้น) → เหลือแค่ชื่อสี+hex+%
+
+**ยังอยู่ ไม่แตะ (เพราะเป็นกฎ engine/a11y ที่ spec.md ยืนยันว่าไม่เปลี่ยน):**
+- กายวิภาค SVG 2 ชั้น, กฎสีเส้นจาก luminance, `shapeId` permanence, registry (§3.7 ทั้งหมด)
+- กฎ "ไม่สื่อด้วยสีอย่างเดียว" และ `--data-ring` เป็นแนวคิดตั้งต้น (ขยายบทบาทเพิ่ม ดู 9.3)
+- Color Role ภายใน engine (แค่เลิกโชว์เป็นคำในหน้า ไม่ใช่เลิกใช้จริง)
+
+### 9.1 Design tokens ใหม่ [P4-C]
+
+**สีพื้นฐาน (single-mode, ไม่มีคอลัมน์ dark อีกต่อไป):**
+
+| Token | ค่า | เปลี่ยนจากเดิมยังไง |
+|---|---|---|
+| `--bg` | `#FBFAF7` | เดิมมี dark variant `#141316` → ลบทิ้ง ใช้ light เดียว |
+| `--surface` | `#FFFFFF` | เหมือนเดิม (light) |
+| `--ink` / `--ink-muted` / `--line` | เหมือนเดิม (light) | เหมือนเดิม (light) |
+| `--accent` / `--accent-ink` / `--accent-hover` | เหมือนเดิม (light) | เหมือนเดิม (light) |
+| `--data-ring`, `--data-gap`, `--garment-fill`, `--garment-line`, `--focus`, `--danger` | เหมือนเดิม (light) | เหมือนเดิม, ไม่มี dark variant แล้ว |
+
+**โทเคนใหม่สำหรับธีมไดนามิก:**
+
+| Token | ค่า | ใช้ทำอะไร |
+|---|---|---|
+| `--theme-tint-h` | คำนวณสด จาก hue ของ Primary role ของการ์ดโฟกัส | hue ของพื้นหลังตอนนี้ |
+| `--theme-tint-s` | **6%** (ค่าคงที่ ไม่ขยับตาม hue) | ความอิ่มสีของพื้นหลัง คงที่ต่ำมากเพื่อไม่แย่งสายตาจากสีเสื้อผ้า |
+| `--theme-tint-l` | **95%** (ค่าคงที่) | ความสว่างพื้นหลัง คงที่สูงมากเพื่อคุมคอนทราสต์กับ `--ink` ให้นิ่งไม่ว่า hue จะเป็นอะไร |
+| `--bg` (เมื่อไม่ได้ล็อกธีม) | `hsl(var(--theme-tint-h) var(--theme-tint-s) var(--theme-tint-l))` | แทนที่ `--bg` คงที่เดิม เฉพาะตอนมีชุดที่โฟกัสอยู่แล้ว (ก่อนนั้นใช้ `#FBFAF7` เดิมเป๊ะ) |
+| `--theme-lock-icon` | ใช้ `--ink` เป็นเส้น, พื้นหลังปุ่มโปร่ง | ปุ่มล็อกธีม (2 สถานะ: กุญแจเปิด/ปิด) |
+
+**โทเคนใหม่สำหรับ Collage Art Style:**
+
+| Token | ค่า | ใช้ทำอะไร |
+|---|---|---|
+| `--collage-overlap-max` | `20%` ของความกว้าง tile | เพดานพื้นที่ที่ทรงหนึ่งบังทรงถัดไปได้ กันไม่ให้บังจนดูรก/สับสนว่าทรงไหนเป็นของหมวดไหน |
+| `--collage-rotate-1..5` | `-6deg, 4deg, -3deg, 5deg, -4deg` (ไล่ตามลำดับ บน→ล่าง→นอก→รองเท้า→แอกเซส) | มุมเอียงคงที่ต่อ "ตำแหน่งในสแตก" ไม่ใช่สุ่ม เพื่อให้ผลลัพธ์คาดเดาได้/ทดสอบซ้ำได้ (หลักการเดียวกับ threshold สีเส้นใน §3.7 ที่ยึด "ค่าเดียวไม่มีการสุ่ม") |
+| `--cutout-shadow` | `2px 3px 0 rgba(20,19,22,.18)` (เงาทึบ ไม่เบลอ) | ให้ทรงดูเหมือนถูก "ตัดแปะวาง" ไม่ใช่ไอคอนแบน |
+| `--cutout-edge` | ขอบ 1.5px สี `--surface` รอบทุกทรง (มาก่อน `--data-ring`) | เส้นขอบกระดาษที่ตัดสองทรงที่ซ้อนทับออกจากกัน แม้สีจะใกล้เคียงกันมาก (ขยายบทบาทเดิมของ `--data-ring` ที่กันสีจมพื้น ให้กันสีจมกันเองด้วย) |
+
+**เหตุผลของค่า S6/L95 (แทนที่ "ยังไม่ fix" ใน spec.md Decision #3):** ที่ S ต่ำและ L สูงขนาดนี้ ความสว่างสัมพัทธ์ (relative luminance) ของพื้นหลังแทบไม่ขยับเลยไม่ว่า hue จะเป็นอะไร (ต่างกันเฉลี่ย < 0.01 ตลอดวงล้อสี) จึงคอนทราสต์ `--ink` กับพื้นหลังยังอยู่แถว 16-17:1 เหมือน `--bg` เดิมทุกกรณี (เทียบได้กับตาราง §6 ที่วัดไว้แล้ว) นี่คือที่มาของกฎ "ไม่ควรลดคอนทราสต์ไม่ว่า hue ไหน" ที่ spec.md วางไว้เป็นข้อบังคับ
+
+### 9.2 Layout hierarchy ที่เปลี่ยน [P4-C/P4-D]
+
+```
+┌ Header  wordmark + eyebrow + PrimaryButton "วันนี้แต่งอะไรดี?" + ThemeLockButton (ใหม่, ขวาสุด)
+├ StickyNav (เหมือนเดิม)
+├ SECTION A · แผงแนะนำ
+│   ModeToggle → OccasionChips → **ColorOfTheDayChips + ปุ่ม "ดูสีเพิ่มเติม"** (ใหม่)
+│   Carousel ── OutfitCard(focused, **collage variant**) + peek
+│   NavRow
+├ SECTION B · ตู้เสื้อผ้า (GarmentChip ใช้ collage variant เดียวกัน)
+├ SECTION C · บันทึกไว้ (ไม่เปลี่ยน)
+└ SECTION D · วิเคราะห์ตู้ (ไม่เปลี่ยน)
+
+[Overlay] ColorToneModal ── เปิดจาก ColorOfTheDayChips หรือ ColorPicker ในฟอร์ม
+```
+
+**ตำแหน่ง ThemeLockButton:** ปลายขวาของ Header เสมอ ห่างจาก ColorOfTheDayChips อย่างน้อย `--sp-6` และใช้ไอคอนกุญแจ (ไม่ใช่หัวใจ/วงกลมเหมือนสวอตช์ล็อกสี) ตามกฎแยกตำแหน่ง/ไอคอนใน UX doc §7
+
+### 9.3 Component inventory: ใหม่/เปลี่ยน
+
+> ระบุสถานะครบเหมือนเดิม (default/hover/active/focus-visible/disabled/loading/error เท่าที่มีความหมาย)
+
+**OutfitCard (collage variant)** [แทนที่ §3.3 บางส่วน]
+- CategoryTile stack เปลี่ยนจากเรียงตั้งเป็น**ซ้อนทับแบบตัดแปะ**: แต่ละ tile หมุน `--collage-rotate-N` ตามตำแหน่ง, ขยับ offset แนวตั้งให้บังกันไม่เกิน `--collage-overlap-max`, ใส่ `--cutout-shadow` + `--cutout-edge`
+- **ป้าย (ชื่อหมวด/ทรง/สี/hex) ย้ายออกจากตัวทรงทั้งหมด** ไปอยู่ใน `CollageLegend` แถบเดียวใต้กลุ่มทรง (reuse โครงเดียวกับ `ProportionBar` legend ที่มีอยู่แล้ว) แก้ปัญหา "ป้ายอ่านไม่ออกเพราะถูกทรงอื่นทับ" ที่ UX doc ตั้งไว้เป็นข้อจำกัด โดยไม่ต้องคิดกลไกใหม่ (ใช้ pattern legend เดิม)
+- **CollapsibleCategorySlot:** หมวดที่ไม่มีของไม่สร้าง tile และไม่มีตำแหน่งในสแตกเลย ระบบคำนวณ `--collage-rotate-N`/offset ใหม่ตามจำนวนทรงที่มีจริง (เช่นมี 2 ทรง ก็ใช้แค่ 2 ค่าแรกของชุดมุม ไม่เว้นช่องของหมวดที่หายไป)
+- states เดิมคงอยู่ (`focused`/`adjacent`/`idea`/`wardrobe`) + เพิ่ม **`collage-2` .. `collage-5`** (จำนวนทรงในสแตก มีผลกับ offset ที่คำนวณ)
+
+**CategoryTile (collage variant)**
+- ทรงยังคง `GarmentShape` เดิมทุกประการ (ไม่แตะ §3.7) เปลี่ยนแค่การจัดวาง/เงา/ขอบตามข้างบน
+- **ไม่มีป้ายใต้ tile อีกต่อไป** (ย้ายไป `CollageLegend`) → tile เหลือแค่ทรง+เงา+ขอบ ลด visual noise ตอนซ้อนทับ
+
+**CollageLegend** (ใหม่) แถบใต้กลุ่มทรง
+- โครงเดียวกับ `ProportionBar` legend: ต่อชิ้น = `ColorSwatch(sm)` + ชื่อหมวด + ชื่อทรง + ชื่อสี + hex, เรียงตามลำดับที่ปรากฏในสแตก (บน→ล่าง→นอก→รองเท้า→แอกเซส เท่าที่มี)
+- **ไม่มีคำว่า role อีกแล้ว** (ตัด "สีหลัก/สีรอง/สีกลาง/สีเน้น" ออกจากทุกที่ที่เคยโชว์ ทั้งตรงนี้และใน `ProportionBar`)
+
+**ThemeLockButton** (ใหม่, Header)
+- ทรง: reuse `IconSquareButton` (44×44) ไอคอนกุญแจ
+- states: `unlocked` (กุญแจเปิด, `--ink`) · `locked` (กุญแจปิด + พื้น `--surface-sunken` ค้าง, ไม่ใช้สีอย่างเดียวบอกสถานะ) · hover/focus เหมือน IconSquareButton เดิม
+- a11y: `aria-pressed` ตามสถานะ + `aria-label` เปลี่ยนตามสถานะ ("ล็อกธีมพื้นหลัง" / "ปลดล็อกธีมพื้นหลัง")
+
+**RecommendedBadge** (ใหม่, บน SwapControl)
+- ทรง: pill เล็ก `--fs-xs` reuse โครง `SampleBadge` แต่ใช้ไอคอนถูก/ดาวแทนคำว่า "ตัวอย่าง" + ข้อความ "แนะนำ"
+- ปรากฏเฉพาะตอนตัวที่กำลังแสดงในวง swap ตรงกับ index อันดับ 1 เท่านั้น (ไม่ใช่ element ถาวร)
+- a11y: มี `aria-label` เพิ่มบน SwapControl เอง ("แนะนำ เข้ากับชุดนี้ดีที่สุด") ไม่ใช่พึ่ง badge ที่เห็นด้วยตาอย่างเดียว
+
+**SwapLockGuard** (ใหม่, บน SwapControl)
+- ไอคอนกุญแจเล็กมุมของ `.tile__swap` **แสดงตลอดเวลา** ที่หมวดนั้นเป็นหมวดเดียวที่ถือสีล็อกอยู่ (ไม่รอกดแล้วค่อยโผล่)
+- เมื่อกรองจนตัวเลือกเหลือ 0 → ปุ่มเข้า `disabled` + hint "ต้องคงสีที่ล็อกไว้ในชุดนี้" (ข้อความต่างจาก hint เดิม "มีชิ้นเดียวในหมวดนี้")
+- a11y: `aria-label` อธิบายเหตุผลเสมอ ไม่ใช่แค่ไอคอน
+
+**SwapSuggestedColorChip** (ใหม่)
+- `ColorSwatch(sm)` แต่ใช้**ขอบเส้นประแทน `--data-ring` ทึบ** (ยืมภาษาเดียวกับ `GarmentShape` variant `outline` ใน §3.7 ที่ใช้เส้นประสื่อว่า "ยังไม่ใช่ของจริง") + ป้าย "สีที่น่าจะเข้ากันเพิ่ม (ยังไม่มีในตู้)"
+- แตะไม่ได้เป็นปุ่ม action (ไม่เปลี่ยนชุด) เป็นข้อมูลอย่างเดียว จึงไม่มี state hover/active แบบปุ่ม
+
+**ColorToneModal** (ใหม่)
+- โครง: scrim ทึบ 40% + panel กลางจอ (มือถือ = แผ่นเลื่อนขึ้นเต็มจอ เหมือน `GarmentForm`) `--r-lg`, มี subtitle บอกแหล่งข้อมูล ("จากตู้ของคุณ" หรือ "สีทั้งหมดที่เลือกได้") ใต้หัวข้อทันที
+- **ToneGroupList** (มุมมองแรก): กริด chip ชื่อกลุ่มโทน (น้ำตาล/เทา/แดง ฯลฯ) กลุ่มที่ไม่มีเฉดในแหล่งข้อมูลนั้นไม่แสดง
+- **ToneGroupDetail** (แตะกลุ่มแล้ว): กริด `ColorSwatch(md)` ของทุกเฉดในกลุ่มนั้น + ปุ่มย้อนกลับไป ToneGroupList
+- ปิด modal: ปุ่ม X มุมขวาบน + Escape + แตะ scrim; เลือกเฉด = ปิด modal ทันที + ใช้ค่าที่จุดเดิม + `InlineFeedback` ยืนยัน
+- a11y: `role="dialog" aria-modal="true"`, trap focus ในแผง, คืน focus ไปปุ่ม "ดูสีเพิ่มเติม" ที่เปิดมันตอนปิด (มาตรฐาน modal, ระบบนี้ยังไม่เคยมี modal มาก่อนจึงกำหนดไว้ชัดตรงนี้)
+
+**ColorOfTheDayChips** (ใหม่, ต่อยอด `OccasionChips`)
+- ทรง/สถานะเดียวกับ `OccasionChips` ทุกประการ (reuse ไม่ประดิษฐ์ใหม่) ต่างแค่แหล่งข้อมูล (สีจริงในตู้ก่อน + พรีเซ็ต) และมี `IconSquareButton` เล็กท้ายแถวเปิด `ColorToneModal`
+- selected = สวอตช์มีขอบ `--accent` 2px (ไม่ใช้พื้น `--accent` เต็มเหมือน chip อื่น เพราะตัวมันเองมีสีอยู่แล้ว การถมพื้นแดงทับจะขัดกฎ "สีข้อมูลอยู่ในภาชนะ ไม่ใช่ปนกับสีการกระทำ")
+
+### 9.4 Responsive [เพิ่มจากตาราง §5]
+
+| | `sm < 640` | `md 640-1023` | `lg >= 1024` |
+|---|---|---|---|
+| ColorToneModal | เต็มจอ (แผ่นเลื่อนขึ้น) | กล่องกลางจอ 480px | กล่องกลางจอ 560px |
+| CollageLegend | 1 คอลัมน์ (ตามลำดับสแตก) | 2 คอลัมน์ | 2 คอลัมน์ |
+| ThemeLockButton | ย้ายเข้า Header เป็นไอคอนล้วน (ไม่มี label ข้อความ) | เหมือน sm | เหมือน sm |
+| Collage overlap | ลด `--collage-overlap-max` เหลือ 14% (จอแคบ ต้องแยกทรงง่ายขึ้น) | 20% (ค่าปกติ) | 20% |
+
+### 9.5 Component states สรุปใหม่ (เฉพาะที่เพิ่มจากเฟส 4)
+
+| Component | สถานะใหม่ |
+|---|---|
+| SwapControl | + `disabled-lock-guard` (ต่างจาก `disabled-single-item` เดิม ใช้ hint ต่างกัน) |
+| SwapControl | + `showing-recommended` (index ตรงกับอันดับ 1 พอดี → มี RecommendedBadge) |
+| OutfitCard | + `collage-2`..`collage-5` (จำนวนทรงจริงในสแตก) |
+| ThemeLockButton | `unlocked` / `locked` |
+| ColorToneModal | `list` (ToneGroupList) / `detail` (ToneGroupDetail) / `closing` |
+| Header (พื้นหลังหน้า) | `tint-active` (ตามชุดล่าสุด) / `tint-locked` |
+
+### 9.6 Accessibility เพิ่มเติม (สอดคล้อง UX doc §9 ใหม่)
+
+- ธีมไดนามิกเปลี่ยนด้วย crossfade `--dur-pan`; `prefers-reduced-motion` → สลับทันทีไม่มีไล่สี (ใช้กลไก `--ease`/`--dur-*` เดิม ไม่สร้างระบบแอนิเมชั่นใหม่)
+- ทุกไอคอนใหม่ (กุญแจล็อกธีม, กุญแจ swap guard, RecommendedBadge) มี `aria-label` ข้อความเสมอ ไม่ใช่พึ่งไอคอน/สีอย่างเดียว
+- `ColorToneModal` เป็น modal ตัวแรกในระบบ ต้อง trap focus + คืน focus ตอนปิด ตามมาตรฐาน (ดู 9.3)
+- Collage overlap เพดาน 20% (14% บนจอแคบ) เป็นค่าที่เลือกเพื่อให้ยังแยกแต่ละทรงด้วยตาได้ ไม่ใช่แค่ความสวยงาม; ป้ายทั้งหมดอยู่นอกโซนซ้อนทับเสมอ (ดู `CollageLegend`)
+
+### 9.7 ส่งต่อการสร้าง (ตามลำดับเฟส A→D ใน spec.md)
+
+- **เฟส A/B (engine + swap):** ยังไม่ต้องแตะ token/component ภาพใหม่เลย ใช้ระบบภาพปัจจุบัน (§1-8) ได้ทันที ยกเว้น `RecommendedBadge`/`SwapLockGuard`/`SwapSuggestedColorChip` (ทำได้แยกจาก Collage Art Style เพราะเป็น component เล็กที่ยืมภาษาเดิม)
+- **เฟส C (visual/theme):** ต้องมีก่อนเริ่ม: โทเคนใน 9.1 ทั้งหมด, `ThemeLockButton`, การลบคอลัมน์ dark, legend ที่ตัดคำ role ออก
+- **เฟส D (color UI + garment redesign):** ต้องมี: `ColorToneModal` (+list/detail), `ColorOfTheDayChips`, OutfitCard/CategoryTile collage variant + `CollageLegend` + `CollapsibleCategorySlot` ใช้กับทั้งการ์ดแนะนำและ `GarmentChip` ในตู้
+
+---
 *ทุกค่าที่ระบุมีเหตุผลกำกับ ไม่มีการตั้งค่าตามอำเภอใจ ถ้าจะเปลี่ยนค่าไหน ให้เปลี่ยนที่ token แล้วมันจะไหลทั้งระบบ*
