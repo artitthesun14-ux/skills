@@ -234,11 +234,13 @@ const waitPersisted = (page, check) => page.waitForFunction(check, null, { timeo
       if(await page.locator(".card--focused .tile__reco").count() > 0) sawReco = true;
     }
     R.ok(sawReco, "SR2 · เฟส 4-B: วนสลับจนเจอตัวอันดับ 1 แล้วมีป้าย 'แนะนำ'");
-    R.ok(/แนะนำ/.test(await page.locator('.card--focused .tile__swap[data-swap$=":top"]').getAttribute("aria-label") || "") ||
-         !sawReco,
-      "SR3 · ux §9: ป้ายแนะนำประกาศผ่าน aria-label ของปุ่มด้วย ไม่ใช่เห็นด้วยตาอย่างเดียว");
+    const recoLabel = await page.locator('.card--focused .tile__swap[data-swap$=":top"]').getAttribute("aria-label") || "";
+    const recoShown = await page.locator(".card--focused .tile__reco").count() > 0;
+    R.ok(recoShown === /แนะนำ/.test(recoLabel),
+      "SR3 · ux §9: ป้ายแนะนำประกาศผ่าน aria-label ของปุ่มเสมอ ไม่ใช่เห็นด้วยตาอย่างเดียว",
+      "badge " + recoShown + " / label " + JSON.stringify(recoLabel));
 
-    const suggTxt = await page.locator(".card--focused .suggs").textContent().catch(() => "");
+    const suggTxt = await page.locator(".card--focused .swapsugg").textContent().catch(() => "");
     R.ok(/ยังไม่มีในตู้/.test(suggTxt) && /#[0-9A-F]{6}/.test(suggTxt),
       "SR4 · เฟส 4-B: วนของในตู้ครบรอบแล้ว -> เสนอสีที่น่าจะเข้ากัน พร้อมชื่อสี+hex", suggTxt.slice(0, 80));
     R.ok(/เสื้อ/.test(suggTxt) && !/กางเกง/.test(suggTxt),

@@ -236,12 +236,12 @@ body{padding-bottom:calc(var(--nav-h) + env(safe-area-inset-bottom))}
 /* เฟส 4-B: ป้าย "แนะนำ" บนหมวดที่วงวนมาหยุดที่ตัวคะแนนดีที่สุด (ความหมายอยู่ที่ aria-label ของปุ่มสลับ) */
 .tile__reco{margin-inline-start:var(--sp-2)}
 /* สีที่น่าจะเข้ากันเพิ่ม: แถวใต้กลุ่มไทล์ สวอตช์เส้นประ = ยังไม่ใช่ของจริงในตู้ */
-.suggs{list-style:none;margin:var(--sp-3) 0 0;padding:0;display:flex;flex-direction:column;gap:var(--sp-2)}
-.sugg{display:flex;flex-direction:column;gap:2px;padding:var(--sp-2) var(--sp-3);
+.swapsugg{list-style:none;margin:var(--sp-3) 0 0;padding:0;display:flex;flex-direction:column;gap:var(--sp-2)}
+.swapsugg__row{display:flex;flex-direction:column;gap:2px;padding:var(--sp-2) var(--sp-3);
   background:var(--surface-sunken);border-radius:var(--r-sm)}
-.sugg__head{font-size:var(--fs-xs);color:var(--ink-muted)}
-.sugg__item{display:flex;align-items:center;gap:var(--sp-2);font-size:var(--fs-xs);color:var(--ink)}
-.sugg__sw{flex:0 0 auto;width:14px;height:14px;border-radius:4px;
+.swapsugg__head{font-size:var(--fs-xs);color:var(--ink-muted)}
+.swapsugg__item{display:flex;align-items:center;gap:var(--sp-2);font-size:var(--fs-xs);color:var(--ink)}
+.swapsugg__sw{flex:0 0 auto;width:14px;height:14px;border-radius:4px;
   border:1px dashed var(--ink-muted);box-shadow:0 0 0 1px var(--data-ring) inset}
 .tile__chip{flex:0 0 auto;width:44px;height:44px;border-radius:var(--r-sm);
   border:1px solid var(--data-ring);align-self:center}
@@ -1235,6 +1235,22 @@ function scoreOf(o){ return SCORES.get(o) || 0; }
 var MIN_ANALYSIS_GARMENTS = 3;
 var GROUP_TH = { neutral:"สีกลาง", cool:"โทนเย็น", warm:"โทนอุ่น", accent:"สีเน้น" };
 
+/* สีที่เข้ากับ baseHex ตามกฎ harmony โดยข้ามมุมที่มีอยู่แล้ว (haveHues) คืนสูงสุด 2 สี
+   ใช้ร่วมกันระหว่าง FR-4 (คิดจากทั้งตู้) กับสีแนะนำตอน swap (คิดจากชิ้นอื่นในลุคเดียว) */
+function harmonySuggestions(baseHex, haveHues){
+  var bh = hexToHsl(baseHex).h, out = [];
+  [ { h:bh + 180, why:"เป็นสีตรงข้ามกับ" },
+    { h:bh + 30,  why:"เป็นสีใกล้เคียงกับ" },
+    { h:bh + 120, why:"เป็นสามเหลี่ยมสีกับ" } ].forEach(function(tg){
+    if(out.length >= 2) return;
+    var h = ((tg.h % 360) + 360) % 360;
+    if(haveHues.some(function(u){ return hueDist(u, h) < 25; })) return;
+    var hex = hslToHex(h, 38, 45);            /* โทนใส่ได้จริง ไม่สดจนกลายเป็นสีเน้น */
+    out.push({ hex:hex, name:colorNameTH(hex), why:tg.why });
+  });
+  return out;
+}
+
 /* 4 กลุ่มต้องไม่ทับกัน: neutral ก่อน แล้ว accent (สด) ที่เหลือแยกอุ่น/เย็น (นิยาม §4.1) */
 function wardrobeGroupOf(hex){
   var c = classifyColor(hex);
@@ -1294,28 +1310,15 @@ function analyzeWardrobe(wardrobe){
 
   /* AC4 สีที่ช่วยเพิ่มการจับคู่: อิงสีฐานเด่นสุด (ไม่นับ neutral และไม่นับสีเน้น) แล้วเสนอมุมที่ยังขาด
      เขียนเชิง "เพิ่มตัวเลือกการจับคู่" ไม่ใช่บอกให้ซื้อ */
-  var suggestions = [];
   var base = colors.filter(function(c){ return wardrobeGroupOf(c.hex) === "cool" || wardrobeGroupOf(c.hex) === "warm"; })[0];
-  if(base){
-    var bh = hexToHsl(base.hex).h;
-    var haveHues = colors.filter(function(c){ return !classifyColor(c.hex).isNeutral; })
-                         .map(function(c){ return hexToHsl(c.hex).h; });
-    var targets = [
-      { h:bh + 180, why:"ตรงข้ามกับ" },
-      { h:bh + 30,  why:"ใกล้เคียงกับ" },
-      { h:bh + 120, why:"สามเหลี่ยมสีกับ" }
-    ];
-    targets.forEach(function(tg){
-      if(suggestions.length >= 2) return;
-      if(haveHues.some(function(u){ return hueDist(u, ((tg.h%360)+360)%360) < 25; })) return;
-      var hex = hslToHex(tg.h, 38, 45);       /* โทนใส่ได้จริง ไม่สดจนกลายเป็นสีเน้น */
-      if(colors.some(function(c){ return c.hex === hex; })) return;
-      suggestions.push({
-        hex: hex, name: colorNameTH(hex),
-        reason: "เป็นสี" + tg.why + base.name + " เพิ่มเข้าไปจะได้คู่จับใหม่โดยไม่ต้องเปลี่ยนของเดิม"
-      });
-    });
-  }
+  var haveHues = colors.filter(function(c){ return !classifyColor(c.hex).isNeutral; })
+                       .map(function(c){ return hexToHsl(c.hex).h; });
+  var suggestions = base
+    ? harmonySuggestions(base.hex, haveHues).map(function(s){
+        return { hex:s.hex, name:s.name,
+                 reason: s.why + base.name + " เพิ่มเข้าไปจะได้คู่จับใหม่โดยไม่ต้องเปลี่ยนของเดิม" };
+      }).filter(function(s){ return !colors.some(function(c){ return c.hex === s.hex; }); })
+    : [];
 
   return { enough:true, total:list.length, colors:colors, groups:groups, neutralPct:neutralPct,
            insights:insights, suggestions:suggestions };
@@ -1351,13 +1354,14 @@ var MIN_OUTFIT_ITEMS = 2;
 /* โอกาสที่แต่ละหมวดจะติดมาในชุด: บน/ล่างสูงเพราะเป็นแกนของลุคจริงและกินพื้นที่มากสุด
    (CATEGORY_WEIGHT) แต่ไม่ใช่ข้อบังคับอีกแล้ว ตู้ที่ไม่มีสองหมวดนี้ก็ยังจัดชุดได้ */
 var CATEGORY_PICK_P = { top:0.95, bottom:0.95, outer:0.35, shoes:0.85, accessory:0.40 };
+var SAMPLE_MIN_TRIES = 48, SAMPLE_TRIES_PER_ITEM = 8;
 
 function generateWardrobeBatch(wardrobe, occasion, avoidKeys, lockedHex){
   var g = groupByCategory(wardrobe);
   var present = CATEGORY_ORDER.filter(function(c){ return g[c].length; });
   /* ต่ำกว่า 2 หมวด = ประกอบชุดไม่ได้จริง บอกตรงๆ ไม่เสกชุดขึ้นมา (spec §7C) */
   if(present.length < MIN_OUTFIT_ITEMS)
-    return { insufficient:{ total:wardrobe.length, categories:present.length } };
+    return { insufficient:{ total:wardrobe.length } };
 
   var lock = lockedHex ? normHex(lockedHex) : null;
   var lockCats = lock ? present.filter(function(c){
@@ -1373,7 +1377,9 @@ function generateWardrobeBatch(wardrobe, occasion, avoidKeys, lockedHex){
     return chosen;
   }
 
-  var tries = Math.min(COMBO_CAP, Math.max(48, wardrobe.length * 8));   /* spec §7C กันหน้าค้าง */
+  /* จำนวนครั้งที่สุ่มคอมโบ: มากพอให้ selectDiverse มีของให้เลือก 3-4 ชุดที่ต่างกันจริง
+     แต่ยังมีเพดาน COMBO_CAP กันตู้ใหญ่ทำหน้าค้าง (spec §7C) */
+  var tries = Math.min(COMBO_CAP, Math.max(SAMPLE_MIN_TRIES, wardrobe.length * SAMPLE_TRIES_PER_ITEM));
   var seen = {}, candidates = [];
   for(var i = 0; i < tries; i++){
     var chosen = topUp(present.filter(function(c){ return Math.random() < CATEGORY_PICK_P[c]; }));
@@ -1734,22 +1740,14 @@ function say(sel, msg){
 function outfitColorSuggestions(look, cat){
   var others = CATEGORY_ORDER.filter(function(c){ return c !== cat && look.items[c]; })
     .map(function(c){ return normHex(look.items[c].color); });
-  if(!others.length) return [];
+  /* ต้องมีสีที่ไม่ใช่สีกลางเป็นฐาน ไม่งั้นมุมสีของฐานแทบไม่มีความหมาย แล้วคำอธิบายจะโม้
+     (กฎเดียวกับ FR-4 ที่ไม่เสนออะไรเลยถ้าตู้มีแต่สีกลาง) */
   var colored = others.filter(function(h){ return !classifyColor(h).isNeutral; });
-  var base = colored[0] || others[0];
-  var baseH = hexToHsl(base).h, baseName = colorNameTH(base);
-  var haveHues = colored.map(function(h){ return hexToHsl(h).h; });
-  var out = [];
-  [ { h:baseH + 180, why:"ตรงข้ามกับ" },
-    { h:baseH + 30,  why:"ใกล้เคียงกับ" },
-    { h:baseH + 120, why:"สามเหลี่ยมสีกับ" } ].forEach(function(tg){
-    if(out.length >= 2) return;
-    var h = ((tg.h % 360) + 360) % 360;
-    if(haveHues.some(function(u){ return hueDist(u, h) < 25; })) return;
-    var hex = hslToHex(h, 38, 45);          /* โทนใส่ได้จริง ไม่สดจนกลายเป็นสีเน้น (เท่ากับ FR-4) */
-    out.push({ hex:hex, name:colorNameTH(hex), why:"เป็นสี" + tg.why + baseName });
-  });
-  return out;
+  if(!colored.length) return [];
+  var base = colored[0];
+  var baseName = colorNameTH(base);
+  return harmonySuggestions(base, colored.map(function(h){ return hexToHsl(h).h; }))
+    .map(function(s){ return { hex:s.hex, name:s.name, why:s.why + baseName }; });
 }
 /* แถวสีแนะนำ: อยู่ใต้กลุ่มไทล์ ไม่ยัดในไทล์ (ลองแล้วไทล์สูงผิดส่วนและการ์ดรก)
    โผล่เฉพาะหมวดที่ผู้ใช้กดวนจนครบของในตู้แล้วเท่านั้น = ตอบตอนผู้ใช้ถามจริง ไม่ใช่ขึ้นลอยๆ */
@@ -1762,14 +1760,14 @@ function suggsHTML(look){
     if(!list.length) return "";
     /* สวอตช์เส้นประ = ยังไม่ใช่ของจริงในตู้ (ยืมภาษาเดียวกับทรงแบบ outline)
        ชื่อสี+hex เป็นข้อความเสมอ ไม่สื่อด้วยสีอย่างเดียว (ux §9) */
-    return '<li class="sugg"><span class="sugg__head">วน'+esc(CATEGORY_TH[c]||c)+
+    return '<li class="swapsugg__row"><span class="swapsugg__head">วน'+esc(CATEGORY_TH[c]||c)+
       'ในตู้ครบแล้ว ลองมองหาสีนี้เพิ่ม (ยังไม่มีในตู้)</span>'+
       list.map(function(s){
-        return '<span class="sugg__item"><span class="sugg__sw" style="background:'+s.hex+'"></span>'+
+        return '<span class="swapsugg__item"><span class="swapsugg__sw" aria-hidden="true" style="background:'+s.hex+'"></span>'+
           '<span>'+esc(s.name)+' <span class="tnum">'+esc(s.hex)+'</span> · '+esc(s.why)+'</span></span>';
       }).join("")+'</li>';
   }).filter(Boolean).join("");
-  return rows ? '<ul class="suggs">'+rows+'</ul>' : "";
+  return rows ? '<ul class="swapsugg">'+rows+'</ul>' : "";
 }
 function tileHTML(item, cat, opts){
   var hex = normHex(item.color), name = colorNameTH(hex);
