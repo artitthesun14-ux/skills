@@ -12,26 +12,43 @@ let fails=0;
 const t=(name,cond,extra='')=>{ if(cond) console.log('  ok  '+name); else {fails++;console.log('  FAIL '+name+' '+extra);} };
 
 console.log('\n== 1. คอนทราสต์ (ยืนยัน plan §0.1) ==');
+/* เฟส 4-C: เหลือโหมดเดียว คู่ของโทเคน dark ถูกลบทิ้งไปพร้อมกับโค้ด ไม่ใช่ปล่อยไว้เขียวลอยๆ */
 const pairs=[
-  ['#E23A4E','#FBFAF7','accent (ไม่ใช่ตัวอักษร) บน bg, เกณฑ์ 3:1',3],['#C62F41','#FBFAF7','eyebrow บน bg (light)',4.5],['#F1596B','#141316','eyebrow บน bg (dark)',4.5],
-  ['#FFFFFF','#C62F41','accent-solid ใหม่ (light)',4.5],
-  ['#FFFFFF','#A82636','accent-solid-hover (light)',4.5],
-  ['#17161A','#F1596B','accent-ink บน accent (dark)',4.5],
-  ['#6E6B66','#FBFAF7','ink-muted บน bg (light)',4.5],
-  ['#6E6B66','#FFFFFF','ink-muted บน surface (light)',4.5],
-  ['#17161A','#FFFFFF','ink บน surface (light)',4.5],
-  ['#A7A29A','#1C1B1F','ink-muted บน surface (dark)',4.5],
-  ['#F4F1EA','#1C1B1F','ink บน surface (dark)',4.5],
+  ['#E23A4E','#FBFAF7','accent (ไม่ใช่ตัวอักษร) บน bg, เกณฑ์ 3:1',3],
+  ['#C62F41','#FBFAF7','eyebrow บน bg',4.5],
+  ['#FFFFFF','#C62F41','accent-solid ใหม่',4.5],
+  ['#FFFFFF','#A82636','accent-solid-hover',4.5],
+  ['#6E6B66','#FBFAF7','ink-muted บน bg',4.5],
+  ['#6E6B66','#FFFFFF','ink-muted บน surface',4.5],
+  ['#17161A','#FFFFFF','ink บน surface',4.5],
   ['#E23A4E','#FBFAF7','focus ring บน bg (ต้องการ 3:1)',3],
-  ['#F1596B','#141316','focus ring บน bg (dark, 3:1)',3],
-  ['#B3261E','#FFFFFF','danger บน surface (light)',4.5],
-  ['#F2B8B5','#1C1B1F','danger บน surface (dark)',4.5],
+  ['#B3261E','#FFFFFF','danger บน surface',4.5],
 ];
 for(const [a,b,label,min] of pairs){
   const r=contrastRatio(a,b);
   const pass=r>=min;
   console.log(`  ${pass?'ok  ':'FAIL'} ${label}: ${r.toFixed(2)}:1 (ต้องการ ${min})`);
   if(!pass) fails++;
+}
+
+/* เฟส 4-C: พื้นหลังไดนามิกใช้ hue ของชุดที่โฟกัส แต่ S/L ตรึงที่ 6%/95% เสมอ
+   กวาดทั้งวงล้อสีเพื่อยืนยันว่าคอนทราสต์ไม่ตกไม่ว่า hue ไหน (แทนเทสต์ "เช็คสองธีม" เดิม) */
+const TINT_S=6, TINT_L=95;
+{
+  let worstInk=99, bestInk=0, worstMuted=99, worstHue=-1;
+  for(let h=0;h<360;h+=5){
+    const bg=hslToHex(h,TINT_S,TINT_L);
+    const ri=contrastRatio('#17161A',bg), rm=contrastRatio('#6E6B66',bg);
+    if(ri<worstInk){ worstInk=ri; worstHue=h; }
+    if(ri>bestInk) bestInk=ri;
+    if(rm<worstMuted) worstMuted=rm;
+  }
+  t('ธีมไดนามิก: --ink บนพื้นหลังทุก hue ผ่าน 4.5:1 (แย่สุด '+worstInk.toFixed(2)+':1 ที่ hue '+worstHue+')', worstInk>=4.5);
+  t('ธีมไดนามิก: --ink-muted บนพื้นหลังทุก hue ผ่าน 4.5:1 (แย่สุด '+worstMuted.toFixed(2)+':1)', worstMuted>=4.5);
+  /* เหตุผลที่เลือก S6/L95: ความสว่างสัมพัทธ์แทบไม่ขยับตาม hue คอนทราสต์จึงนิ่ง ไม่ใช่แค่ "ผ่านพอดี"
+     ถ้าค่านี้เกิน 1:1 เมื่อไหร่ แปลว่าพื้นหลังเริ่มสว่าง/มืดไม่เท่ากันตาม hue จนตาจับได้ */
+  t('ธีมไดนามิก: คอนทราสต์ --ink ต่างกันทั้งวงล้อสีไม่เกิน 1:1 (ช่วง '+worstInk.toFixed(2)+'-'+bestInk.toFixed(2)+')',
+    bestInk - worstInk <= 1);
 }
 
 console.log('\n== 2. engine: proportion ==');
@@ -307,6 +324,34 @@ console.log('\n== 13. เฟส 4-A: Flexible Outfit Generation (เลิกบ
     accLock.outfits && accLock.outfits.length>=1 &&
     accLock.outfits.every(o=>CATEGORY_ORDER.some(c=>o.items[c]&&normHex(o.items[c].color)===LOCK)),
     JSON.stringify(accLock.noMatch?'noMatch':('ได้ '+(accLock.outfits||[]).length+' ชุด')));
+}
+
+console.log('\n== 14. เฟส 4-D: จัดกลุ่มสีตามโทน ==');
+{
+  const G = toneGroups(PRESET_COLORS);
+  t('กลุ่มที่คืนมามีเฉดจริงทุกกลุ่ม (ไม่มีกลุ่มว่าง)', G.length>0 && G.every(x=>x.shades.length>0));
+  t('ทุกเฉดใน PRESET_COLORS ถูกจัดเข้ากลุ่มครบ ไม่มีสีตกหล่น',
+    G.reduce((n,x)=>n+x.shades.length,0) === new Set(PRESET_COLORS.map(normHex)).size);
+  t('ลำดับกลุ่มคงที่ เรียกซ้ำได้ผลเดิม',
+    JSON.stringify(toneGroups(PRESET_COLORS)) === JSON.stringify(toneGroups(PRESET_COLORS.slice().reverse())));
+  t('สีซ้ำถูกยุบเหลือเฉดเดียว',
+    toneGroups(['#FFFFFF','#ffffff','#FFF']).reduce((n,x)=>n+x.shades.length,0) === 1);
+  /* ชื่อกลุ่มต้องมาจากคลังคำเดิม ไม่ใช่ taxonomy ใหม่: ทุกกลุ่มต้องอยู่ใน TONE_ORDER */
+  t('ชื่อกลุ่มทุกชื่อมาจากลำดับที่ประกาศไว้ ไม่มีคำแปลกโผล่',
+    G.every(x=>TONE_ORDER.indexOf(x.group)>=0), G.map(x=>x.group).join(','));
+  /* สองทางเข้าใช้แหล่งข้อมูลต่างกันจริง (spec Decision #4) */
+  const owned=['#C0392B','#C0392B','#17161A'];
+  const A=toneGroups(owned), B=toneGroups(PRESET_COLORS);
+  t('ทางเข้า (a) เห็นเฉพาะสีที่มีจริง ไม่ลากพรีเซ็ตที่ยังไม่มีเข้ามา',
+    A.reduce((n,x)=>n+x.shades.length,0) === 2 && B.length > A.length);
+  t('ตู้ว่าง -> ไม่มีกลุ่มให้โชว์ (หน้าจอต้องขึ้นข้อความแทน ไม่ใช่กริดว่าง)', toneGroups([]).length === 0);
+  /* กลุ่มแม่ยุบชื่อเฉพาะเข้าด้วยกันจริง ไม่ใช่แค่ตัดคำขยาย */
+  t('กรมท่าถูกจัดอยู่กลุ่มน้ำเงิน', toneGroupOf('#2B3A67') === 'น้ำเงิน', toneGroupOf('#2B3A67'));
+  t('ครีม/เบจ/น้ำตาล อยู่กลุ่มเดียวกัน',
+    toneGroupOf('#EFE6D2') === toneGroupOf('#C8B79B') && toneGroupOf('#C8B79B') === toneGroupOf('#6B4A2F'));
+  t('เฉดอ่อน/เข้มของสีเดียวกันอยู่กลุ่มเดียวกัน',
+    toneGroupOf(hslToHex(210,60,30)) === toneGroupOf(hslToHex(210,60,70)),
+    toneGroupOf(hslToHex(210,60,30))+' / '+toneGroupOf(hslToHex(210,60,70)));
 }
 
 console.log(fails? `\n### ${fails} ข้อไม่ผ่าน\n` : '\n### ผ่านทั้งหมด\n');

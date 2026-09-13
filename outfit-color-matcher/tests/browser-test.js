@@ -230,15 +230,19 @@ await bc.close();
 // ---------- 11. ภาพหน้าจอ ----------
 console.log('\n== 11. เก็บภาพหน้าจอ ==');
 for(const [name,opt] of [
-  ['desktop-light',{viewport:{width:1280,height:1000},colorScheme:'light'}],
-  ['desktop-dark', {viewport:{width:1280,height:1000},colorScheme:'dark'}],
-  ['mobile-light', {viewport:{width:390,height:844},colorScheme:'light',isMobile:true,hasTouch:true}],
-  ['mobile-dark',  {viewport:{width:390,height:844},colorScheme:'dark',isMobile:true,hasTouch:true}],
+  ['desktop',{viewport:{width:1280,height:1000}}],
+  ['mobile', {viewport:{width:390,height:844},isMobile:true,hasTouch:true}],
 ]){
   const c=await browser.newContext(opt); const p=await c.newPage();
   await p.goto(FILE); await p.waitForTimeout(500);
   await p.screenshot({path:`${SHOT}/${name}.png`,fullPage:false});
-  if(name==='desktop-light'){
+  // เฟส 4-D: เก็บภาพระบบภาพใหม่ไว้ตรวจด้วยตา (สแตกตัดแปะ + มุมมองจัดกลุ่มโทน)
+  await p.locator('#sec-suggest').scrollIntoViewIfNeeded(); await p.waitForTimeout(200);
+  await p.screenshot({path:`${SHOT}/${name}-collage.png`});
+  await p.locator('[data-tone="lock"]').click(); await p.waitForTimeout(250);
+  await p.screenshot({path:`${SHOT}/${name}-tonemodal.png`});
+  await p.keyboard.press('Escape'); await p.waitForTimeout(150);
+  if(name==='desktop'){
     await p.locator('#addBtn').click(); await p.waitForTimeout(200);
     await p.locator('#sec-wardrobe').scrollIntoViewIfNeeded(); await p.waitForTimeout(200);
     await p.screenshot({path:`${SHOT}/desktop-form.png`});

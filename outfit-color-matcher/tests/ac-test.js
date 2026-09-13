@@ -143,8 +143,12 @@ const waitPersisted = (page, check) => page.waitForFunction(check, null, { timeo
                advice: card.querySelectorAll(".advice li").length,
                html: document.querySelector("#resultsSlot").innerHTML };
     });
-    R.ok(dom.segs >= 1 && dom.advice >= 1 && /%/.test(dom.legend) && /(สีหลัก|สีรอง|สีกลาง|สีเน้น)/.test(dom.legend),
-      "B3a · FR-1 AC4: การ์ดมีสัดส่วนสี + role + % + คำแนะนำอย่างน้อย 1 ข้อ");
+    R.ok(dom.segs >= 1 && dom.advice >= 1 && /%/.test(dom.legend) && /#[0-9A-F]{6}/i.test(dom.legend),
+      "B3a · FR-1 AC4: การ์ดมีสัดส่วนสี + ชื่อสี + hex + % + คำแนะนำอย่างน้อย 1 ข้อ");
+    /* เฟส 4-C: ศัพท์ role เป็นเรื่องภายใน engine ห้ามโผล่ในหน้าอีกต่อไป
+       (คำว่า "สีหลัก" ในประโยคคำแนะนำยังอยู่ได้ ตรงนี้เช็คเฉพาะ legend ที่เคยเป็นป้าย taxonomy) */
+    R.ok(!/(สีหลัก|สีรอง|สีกลาง|สีเน้น)/.test(dom.legend),
+      "B3a2 · เฟส 4-C: legend ไม่มีศัพท์ role ให้ผู้ใช้งง", dom.legend.replace(/\s+/g," ").slice(0,120));
     R.ok(!/score|คะแนน|data-score/i.test(dom.html), "B3b · FR-1 AC4: ไม่มีคะแนนโผล่ในผลลัพธ์");
     const only = await snap(page);
     R.ok(only.n === 1 && await page.locator('[data-nav="1"]:disabled').count() === 1,
@@ -651,6 +655,128 @@ const waitPersisted = (page, check) => page.waitForFunction(check, null, { timeo
       state.batch.length > 0 && state.batch.every(o =>
         ["top","bottom"].some(c => o.items[c] && o.items[c].color.toUpperCase() === "#3F6B4F"))),
       "CF9 · FR-5 AC1: โหมดไอเดียล็อกสีได้ ทุกชุดมีสีนั้นเป็นชิ้นหลัก");
+    allErrs.push(...errs); await ctx.close();
+  }
+
+  /* ===== เฟส 4-D: ColorToneModal (ตั๋ว 13) ===== */
+  {
+    const { ctx, page, errs } = await H.open(browser, null);
+    const owned = await page.evaluate(() => state.wardrobe.map(g => g.color.toUpperCase()));
+    R.ok(await page.$('#colorLockChips .morecolors') !== null && await page.$('[data-tone="lock"]') !== null,
+      "TN1 · มีปุ่ม ดูสีเพิ่มเติม ท้ายแถวสีของวันนี้");
+
+    await page.click('[data-tone="lock"]'); await page.waitForTimeout(150);
+    const open1 = await page.evaluate(() => {
+      const d = document.querySelector("#toneDlg");
+      return { open: d.open, modal: d.getAttribute("aria-modal"),
+               sub: d.querySelector(".tonedlg__sub").textContent,
+               inside: d.contains(document.activeElement),
+               hexes: d.textContent.match(/#[0-9A-F]{6}/gi) || [],
+               groups: [...d.querySelectorAll("[data-tonegroup]")].map(b => b.dataset.tonegroup) };
+    });
+    R.ok(open1.open && open1.modal === "true" && open1.inside,
+      "TN2 · modal เปิดจริง เป็น aria-modal และโฟกัสอยู่ในแผง", JSON.stringify(open1.open)+" "+open1.inside);
+    R.ok(/จากตู้ของคุณ/.test(open1.sub), "TN3 · ทางเข้า (a) บอกว่าแหล่งข้อมูลคือตู้ของผู้ใช้", open1.sub);
+    R.ok(open1.groups.length >= 2, "TN4 · มุมมองแรกเป็นรายชื่อกลุ่มโทน", open1.groups.join(","));
+
+    await page.click('[data-tonegroup="' + open1.groups[0] + '"]'); await page.waitForTimeout(150);
+    const detail = await page.evaluate(() => {
+      const d = document.querySelector("#toneDlg");
+      return { shades: [...d.querySelectorAll("[data-toneshade]")].map(b => b.textContent.trim()),
+               back: !!d.querySelector(".tonedlg__back") };
+    });
+    R.ok(detail.shades.length >= 1 && detail.back,
+      "TN5 · แตะกลุ่มแล้วกางเป็นเฉดในกลุ่มนั้น + มีปุ่มย้อนกลับ", detail.shades.join(" | "));
+    R.ok(detail.shades.every(txt => /#[0-9A-F]{6}/i.test(txt) && txt.replace(/[#0-9A-F·\s]/gi,"").length > 0),
+      "TN6 · ทุกเฉดมีชื่อสี + hex เป็นข้อความ ไม่สื่อด้วยสีอย่างเดียว", detail.shades.join(" | "));
+    /* ทางเข้า (a) ห้ามมีสีพรีเซ็ตที่ยังไม่มีในตู้ (spec Out of Scope) */
+    const strayLock = open1.hexes.map(h => h.toUpperCase()).filter(h => !owned.includes(h));
+    R.ok(strayLock.length === 0, "TN7 · ทางเข้า (a) ไม่โชว์สีที่ยังไม่มีในตู้", strayLock.join(","));
+
+    const firstShade = await page.evaluate(() => document.querySelector("[data-toneshade]").dataset.toneshade);
+    await page.click('[data-toneshade="' + firstShade + '"]'); await page.waitForTimeout(300);
+    const after = await page.evaluate(() => ({
+      open: document.querySelector("#toneDlg").open,
+      locked: state.lockedColor,
+      fb: document.querySelector("#liveFeedback").textContent
+    }));
+    R.ok(!after.open && after.locked === firstShade && after.fb.length > 0,
+      "TN8 · เลือกเฉด = ปิด modal + ใช้ค่าที่จุดเดิม + มีข้อความยืนยัน",
+      JSON.stringify(after));
+
+    await page.click('[data-tone="lock"]'); await page.waitForTimeout(120);
+    await page.keyboard.press("Escape"); await page.waitForTimeout(120);
+    R.ok(await page.evaluate(() => !document.querySelector("#toneDlg").open && state.tone === null),
+      "TN9 · Escape ปิด modal และล้างสถานะตาม");
+    allErrs.push(...errs); await ctx.close();
+  }
+  {   /* ทางเข้า (b): ตู้ว่างก็ยังต้องเลือกสีได้ครบทั้งจานสี */
+    const { ctx, page, errs } = await H.open(browser, H.store([], { mode:"idea" }));
+    await page.click("#addBtn"); await page.waitForTimeout(200);
+    await page.click('[data-tone="form"]'); await page.waitForTimeout(200);
+    const d = await page.evaluate(() => {
+      const dlg = document.querySelector("#toneDlg");
+      return { sub: dlg.querySelector(".tonedlg__sub").textContent,
+               groups: [...dlg.querySelectorAll("[data-tonegroup]")].map(b => b.dataset.tonegroup),
+               presets: PRESET_COLORS.length };
+    });
+    R.ok(d.groups.length >= 3 && /สีทั้งหมดที่เลือกได้/.test(d.sub),
+      "TN10 · ทางเข้า (b) ตู้ว่างก็ยังมีกลุ่มให้เลือกครบจานสี", d.sub + " " + d.groups.join(","));
+
+    await page.click('[data-tonegroup="' + d.groups[0] + '"]'); await page.waitForTimeout(150);
+    const shade = await page.evaluate(() => document.querySelector("[data-toneshade]").dataset.toneshade);
+    await page.click('[data-toneshade="' + shade + '"]'); await page.waitForTimeout(250);
+    R.ok(await page.evaluate(() => !document.querySelector("#toneDlg").open && state.formDraft.color) === shade,
+      "TN11 · เลือกเฉดจากฟอร์ม = ตั้งเป็นสีของชิ้นที่กำลังเพิ่ม", shade);
+    allErrs.push(...errs); await ctx.close();
+  }
+
+  /* ===== เฟส 4-D: Collage (ตั๋ว 14) ===== */
+  {
+    const { ctx, page, errs } = await H.open(browser, null);
+    const c = await page.evaluate(() => {
+      const card = document.querySelector(".card--focused");
+      const cuts = card.querySelectorAll(".cut").length;
+      const rows = [...card.querySelectorAll(".clegend .tile")];
+      const n = getComputedStyle(card.querySelector(".collage")).getPropertyValue("--n").trim();
+      return { cuts, rows: rows.length, n,
+               txt: rows.map(r => r.textContent.replace(/\s+/g," ").trim()) };
+    });
+    R.ok(c.cuts === c.rows && c.cuts === Number(c.n) && c.cuts >= 2,
+      "CG1 · จำนวนทรงในสแตก = จำนวนแถว legend = จำนวนหมวดที่ชุดนี้มีจริง", JSON.stringify(c));
+    R.ok(c.txt.every(t => /#[0-9A-F]{6}/i.test(t)),
+      "CG2 · ทุกแถว legend มีชื่อสี + hex ครบ (ป้ายไม่ถูกทรงอื่นทับ)", c.txt.join(" | "));
+    allErrs.push(...errs); await ctx.close();
+  }
+  {   /* ชุดที่มีแค่ 2 หมวด ต้องไม่เหลือช่องว่างของหมวดที่ขาด (spec Decision #5) */
+    const sparse = H.store([
+      H.g("o1","outer","jacket","#2B3A67","แจ็กเก็ตกรมท่า"),
+      H.g("o2","outer","blazer","#6B4A2F","เบลเซอร์น้ำตาล"),
+      H.g("s1","shoes","sneaker","#FFFFFF","สนีกเกอร์ขาว"),
+      H.g("s2","shoes","boot","#17161A","บูทดำ")
+    ]);
+    const { ctx, page, errs } = await H.open(browser, sparse);
+    const sp = await page.evaluate(() => {
+      const card = document.querySelector(".card--focused");
+      return { cuts: card.querySelectorAll(".cut").length,
+               rows: card.querySelectorAll(".clegend .tile").length,
+               empties: card.querySelectorAll(".cut:empty, .clegend .tile:empty").length };
+    });
+    R.ok(sp.cuts === 2 && sp.rows === 2 && sp.empties === 0,
+      "CG3 · ชุด 2 หมวด: สแตกมี 2 ทรง ไม่เว้นช่องของหมวดที่ขาด", JSON.stringify(sp));
+
+    /* ปุ่มสลับต้องยังกดโดนจริง ไม่ถูกทรงที่ซ้อนทับบังไว้ */
+    const hit = await page.evaluate(() => {
+      const btns = [...document.querySelectorAll(".card--focused .tile__swap")];
+      return btns.map(b => {
+        b.scrollIntoView({ block:"center" });   /* elementFromPoint ใช้ได้เฉพาะจุดที่อยู่ในจอ */
+        const r = b.getBoundingClientRect();
+        const el = document.elementFromPoint(r.left + r.width/2, r.top + r.height/2);
+        return { h: Math.round(r.height), hit: b.contains(el) || b === el };
+      });
+    });
+    R.ok(hit.length >= 1 && hit.every(x => x.h >= 44 && x.hit),
+      "CG4 · ปุ่มสลับสูง >= 44px และกดโดนจริง ไม่ถูกทรงอื่นบัง", JSON.stringify(hit));
     allErrs.push(...errs); await ctx.close();
   }
 

@@ -4,7 +4,12 @@
    1. TOKENS  (ui doc §1.1-1.3 + plan §0.1 accent split)
    ============================================================ */
 :root{
-  --bg:#FBFAF7; --surface:#FFFFFF; --surface-sunken:#F4F2EC;
+  /* ธีมไดนามิก (เฟส 4-C): S/L ตรึงไว้ต่ำ/สูงมาก ความสว่างสัมพัทธ์ของพื้นหลังจึงแทบไม่ขยับ
+     ไม่ว่า hue จะเป็นอะไร คอนทราสต์กับ --ink เลยยังอยู่แถว 16-17:1 เท่า #FBFAF7 เดิมทุกกรณี
+     (ui doc §9.1) ก่อนมีชุดแรก ยังไม่มี hue ให้ยืม จึงใช้ #FBFAF7 เดิมเป๊ะ */
+  --theme-tint-s:6%; --theme-tint-l:95%;
+  --bg:#FBFAF7;
+  --surface:#FFFFFF; --surface-sunken:#F4F2EC;
   --ink:#17161A; --ink-muted:#6E6B66; --line:#ECE9E2;
 
   /* accent = "การกระทำ" เท่านั้น ห้ามเป็นสีของข้อมูล (ui doc §0)
@@ -32,30 +37,20 @@
 
   --dur-fast:150ms; --dur-pan:300ms; --ease:cubic-bezier(.2,0,0,1);
   --nav-h:56px;
-}
-@media (prefers-color-scheme:dark){
-  :root:not([data-theme="light"]){
-    --bg:#141316; --surface:#1C1B1F; --surface-sunken:#232228;
-    --ink:#F4F1EA; --ink-muted:#A7A29A; --line:#2B2A2E;
-    --accent:#F1596B; --accent-solid:#F1596B; --accent-solid-hover:#FF6E7E;
-    --accent-ink:#17161A;                     /* on #F1596B = 5.47:1 */
-    --data-ring:rgba(255,255,255,.20);
-    --danger:#F2B8B5;
-    --shadow-card:0 1px 2px rgba(0,0,0,.30);
-    --shadow-raised:0 8px 28px -12px rgba(0,0,0,.55);
-  }
-}
-:root[data-theme="dark"]{
-  --bg:#141316; --surface:#1C1B1F; --surface-sunken:#232228;
-  --ink:#F4F1EA; --ink-muted:#A7A29A; --line:#2B2A2E;
-  --accent:#F1596B; --accent-solid:#F1596B; --accent-solid-hover:#FF6E7E;
-  --accent-ink:#17161A;
-  --data-ring:rgba(255,255,255,.20);
-  --danger:#F2B8B5;
-  --shadow-card:0 1px 2px rgba(0,0,0,.30);
-  --shadow-raised:0 8px 28px -12px rgba(0,0,0,.55);
-}
 
+  /* Collage Art Style (ui doc §9.1): ทุกค่าคงที่ ไม่มีการสุ่ม ผลลัพธ์จึงทดสอบซ้ำได้
+     มุมเอียงยึด "ตำแหน่งในสแตก" ไม่ใช่หมวด ชุดที่มี 2 ชิ้นจึงใช้แค่สองค่าแรก */
+  /* เศษส่วนไม่มีหน่วย ไม่ใช่ % เพราะ CSS calc คูณ % กับความยาวไม่ได้ ค่ายังหมายถึง 20% ของความกว้างทรงเหมือนเดิม */
+  --collage-overlap-max:.2;
+  --collage-rotate-1:-6deg; --collage-rotate-2:4deg; --collage-rotate-3:-3deg;
+  --collage-rotate-4:5deg;  --collage-rotate-5:-4deg;
+  --cutout-shadow:2px 3px 0 rgba(20,19,22,.18);
+  --cutout-edge:1.5px solid var(--surface);
+}
+/* มีชุดที่โฟกัสอยู่แล้ว: ยืม hue ของสี Primary มาเป็นพื้นหลัง (JS ตั้ง --theme-tint-h + data-tint) */
+:root[data-tint]{ --bg:hsl(var(--theme-tint-h) var(--theme-tint-s) var(--theme-tint-l)) }
+body{transition:background-color var(--dur-pan) var(--ease)}
+@media (prefers-reduced-motion:reduce){ body{transition:none} }
 /* ============================================================
    2. RESET + BASE
    ============================================================ */
@@ -120,6 +115,13 @@ body{padding-bottom:calc(var(--nav-h) + env(safe-area-inset-bottom))}
 }
 .hero__lede{color:var(--ink-muted);max-width:52ch;margin-bottom:var(--sp-5)}
 .hero__actions{display:flex;gap:var(--sp-3);flex-wrap:wrap;align-items:center}
+/* ปุ่มล็อกธีม: ไอคอนกุญแจ ไม่ใช่หัวใจ/สวอตช์ จะได้ไม่สับสนกับการล็อกสีเพื่อจัดชุด (FR-5) */
+.themelock{margin-inline-start:auto;flex:0 0 auto;width:44px;height:44px;
+  display:grid;place-items:center;font-size:18px;line-height:1;cursor:pointer;
+  border:1px solid var(--line);border-radius:var(--r-sm);
+  background:var(--surface);color:var(--ink)}
+.themelock:hover{background:var(--surface-sunken)}
+.themelock[aria-pressed="true"]{background:var(--surface-sunken);border-color:var(--ink)}
 
 /* ============================================================
    4. COMPONENTS
@@ -225,15 +227,34 @@ body{padding-bottom:calc(var(--nav-h) + env(safe-area-inset-bottom))}
 .card__rule{font-size:var(--fs-xs);font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent-solid)}
 .card__foot{display:flex;justify-content:flex-end;margin-top:var(--sp-4)}
 
-.tiles{display:flex;flex-direction:column;gap:var(--sp-3)}
-/* sm: tile 72px + ป้ายข้าง (plan §0.3 ยึดตาม ui doc §5) */
-.tile{display:flex;align-items:center;gap:var(--sp-3)}
-.tile__box{
-  flex:0 0 72px;width:72px;aspect-ratio:1;border-radius:var(--r-sm);
-  border:1px solid var(--data-ring);   /* วงแหวนกันกลืน บังคับ (ui doc §0 ข้อ 2) */
-  overflow:hidden;position:relative;background:var(--surface-sunken)
+/* ============ Collage Art Style (เฟส 4-D, ui doc §9.3) ============
+   ทรงเสื้อผ้าซ้อนทับกันเป็นภาพตัดแปะหนึ่งภาพ ป้ายทุกชนิดย้ายลงมาอยู่ใน legend ข้างล่าง
+   เพราะป้ายที่อยู่บนทรงจะถูกทรงถัดไปทับจนอ่านไม่ออก (ข้อจำกัดที่ ux doc §9 ตั้งไว้) */
+.collage{display:flex;flex-direction:column;gap:var(--sp-4)}
+.cstack{display:flex;justify-content:center;align-items:flex-end;padding-block:var(--sp-2)}
+/* ความกว้างของทรงหนึ่งชิ้น หาจาก n ชิ้นที่ทับกันชิ้นละ --collage-overlap-max ของตัวเอง:
+   กว้างรวม = w * (n - overlap*(n-1)) จึงย้อนกลับมาได้เป็นสูตรนี้ ทรงเลยพอดีการ์ดเสมอ
+   ไม่ว่าชุดจะมี 2 หรือ 5 ชิ้น และไม่ต้องมี breakpoint แยกต่อจำนวนชิ้น */
+.cut{
+  --cut-w:min(124px, calc(100% / (var(--n) - var(--collage-overlap-max) * (var(--n) - 1))));
+  flex:0 0 auto;width:var(--cut-w);aspect-ratio:1;position:relative;
+  transform:rotate(var(--rot,0deg));
+  border-radius:var(--r-sm);overflow:hidden;background:var(--surface-sunken);
+  border:var(--cutout-edge);box-shadow:var(--cutout-shadow),0 0 0 1px var(--data-ring)
 }
-.tile__box .shape{width:100%;height:100%}
+.cut + .cut{margin-inline-start:calc(-1 * var(--cut-w) * var(--collage-overlap-max))}
+.cut:nth-child(1){--rot:var(--collage-rotate-1);z-index:1}
+.cut:nth-child(2){--rot:var(--collage-rotate-2);z-index:2}
+.cut:nth-child(3){--rot:var(--collage-rotate-3);z-index:3}
+.cut:nth-child(4){--rot:var(--collage-rotate-4);z-index:4}
+.cut:nth-child(5){--rot:var(--collage-rotate-5);z-index:5}
+.cut .shape{width:100%;height:100%}
+/* CollageLegend: ที่เดียวที่เก็บข้อความทั้งหมดของชุด จึงต้องครบ ชื่อหมวด ชื่อชิ้น ชื่อสี hex
+   หนึ่งคอลัมน์ทุกขนาดจอ: การ์ดกว้างสุดแค่ 480px แบ่งสองคอลัมน์แล้วชื่อชิ้นถูกตัดด้วย ellipsis
+   ซึ่งขัดกฎ "ทุกชิ้นต้องมีชื่อ+hex อ่านได้ครบ" โดยตรง (เบี่ยงจาก ui doc §9.4 ด้วยเหตุผลนี้) */
+.clegend{display:flex;flex-direction:column;gap:var(--sp-2)}
+.clegend .tile__color{white-space:nowrap}
+.tile{display:flex;align-items:center;gap:var(--sp-3)}
 .tile__label{min-width:0;flex:1;overflow:hidden}
 .tile__cat,.tile__name,.tile__color{display:block;overflow:hidden}
 .tile__cat{font-size:var(--fs-xs);color:var(--ink-muted);text-transform:uppercase;letter-spacing:.06em;
@@ -252,7 +273,7 @@ body{padding-bottom:calc(var(--nav-h) + env(safe-area-inset-bottom))}
 .swapsugg__sw{flex:0 0 auto;width:14px;height:14px;border-radius:4px;
   border:1px dashed var(--ink-muted);box-shadow:0 0 0 1px var(--data-ring) inset}
 .tile__chip{flex:0 0 auto;width:44px;height:44px;border-radius:var(--r-sm);
-  border:1px solid var(--data-ring);align-self:center}
+  border:1px solid var(--data-ring);align-self:center;order:-1}
 /* สีล้ำ ไม่บังคับผ่านคอนทราสต์ (คือค่าจริงของเสื้อผ้า) กันกลืนด้วย --data-ring;
    ข้อความ ชื่อสี+hex ข้างกันเป็นตัวสื่อ chip นี้จึง aria-hidden ไม่สื่อด้วยสีเดี่ยว (ux §9) */
 /* เฟส 2: ปุ่มสลับทีละชิ้น + หัวใจบันทึก (ui View C) */
@@ -331,7 +352,6 @@ body{padding-bottom:calc(var(--nav-h) + env(safe-area-inset-bottom))}
 }
 .pbar__item.is-active{background:var(--surface-sunken);box-shadow:0 0 0 4px var(--surface-sunken)}
 .pbar__item b{color:var(--ink);font-weight:600}
-.pbar__role{font-size:var(--fs-xs);color:var(--ink-muted)}
 
 .advice{margin-top:var(--sp-4);display:flex;flex-direction:column;gap:var(--sp-2)}
 .advice li{
@@ -348,8 +368,11 @@ body{padding-bottom:calc(var(--nav-h) + env(safe-area-inset-bottom))}
   padding:var(--sp-3);position:relative;transition:box-shadow var(--dur-fast) var(--ease)
 }
 .gchip:hover{box-shadow:var(--shadow-card)}
+/* ตู้เสื้อผ้าใช้ภาษาภาพเดียวกับการ์ด (เงาทึบ + ขอบกระดาษ) แต่เป็นทรงเดี่ยว ไม่ซ้อนกัน
+   เพราะแต่ละชิ้นในตู้คือของคนละชิ้น ไม่ใช่ชุดเดียวกัน (ui doc §9.7) */
 .gchip__box{
-  aspect-ratio:1;border-radius:var(--r-sm);border:1px solid var(--data-ring);
+  aspect-ratio:1;border-radius:var(--r-sm);border:var(--cutout-edge);
+  box-shadow:var(--cutout-shadow),0 0 0 1px var(--data-ring);
   overflow:hidden;margin-bottom:var(--sp-3);background:var(--surface-sunken)
 }
 .gchip__box .shape{width:100%;height:100%}
@@ -480,6 +503,8 @@ body{padding-bottom:calc(var(--nav-h) + env(safe-area-inset-bottom))}
    5. RESPONSIVE (ui doc §5)
    ============================================================ */
 :root{--card-w:86vw;--peek:7vw}
+/* จอแคบต้องแยกทรงออกจากกันง่ายขึ้น จึงลดพื้นที่ที่ทรงหนึ่งบังอีกทรง (ui doc §9.4) */
+@media (max-width:639px){ :root{--collage-overlap-max:.14} }
 @media (min-width:640px){
   :root{--card-w:440px;--peek:40px;--nav-h:56px}
   .container{padding:0 var(--sp-5)}
@@ -490,12 +515,6 @@ body{padding-bottom:calc(var(--nav-h) + env(safe-area-inset-bottom))}
   .nav__btn[aria-current="true"]{border-bottom-color:var(--accent)}
   .nav__list{max-width:1040px;margin:0 auto;padding-inline:var(--sp-5)}
   body{padding-bottom:0;padding-top:var(--nav-h)}
-  /* md/lg: ป้ายอยู่ใต้ tile (plan §0.3) */
-  .tiles{flex-direction:row;flex-wrap:wrap;gap:var(--sp-4)}
-  .tile{flex-direction:column;align-items:stretch;gap:var(--sp-2);flex:0 0 96px}
-  .tile__box{flex:none;width:96px}
-  /* md/lg: tile เป็นคอลัมน์ สวอตช์กลายเป็นแถบสีเต็มความกว้างใต้ป้าย */
-  .tile__chip{width:100%;height:12px;align-self:stretch}
 
   .carousel-wrap{
     margin-inline:auto;
@@ -506,8 +525,55 @@ body{padding-bottom:calc(var(--nav-h) + env(safe-area-inset-bottom))}
 @media (min-width:1024px){
   :root{--card-w:480px;--peek:72px}
   .grid{grid-template-columns:repeat(4,1fr)}
-  .tile,.tile__box{flex-basis:104px;width:104px}
 }
+
+/* ============ ColorToneModal (เฟส 4-D, ui doc §9.3) ============
+   ใช้ <dialog> จริง จะได้ trap focus, Escape และการคืนโฟกัสตอนปิดจากเบราว์เซอร์เอง
+   ไม่ต้องเขียนกลไก modal ขึ้นมาใหม่ให้พลาดง่าย */
+.tonedlg{border:0;padding:0;background:transparent;max-width:none;max-height:none;
+  width:100%;height:100%;margin:0}
+.tonedlg::backdrop{background:rgba(20,19,22,.4)}
+.tonedlg__box{position:absolute;inset:auto 0 0 0;max-height:92vh;overflow-y:auto;
+  background:var(--surface);border-radius:var(--r-lg) var(--r-lg) 0 0;
+  padding:var(--sp-5) var(--sp-4) var(--sp-6);box-shadow:var(--shadow-raised)}
+.tonedlg__head{display:flex;align-items:flex-start;gap:var(--sp-3);margin-bottom:var(--sp-4)}
+.tonedlg__title{font-size:var(--fs-h2);font-weight:700}
+.tonedlg__sub{font-size:var(--fs-sm);color:var(--ink-muted)}
+.tonedlg__x{margin-inline-start:auto;flex:0 0 auto;width:44px;height:44px;border-radius:var(--r-sm);
+  border:1px solid var(--line);background:var(--surface);color:var(--ink);
+  display:inline-flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer}
+.tonedlg__x:hover{background:var(--surface-sunken)}
+.tonegrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--sp-3)}
+.tonegroup{display:flex;flex-direction:column;gap:var(--sp-2);align-items:flex-start;
+  padding:var(--sp-3);border:1px solid var(--line);border-radius:var(--r-md);
+  background:var(--surface);color:var(--ink);text-align:start;cursor:pointer;min-height:44px}
+.tonegroup:hover{background:var(--surface-sunken)}
+.tonegroup__name{font-size:var(--fs-sm);font-weight:600}
+.tonegroup__count{font-size:var(--fs-xs);color:var(--ink-muted)}
+.tonegroup__dots{display:flex;gap:2px;flex-wrap:wrap}
+.tonegroup__dot{width:14px;height:14px;border-radius:4px;border:1px solid var(--data-ring)}
+/* เฉดในกลุ่ม: สวอตช์ + ชื่อสี + hex เป็นข้อความเสมอ ห้ามเหลือแค่สี (ux §9) */
+.toneshade{display:flex;align-items:center;gap:var(--sp-3);width:100%;min-height:44px;
+  padding:var(--sp-2) var(--sp-3);border:1px solid var(--line);border-radius:var(--r-md);
+  background:var(--surface);color:var(--ink);text-align:start;cursor:pointer}
+.toneshade:hover{background:var(--surface-sunken)}
+.toneshade__sw{flex:0 0 auto;width:32px;height:32px;border-radius:var(--r-sm);border:1px solid var(--data-ring)}
+.toneshade__txt{font-size:var(--fs-sm);min-width:0;overflow-wrap:anywhere}
+.tonelist{display:flex;flex-direction:column;gap:var(--sp-2)}
+.tonedlg__back{align-self:flex-start;margin-bottom:var(--sp-3);min-height:44px;
+  border:1px solid var(--line);border-radius:var(--r-sm);background:var(--surface);
+  color:var(--ink);padding:0 var(--sp-3);cursor:pointer}
+.tonedlg__back:hover{background:var(--surface-sunken)}
+.morecolors{flex:0 0 auto;min-height:44px;white-space:nowrap;
+  border:1px dashed var(--ink-muted);border-radius:var(--r-pill);
+  background:var(--surface);color:var(--ink);padding:0 var(--sp-4);font-size:var(--fs-sm);cursor:pointer}
+.morecolors:hover{background:var(--surface-sunken)}
+@media (min-width:640px){
+  .tonedlg__box{inset:50% auto auto 50%;transform:translate(-50%,-50%);width:480px;
+    border-radius:var(--r-lg);max-height:80vh}
+  .tonegrid{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media (min-width:1024px){ .tonedlg__box{width:560px} }
 
 /* ============================================================
    6. REDUCED MOTION (ui doc §6)
@@ -729,7 +795,6 @@ body{padding-bottom:calc(var(--nav-h) + env(safe-area-inset-bottom))}
     <li style="display:contents"><button class="nav__btn" data-jump="sec-wardrobe"><span class="nav__icon" aria-hidden="true">👕</span>ตู้เสื้อผ้า</button></li>
     <li style="display:contents"><button class="nav__btn" data-jump="sec-favorites"><span class="nav__icon" aria-hidden="true">♥</span>บันทึกไว้</button></li>
     <li style="display:contents"><button class="nav__btn" data-jump="sec-analysis"><span class="nav__icon" aria-hidden="true">◔</span>วิเคราะห์</button></li>
-    <li style="display:contents"><button class="nav__btn" id="themeBtn"><span class="nav__icon" aria-hidden="true">◐</span><span id="themeLabel">ธีม</span></button></li>
   </ul>
 </nav>
 
@@ -745,6 +810,8 @@ body{padding-bottom:calc(var(--nav-h) + env(safe-area-inset-bottom))}
     <div class="hero__actions">
       <button class="btn btn--primary" id="heroGen">วันนี้แต่งอะไรดี?</button>
       <button class="btn btn--ghost" data-jump="sec-wardrobe">ดูตู้เสื้อผ้าของฉัน</button>
+      <button class="themelock" id="themeLockBtn" aria-pressed="false"
+        aria-label="ล็อกสีพื้นหลัง"><span aria-hidden="true">🔓</span></button>
     </div>
   </header>
 
@@ -815,6 +882,10 @@ body{padding-bottom:calc(var(--nav-h) + env(safe-area-inset-bottom))}
   </footer>
 </main>
 
+<dialog class="tonedlg" id="toneDlg" role="dialog" aria-modal="true" aria-labelledby="toneTitle">
+  <div class="tonedlg__box" id="toneBox"></div>
+</dialog>
+
 <dialog class="dialog" id="confirmDlg">
   <form method="dialog" class="dialog__box">
     <h2 class="dialog__title" id="dlgTitle">ยืนยัน</h2>
@@ -855,7 +926,6 @@ var RULE_TH = {
   monochrome:"Monochrome", analogous:"Analogous", complementary:"Complementary",
   triadic:"Triadic", "neutral-accent":"Neutral + Accent", neutral:"All Neutral"
 };
-var ROLE_TH = { primary:"สีหลัก", secondary:"สีรอง", neutral:"สีกลาง", accent:"สีเน้น" };
 
 var OCCASIONS = [
   { id:"unspecified", label:"ไม่ระบุ" }, { id:"everyday", label:"ทั่วไป" },
@@ -966,6 +1036,49 @@ function colorNameTH(hex){
   else if(c.s < 38) mod = "หม่น";
   return mod ? base + mod : base;
 }
+/* ============================================================
+   B1b. กลุ่มโทนสี (เฟส 4-D)
+   ไม่มี taxonomy ใหม่: ทุกคำมาจากคลังคำของ colorNameTH() ทั้งหมด แค่ตัดคำขยาย
+   (อ่อน/เข้ม/หม่น) ออกแล้วยุบชื่อเฉพาะเข้ากลุ่มแม่ ผู้ใช้จึงเห็นคำเดียวกับที่เห็นบนการ์ด
+   ============================================================ */
+var TONE_PARENT = {
+  "ขาว":"ขาว-เทา-ดำ", "ดำ":"ขาว-เทา-ดำ", "เทา":"ขาว-เทา-ดำ",
+  "ครีม":"เบจ-น้ำตาล", "เบจ":"เบจ-น้ำตาล", "น้ำตาลเทา":"เบจ-น้ำตาล", "น้ำตาล":"เบจ-น้ำตาล",
+  "แดงเลือดหมู":"แดง",
+  "เหลืองส้ม":"ส้ม",
+  "เขียวอมเหลือง":"เขียว", "เขียวอมฟ้า":"เขียว",
+  "กรมท่า":"น้ำเงิน", "น้ำเงินม่วง":"น้ำเงิน"
+};
+/* ลำดับกลุ่มคงที่ ไล่จากโทนกลางไปสีสด ผลลัพธ์จึงเหมือนเดิมทุกครั้ง ไม่ขึ้นกับลำดับของในตู้ */
+var TONE_ORDER = ["ขาว-เทา-ดำ","เบจ-น้ำตาล","แดง","ส้ม","เหลือง","เขียว","ฟ้า","น้ำเงิน","ม่วง","ชมพู"];
+function toneGroupOf(hex){
+  var n = colorNameTH(hex).replace(/(อ่อน|เข้ม|หม่น)$/, "");
+  return TONE_PARENT[n] || n;
+}
+/* คืนเฉพาะกลุ่มที่มีเฉดจริงในแหล่งข้อมูลที่ส่งเข้ามา กลุ่มว่างไม่โผล่ (spec Decision #4) */
+function toneGroups(hexes){
+  var bag = {}, seen = {};
+  hexes.forEach(function(raw){
+    var h = normHex(raw);
+    if(seen[h]) return;
+    seen[h] = 1;
+    var gname = toneGroupOf(h);
+    (bag[gname] = bag[gname] || []).push(h);
+  });
+  /* เรียงเฉดในกลุ่มจากอ่อนไปเข้มเสมอ ไม่ใช่ตามลำดับที่บังเอิญเพิ่มเข้าตู้
+     ผู้ใช้จึงกวาดตาหาเฉดที่ต้องการได้ และผลลัพธ์เท่าเดิมทุกครั้งที่เปิด */
+  Object.keys(bag).forEach(function(gname){
+    bag[gname].sort(function(a,b){
+      var d = hexToHsl(b).l - hexToHsl(a).l;
+      return d !== 0 ? d : (a < b ? -1 : a > b ? 1 : 0);
+    });
+  });
+  var known = TONE_ORDER.filter(function(g){ return bag[g]; });
+  /* กันกรณีมีชื่อกลุ่มที่ไม่ได้อยู่ในลำดับที่ตั้งไว้ ยอมให้โผล่ท้ายแถว ดีกว่าหายไปเงียบๆ */
+  var extra = Object.keys(bag).filter(function(g){ return TONE_ORDER.indexOf(g) < 0; }).sort();
+  return known.concat(extra).map(function(g){ return { group:g, shades:bag[g] }; });
+}
+
 /* ============================================================
    B2. คลังทรงเสื้อผ้า (ui doc §3.7)
    registry เป็น "ข้อมูล" เพิ่มทรงใหม่ = เติมรายการ ไม่ต้องแก้คอมโพเนนต์
@@ -1610,10 +1723,12 @@ function shapeNameOf(shapeId, category){ return resolveShape(shapeId, category).
 
 var state = {
   mode:null,                         /* null = ยังไม่เคยเลือก -> ให้ความพร้อมของตู้ตัดสิน (spec §4.6) */
-  occasion:"unspecified", theme:"system", lockedColor:null,   /* FR-5 สีที่ล็อกไว้ (hex) หรือ null */
+  occasion:"unspecified", lockedColor:null,   /* FR-5 สีที่ล็อกไว้ (hex) หรือ null */
+  themeLocked:false, themeTintH:null, seenTintNote:false,  /* เฟส 4-C ธีมพื้นหลังไดนามิก */
   wardrobe:[], favorites:[], batch:[], index:0, result:null,
   autoSwitchedTo:null, quotaWarned:false, seenStorageNote:false, migrated:false,
-  formOpen:false, editingId:null, formDraft:null, openMenuId:null, favEditId:null
+  formOpen:false, editingId:null, formDraft:null, openMenuId:null, favEditId:null,
+  tone:null                          /* เฟส 4-D { src:"lock"|"form", group:ชื่อกลุ่ม|null } */
 };
 
 /* ---------- โหลดสถานะ ---------- */
@@ -1624,10 +1739,12 @@ function init(){
     state.favorites = Array.isArray(saved.favorites) ? saved.favorites : [];
     var st = saved.settings || {};
     state.occasion       = st.occasion || "unspecified";
-    state.theme          = st.theme || "system";
     state.seenStorageNote= !!st.seenStorageNote;
     state.mode           = st.mode === "wardrobe" || st.mode === "idea" ? st.mode : null;
     state.lockedColor    = isValidHex(st.lockedColor || "") ? normHex(st.lockedColor) : null;
+    state.themeLocked    = !!st.themeLocked;
+    state.themeTintH     = typeof st.themeTintH === "number" ? st.themeTintH : null;
+    state.seenTintNote   = !!st.seenTintNote;
   }else{
     state.wardrobe = seedWardrobe();
   }
@@ -1644,7 +1761,8 @@ function init(){
     }
   });
   state.migrated = migrated;
-  applyTheme();
+  /* ธีมที่ล็อกไว้ต้องกลับมาตั้งแต่เฟรมแรก ไม่ใช่รอให้เจนชุดแรกเสร็จแล้วค่อยกระพริบเปลี่ยน */
+  if(state.themeLocked && state.themeTintH !== null) paintTint(state.themeTintH);
   /* ค่าเริ่มต้นของโหมดตามความพร้อมตู้ (spec §4.6) ถ้าไม่เคยเลือกไว้ */
   if(!state.mode) state.mode = wardrobeReady() ? "wardrobe" : "idea";
   renderOccasion();
@@ -1655,6 +1773,7 @@ function init(){
   renderColorLock();
   renderBanners();
   renderMode();
+  renderThemeLock();
   observeSections();
   if(migrated) persist();   /* เขียนผลการย้ายข้อมูลกลับลงเครื่องครั้งเดียว */
 }
@@ -1668,8 +1787,9 @@ function persist(opts){
     wardrobe: state.wardrobe,
     favorites: state.favorites,
     settings: {
-      mode:state.mode, occasion:state.occasion, theme:state.theme,
-      lockedColor:state.lockedColor, seenStorageNote:state.seenStorageNote
+      mode:state.mode, occasion:state.occasion,
+      lockedColor:state.lockedColor, seenStorageNote:state.seenStorageNote,
+      themeLocked:state.themeLocked, themeTintH:state.themeTintH, seenTintNote:state.seenTintNote
     }
   });
   if(!res.ok && res.quota && opts && opts.onQuota) opts.onQuota();
@@ -1705,10 +1825,13 @@ function lockColorOptions(){
 function renderColorLock(){
   var slot = $("#colorLockChips"); if(!slot) return;
   var none = '<button class="chip" role="radio" data-lock="" aria-checked="'+(!state.lockedColor)+'">ไม่ระบุ</button>';
+  /* ปุ่มอยู่ท้ายแถวเสมอ เพราะแถวนี้เลื่อนแนวนอนจนสีท้ายๆ หลุดจอได้ (spec Decision #4)
+     ไม่ใช่ role="radio" เพราะมันไม่ใช่ตัวเลือกสีหนึ่งตัว แต่เป็นทางเข้าไปดูทั้งหมด */
+  var more = '<button class="morecolors" type="button" data-tone="lock">ดูสีเพิ่มเติม</button>';
   slot.innerHTML = none + lockColorOptions().map(function(h){
     return '<button class="preset" role="radio" data-lock="'+h+'" aria-checked="'+(state.lockedColor === h)+'" '+
       'style="background:'+h+'" aria-label="'+esc(colorNameTH(h)+" "+h)+'"></button>';
-  }).join("");
+  }).join("") + more;
 }
 function renderOccasion(){
   $("#occasionChips").innerHTML = OCCASIONS.map(function(o){
@@ -1777,12 +1900,15 @@ function suggsHTML(look){
   }).filter(Boolean).join("");
   return rows ? '<ul class="swapsugg">'+rows+'</ul>' : "";
 }
-function tileHTML(item, cat, opts){
+/* เฟส 4-D: ทรงไปอยู่ในสแตกตัดแปะ ส่วนข้อความทั้งหมดมาอยู่ในแถว legend นี้แถวเดียว
+   หน้าที่ของแถวคือ "ข้อมูลครบของชิ้นนั้น" ตามกฎไม่สื่อด้วยสีอย่างเดียว: สวอตช์ + ชื่อหมวด +
+   ชื่อชิ้น/ชื่อทรง + ชื่อสี + hex และปุ่มสลับที่ไม่มีวันถูกทรงอื่นทับ */
+function legendRowHTML(item, cat, opts){
   var hex = normHex(item.color), name = colorNameTH(hex);
   /* โหมดไอเดียไม่มีชื่อชิ้นจริง จึงแสดง "ชื่อทรง" แทน
      ต้องมีข้อความเสมอ ไม่งั้นสื่อด้วยรูปทรง/สีอย่างเดียว (ux §9) */
   var label = item.isIdea ? shapeNameOf(item.shapeId, cat) : item.name;
-  /* ปุ่มสลับทีละชิ้น (FR-2) เฉพาะการ์ดโฟกัส + โหมดจากตู้ของฉัน
+  /* ปุ่มสลับทีละชิ้น (FR-2) เฉพาะโหมดจากตู้ของฉัน
      หมวดที่มีชิ้นเดียวในตู้ = ไม่มีตัวถัดไปให้สลับ จึง disabled + hint (spec §7C) */
   var swapBtn = "", reco = "";
   if(opts && opts.swap){
@@ -1797,7 +1923,7 @@ function tileHTML(item, cat, opts){
       'aria-label="เปลี่ยน'+esc(CATEGORY_TH[cat]||cat)+(isTop ? " (ตอนนี้คือตัวที่แนะนำ เข้ากับชุดนี้ดีที่สุด)" : "")+'"'+
       (many ? '' : ' disabled title="มีชิ้นเดียวในหมวดนี้"')+'>🔄</button>';
   }
-  return '<li class="tile"><span class="tile__box">'+shapeSVG(item.shapeId, hex, cat)+'</span>'+
+  return '<li class="tile">'+
     '<span class="tile__label">'+
       '<span class="tile__cat">'+esc(CATEGORY_TH[cat])+reco+'</span>'+
       '<span class="tile__name" title="'+esc(label)+'">'+esc(label)+'</span>'+
@@ -1806,15 +1932,25 @@ function tileHTML(item, cat, opts){
     '<span class="tile__chip" aria-hidden="true" style="background:'+hex+'"></span>'+
     swapBtn+'</li>';
 }
+/* สแตกทรงตัดแปะ: --n คือจำนวนทรงจริง หมวดที่ชุดนี้ไม่มีของไม่กินตำแหน่งในสแตกเลย
+   ชุด 2 ชิ้นจึงใช้แค่มุมเอียงสองค่าแรก ไม่เว้นช่องว่างของหมวดที่หายไป (spec Decision #5) */
+function collageHTML(o, cats, opts){
+  var cuts = cats.map(function(c){
+    return '<li class="cut">'+shapeSVG(o.items[c].shapeId, normHex(o.items[c].color), c)+'</li>';
+  }).join("");
+  var rows = cats.map(function(c){ return legendRowHTML(o.items[c], c, opts); }).join("");
+  return '<div class="collage" style="--n:'+cats.length+'">'+
+    '<ul class="cstack" aria-hidden="true">'+cuts+'</ul>'+
+    '<ul class="clegend">'+rows+'</ul></div>';
+}
 function pbarHTML(breakdown, cardId){
   var segs = breakdown.map(function(b,i){
-    var label = b.name + " " + b.pct + "% (" + ROLE_TH[b.role || "neutral"] + ")";
     /* เป็น span ไม่ใช่ button: แทร็กทั้งแถบคือ role="img" หนึ่งภาพ ถ้าลูกโฟกัสได้
        ผู้ใช้คีย์บอร์ดจะ tab เข้าไปในสิ่งที่ AT บอกว่าเป็นภาพ และช่องสูง 12px
        ก็เล็กกว่าเกณฑ์ touch target ค่าทุกตัวอ่านได้จาก legend ที่เป็นข้อความอยู่แล้ว */
     return '<span class="pbar__seg" data-card="'+cardId+'" data-idx="'+i+'" '+
       'style="flex:'+b.pct+' 1 0;background:'+b.hex+'" '+
-      'title="'+esc(b.name+" · "+b.hex+" · "+ROLE_TH[b.role||"neutral"]+" · "+b.pct+"%")+'"></span>';
+      'title="'+esc(b.name+" · "+b.hex+" · "+b.pct+"%")+'"></span>';
   }).join("");
   /* direct label เฉพาะ segment >= 12% ที่เหลืออ่านจาก legend (ui doc §3.4) */
   var labs = breakdown.map(function(b){
@@ -1824,8 +1960,7 @@ function pbarHTML(breakdown, cardId){
   var legend = breakdown.map(function(b,i){
     return '<span class="pbar__item" data-legend="'+cardId+'-'+i+'">'+
       '<span class="swatch swatch--sm" style="background:'+b.hex+'"></span>'+
-      '<span><b>'+esc(b.name)+'</b> '+b.pct+'% <span class="tnum">'+esc(b.hex)+'</span>'+
-      ' <span class="pbar__role">'+esc(ROLE_TH[b.role || "neutral"])+'</span></span></span>';
+      '<span><b>'+esc(b.name)+'</b> '+b.pct+'% <span class="tnum">'+esc(b.hex)+'</span></span></span>';
   }).join("");
   var summary = breakdown.map(function(b){ return b.name+" "+b.pct+"%"; }).join(", ");
   return '<div class="pbar">'+
@@ -1841,9 +1976,7 @@ function cardHTML(o, i, focused){
      updateCarousel() สลับแค่คลาส ไม่ได้เรนเดอร์ใหม่ การ์ดนั้นจึงไม่มีปุ่มสลับเลย */
   var canSwap = o.sourceMode === "wardrobe";
   /* เฟส 4-A: ไม่มีหมวดที่ถูกบังคับแล้ว หมวดที่ชุดนี้ไม่มีของก็ไม่ต้องกันช่องว่างไว้ */
-  var tiles = CATEGORY_ORDER
-    .filter(function(c){ return o.items[c]; })
-    .map(function(c){ return tileHTML(o.items[c], c, { swap:canSwap, i:i, look:o }); }).join("");
+  var cats = CATEGORY_ORDER.filter(function(c){ return o.items[c]; });
   var faved = hasFav(favKey(o));
   return '<div class="cardslot">'+
     '<article class="card '+(focused ? "card--focused" : "card--adjacent")+'" '+
@@ -1856,7 +1989,7 @@ function cardHTML(o, i, focused){
       '<button class="card__fav" data-fav="'+i+'" aria-pressed="'+faved+'" '+
         'aria-label="'+(faved ? "เอาชุดนี้ออกจากที่บันทึก" : "บันทึกชุดนี้")+'">'+(faved ? "♥" : "♡")+'</button>'+
     '</div>'+
-    '<ul class="tiles">'+tiles+'</ul>'+
+    collageHTML(o, cats, { swap:canSwap, i:i, look:o })+
     (canSwap ? suggsHTML(o) : "")+
     pbarHTML(o.colorBreakdown, cardId)+
     '<ul class="advice">'+o.advice.map(function(a){ return "<li>"+a+"</li>"; }).join("")+'</ul>'+
@@ -1869,6 +2002,7 @@ function cardHTML(o, i, focused){
 }
 function renderResults(){
   var slot = $("#resultsSlot");
+  applyThemeTint();
 
   if(state.result && state.result.insufficient){          /* A3 */
     /* เฟส 4-A: ไม่มีหมวดที่ถูกบังคับอีกแล้ว เกณฑ์เหลือ "ต้องมีของ 2 หมวดต่างกัน"
@@ -2007,7 +2141,8 @@ function renderForm(){
         '<span class="previewrow__txt">ตัวอย่างที่จะบันทึก: <b id="fPrevName">'+esc(shapeNameOf(d.shapeId, d.category))+'</b><br>'+
           '<span id="fPrevColor">'+esc(colorNameTH(d.color))+' · <span class="tnum">'+esc(d.color)+'</span></span></span>'+
       '</div>'+
-      '<div class="presets">'+presets+'</div>'+
+      '<div class="presets">'+presets+
+        '<button type="button" class="morecolors" data-tone="form">ดูสีเพิ่มเติม</button></div>'+
       '<div class="hexrow">'+
         '<span class="swatch swatch--md" id="fSwatch" style="background:'+d.color+'"></span>'+
         '<input class="input tnum" id="fHex" value="'+esc(d.color)+'" maxlength="7" spellcheck="false">'+
@@ -2024,6 +2159,112 @@ function renderForm(){
       '<button type="submit" class="btn btn--primary">'+(state.editingId ? "บันทึกการแก้ไข" : "เพิ่มเข้าตู้")+'</button>'+
       '<button type="button" class="btn btn--ghost" data-cancel="1">ยกเลิก</button>'+
     '</div></form>';
+}
+
+/* ---------- ColorToneModal (เฟส 4-D) ---------- */
+/* สองทางเข้าจงใจใช้คนละแหล่งข้อมูล: แถว "วันนี้อยากใส่สีอะไร?" ตอบว่า "เรามีสีอะไรอยู่"
+   ส่วนตัวเลือกสีในฟอร์มตอบว่า "ชิ้นใหม่นี้เป็นสีอะไรได้บ้าง" ถ้ากรองตามของที่มี
+   ทางเข้าหลังจะว่างเปล่าพอดีกับคนที่ตู้ยังว่าง ซึ่งเป็นคนที่ต้องใช้มันที่สุด (spec Decision #4) */
+function toneSourceHexes(src){
+  if(src === "form") return PRESET_COLORS.slice();
+  return state.wardrobe.map(function(g){ return normHex(g.color); });
+}
+function openToneModal(src){
+  state.tone = { src:src, group:null };
+  renderToneModal();
+  var d = $("#toneDlg");
+  if(d && !d.open) d.showModal();
+}
+function closeToneModal(){
+  state.tone = null;
+  var d = $("#toneDlg");
+  if(d && d.open) d.close();   /* เบราว์เซอร์คืนโฟกัสไปปุ่มที่เปิด modal ให้เอง */
+}
+function renderToneModal(){
+  var box = $("#toneBox"); if(!box || !state.tone) return;
+  var src = state.tone.src;
+  var groups = toneGroups(toneSourceHexes(src));
+  var head = '<div class="tonedlg__head"><span>'+
+      '<span class="tonedlg__title" id="toneTitle">เลือกสีตามโทน</span><br>'+
+      '<span class="tonedlg__sub">'+(src === "form" ? "สีทั้งหมดที่เลือกได้" : "จากตู้ของคุณ")+'</span>'+
+    '</span><button type="button" class="tonedlg__x" data-toneclose="1" aria-label="ปิด">✕</button></div>';
+
+  if(!groups.length){
+    box.innerHTML = head + '<p class="empty__body">ตู้ยังไม่มีสีให้จัดกลุ่ม เพิ่มเสื้อผ้าก่อนแล้วค่อยกลับมาดู</p>';
+    return;
+  }
+  var picked = state.tone.group && groups.filter(function(gr){ return gr.group === state.tone.group; })[0];
+  if(!picked){
+    box.innerHTML = head + '<div class="tonegrid">' + groups.map(function(gr){
+      var dots = gr.shades.slice(0,6).map(function(h){
+        return '<span class="tonegroup__dot" style="background:'+h+'"></span>';
+      }).join("");
+      return '<button type="button" class="tonegroup" data-tonegroup="'+esc(gr.group)+'" '+
+        'aria-label="'+esc("โทน"+gr.group+" "+gr.shades.length+" เฉด")+'">'+
+        '<span class="tonegroup__dots" aria-hidden="true">'+dots+'</span>'+
+        '<span class="tonegroup__name">'+esc(gr.group)+'</span>'+
+        '<span class="tonegroup__count">'+gr.shades.length+' เฉด</span></button>';
+    }).join("") + '</div>';
+    return;
+  }
+  box.innerHTML = head +
+    '<button type="button" class="tonedlg__back" data-tonegroup="">← ทุกกลุ่มโทน</button>'+
+    '<div class="tonelist">' + picked.shades.map(function(h){
+      var nm = colorNameTH(h);
+      return '<button type="button" class="toneshade" data-toneshade="'+h+'">'+
+        '<span class="toneshade__sw" style="background:'+h+'"></span>'+
+        '<span class="toneshade__txt">'+esc(nm)+' · <span class="tnum">'+esc(h)+'</span></span></button>';
+    }).join("") + '</div>';
+}
+/* เลือกเฉดแล้วต้องให้ผลเหมือนแตะสวอตช์ในแถวที่เปิดมันมา ไม่ใช่เส้นทางพิเศษของ modal */
+function pickToneShade(hex){
+  var src = state.tone && state.tone.src;
+  closeToneModal();
+  if(src === "form"){
+    if(!state.formDraft) return;
+    state.formDraft.color = normHex(hex);
+    renderForm();
+    say("#wardFeedback", "เลือกสี" + colorNameTH(hex) + " (" + normHex(hex) + ") ให้ชิ้นนี้แล้ว");
+    return;
+  }
+  state.lockedColor = normHex(hex);
+  renderColorLock(); persist(); regenerate(true);
+  say("#liveFeedback", "จัดชุดรอบสี" + colorNameTH(hex) + "ให้แล้ว");
+}
+
+/* ---------- ธีมพื้นหลังไดนามิก (เฟส 4-C) ---------- */
+/* ยืมแค่ hue ของสี Primary ของการ์ดที่กำลังโฟกัส ส่วน S/L มาจากโทเคนคงที่เสมอ
+   ดังนั้นไม่ว่าชุดจะสีอะไร พื้นหลังก็ยังเป็นพาสเทลสว่างเท่าเดิม คอนทราสต์กับ --ink ไม่ตก */
+function paintTint(h){
+  var root = document.documentElement;
+  root.style.setProperty("--theme-tint-h", String(h));
+  root.setAttribute("data-tint", "");
+}
+function focusedPrimaryHex(){
+  var o = state.batch && state.batch[state.index];
+  if(!o || !o.colorBreakdown || !o.colorBreakdown.length) return null;
+  var rows = o.colorBreakdown;
+  for(var i=0;i<rows.length;i++){ if(rows[i].role === "primary") return rows[i].hex; }
+  return rows[0].hex;   /* ลุคที่เป็นสีกลางล้วนไม่มี primary ใช้สัดส่วนสูงสุดแทน */
+}
+function applyThemeTint(){
+  if(state.themeLocked) return;                 /* ล็อกไว้ = พื้นหลังค้างที่สีเดิม */
+  var hex = focusedPrimaryHex();
+  if(!hex) return;                              /* ยังไม่มีชุด = พื้นหลัง #FBFAF7 เดิม */
+  state.themeTintH = Math.round(hexToHsl(hex).h);
+  paintTint(state.themeTintH);
+  /* ครั้งแรกที่พื้นหลังขยับเอง ต้องบอกว่าเป็นความตั้งใจ ไม่ใช่บั๊ก (ux §7B) */
+  if(!state.seenTintNote){
+    state.seenTintNote = true;
+    say("#liveFeedback", "พื้นหลังจะขยับสีตามชุดที่แนะนำ กดปุ่มกุญแจถ้าอยากให้หยุดที่สีนี้");
+    persist();
+  }
+}
+function renderThemeLock(){
+  var b = $("#themeLockBtn"); if(!b) return;
+  b.setAttribute("aria-pressed", String(state.themeLocked));
+  b.setAttribute("aria-label", state.themeLocked ? "ปลดล็อกสีพื้นหลัง" : "ล็อกสีพื้นหลัง");
+  b.firstChild.textContent = state.themeLocked ? "🔒" : "🔓";
 }
 
 /* ---------- แบนเนอร์ (ux §7B no silent state change) ---------- */
@@ -2056,13 +2297,6 @@ function renderBanners(){
   $("#storageBannerSlot").innerHTML = out;
 }
 
-/* ---------- ธีม ---------- */
-function applyTheme(){
-  if(state.theme === "system") document.documentElement.removeAttribute("data-theme");
-  else document.documentElement.setAttribute("data-theme", state.theme);
-  var lbl = { system:"ธีม: ตามเครื่อง", light:"ธีม: สว่าง", dark:"ธีม: มืด" }[state.theme];
-  var el = $("#themeLabel"); if(el){ el.textContent = "ธีม"; $("#themeBtn").setAttribute("aria-label", lbl); }
-}
 </script>
 
 <script>
@@ -2084,6 +2318,7 @@ function updateCarousel(){
   });
   var pos = document.querySelector(".navrow__pos");
   if(pos) pos.textContent = "ชุดที่ " + (state.index+1) + " จาก " + state.batch.length;
+  applyThemeTint();   /* พื้นหลังตามชุด "ที่กำลังดู" ไม่ใช่แค่ชุดแรกของแบตช์ */
 }
 function goTo(delta){
   if(state.batch.length < 2) return;
@@ -2359,7 +2594,8 @@ document.addEventListener("click", function(e){
   var t = e.target.closest("[data-jump],[data-mode],[data-occ],[data-nav],[data-gen],[data-setmode],"+
     "[data-add],[data-edit],[data-del],[data-more],[data-cat],[data-shape],[data-preset],[data-cancel],"+
     "[data-clearsample],[data-notedone],[data-migdone],[data-swap],[data-fav],[data-lock],[data-goto],"+
-    "[data-favmore],[data-favedit],[data-favdup],[data-favdel],.pbar__seg");
+    "[data-favmore],[data-favedit],[data-favdup],[data-favdel],.pbar__seg,"+
+    "[data-tone],[data-toneclose],[data-tonegroup],[data-toneshade]");
   /* คลิกที่อื่น = ปิดเมนูของชิ้นเสื้อผ้า */
   if(state.openMenuId && (!t || (!t.dataset.more && !t.dataset.edit && !t.dataset.del
       && !t.dataset.favmore && !t.dataset.favedit && !t.dataset.favdup && !t.dataset.favdel))){
@@ -2372,6 +2608,17 @@ document.addEventListener("click", function(e){
     state.favEditId = null; renderFavorites();
   }
   if(!t) return;
+  /* ColorToneModal (เฟส 4-D) */
+  if(t.dataset.tone){ openToneModal(t.dataset.tone); return; }
+  if(t.dataset.toneclose){ closeToneModal(); return; }
+  if(t.dataset.tonegroup !== undefined && state.tone){
+    state.tone.group = t.dataset.tonegroup || null;
+    renderToneModal();
+    var backBtn = $("#toneBox").querySelector(state.tone.group ? ".tonedlg__back" : ".tonegroup");
+    if(backBtn) backBtn.focus();
+    return;
+  }
+  if(t.dataset.toneshade){ pickToneShade(t.dataset.toneshade); return; }
   if(t.dataset.more){
     state.openMenuId = (state.openMenuId === t.dataset.more) ? null : t.dataset.more;
     renderWardrobe();
@@ -2536,12 +2783,25 @@ $("#heroGen").addEventListener("click", function(){
   document.getElementById("sec-suggest").scrollIntoView({ behavior:"smooth", block:"start" });
   regenerate(false);
 });
-$("#themeBtn").addEventListener("click", function(){
-  state.theme = state.theme === "system" ? "light" : state.theme === "light" ? "dark" : "system";
-  applyTheme(); persist();
-  say("#liveFeedback", { system:"ใช้ธีมตามเครื่อง", light:"ธีมสว่าง", dark:"ธีมมืด" }[state.theme]);
-});
 $("#addBtn").addEventListener("click", function(){ openForm(null); });
+
+/* แตะนอกแผง = ปิด (Escape กับการคืนโฟกัสเป็นหน้าที่ของ <dialog> เองอยู่แล้ว) */
+$("#toneDlg").addEventListener("click", function(e){
+  if(!e.target.closest(".tonedlg__box")) closeToneModal();
+});
+/* ปิดด้วย Escape ผ่านกลไกของเบราว์เซอร์ ต้องล้าง state ตามให้ตรงกับสิ่งที่เห็น */
+$("#toneDlg").addEventListener("close", function(){ state.tone = null; });
+
+/* ล็อกธีม = คุมพื้นหลังหน้าเว็บเท่านั้น คนละเรื่องกับสวอตช์ล็อกสีที่คุมชุดที่แนะนำ (ux §7) */
+$("#themeLockBtn").addEventListener("click", function(){
+  state.themeLocked = !state.themeLocked;
+  if(!state.themeLocked) applyThemeTint();
+  renderThemeLock();
+  persist();
+  say("#liveFeedback", state.themeLocked
+    ? "ล็อกพื้นหลังไว้ที่สีนี้แล้ว"
+    : "ปลดล็อกแล้ว พื้นหลังจะขยับตามชุดใหม่อีกครั้ง");
+});
 
 /* nav active ตาม section ที่อยู่ในจอ */
 function observeSections(){

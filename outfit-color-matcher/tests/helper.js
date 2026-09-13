@@ -41,7 +41,7 @@ async function open(browser, seed, opts){
 
 function store(wardrobe, settings){
   return { wardrobe: wardrobe, favorites: [],
-           settings: Object.assign({ mode:"wardrobe", occasion:"unspecified", theme:"system" }, settings||{}) };
+           settings: Object.assign({ mode:"wardrobe", occasion:"unspecified" }, settings||{}) };
 }
 function g(id, cat, shapeId, color, name){
   return { id:id, name:name || (id+" "+cat), category:cat, shapeId:shapeId, color:color };

@@ -54,11 +54,12 @@ const CONTRAST_PROBES = [
     function probes_arg(){ return CONTRAST_PROBES; }
   }
 
-  /* ---- D1 คอนทราสต์จริง ทั้งสองธีม ---- */
-  for(const theme of ["light","dark"]){
+  /* ---- D1 คอนทราสต์จริง (เฟส 4-C: เหลือโหมดเดียว วนสองธีมไม่มีความหมายอีกต่อไป) ---- */
+  {
+    const theme = "light";
     const { ctx, page, errs } = await H.open(browser, null, { context:{ colorScheme: theme } });
     const rows = await contrastTable(page, theme);
-    console.log("\n--- คอนทราสต์จริง (" + theme + ") ---");
+    console.log("\n--- คอนทราสต์จริง ---");
     rows.forEach(r => {
       if(r.missing){ console.log("  (ไม่พบ) " + r.label); return; }
       console.log("  " + (r.ratio >= r.min ? "ok  " : "ต่ำ ") + String(r.ratio).padStart(6) + ":1  " + r.label + "  " + r.fg + " บน " + r.bg);
@@ -178,17 +179,46 @@ const CONTRAST_PROBES = [
     allErrs.push(...errs); await ctx.close();
   }
 
-  /* ---- D7 ธีม ---- */
+  /* ---- D7 ธีมพื้นหลังไดนามิก (เฟส 4-C แทนที่เทสต์สลับ light/dark เดิม) ---- */
+  {
+    /* ตู้ตัวอย่างเป็นโทนเบจ/ครีมล้วน hue ของ Primary จึงแทบไม่ขยับ
+       เทสต์นี้ต้องการพิสูจน์ "กลไก" จึง seed ตู้ที่สีห่างกันคนละซีกวงล้อสีจริงๆ */
+    const wide = H.store([
+      H.g("t1","top","tee-crew","#C0392B","เสื้อแดง"),
+      H.g("t2","top","polo","#2E86C1","เสื้อฟ้า"),
+      H.g("t3","top","hoodie","#27AE60","เสื้อเขียว"),
+      H.g("b1","bottom","chino","#F4F1E8","กางเกงครีม"),
+      H.g("b2","bottom","jeans-straight","#2C2C2C","ยีนส์ดำ"),
+      H.g("s1","shoes","sneaker","#FFFFFF","รองเท้าขาว")
+    ]);
+    const { ctx, page, errs } = await H.open(browser, wide);
+    const bgOfPage = () => page.evaluate(() => getComputedStyle(document.body).backgroundColor);
+    const hues = new Set();
+    for(let i=0;i<10;i++){
+      await page.click("#heroGen"); await page.waitForTimeout(120);
+      hues.add(await page.evaluate(() => document.documentElement.style.getPropertyValue("--theme-tint-h")));
+    }
+    R.ok(hues.size >= 2, "D7a · ธีมไดนามิก: พื้นหลังเปลี่ยน hue ตามชุดใหม่จริง", [...hues].join(","));
+
+    await page.click("#themeLockBtn"); await page.waitForTimeout(80);
+    const locked = await bgOfPage();
+    const pressed = await page.getAttribute("#themeLockBtn", "aria-pressed");
+    for(let i=0;i<6;i++){ await page.click("#heroGen"); await page.waitForTimeout(90); }
+    const afterLock = await bgOfPage();
+    R.ok(pressed === "true" && locked === afterLock,
+      "D7b · ล็อกธีม: เจนใหม่ 6 ครั้งแล้วพื้นหลังไม่ขยับ", pressed + " " + locked + " -> " + afterLock);
+
+    const lockLabel = await page.getAttribute("#themeLockBtn", "aria-label");
+    await page.click("#themeLockBtn"); await page.waitForTimeout(80);
+    const unlockLabel = await page.getAttribute("#themeLockBtn", "aria-label");
+    R.ok(!!lockLabel && !!unlockLabel && lockLabel !== unlockLabel,
+      "D7c · ปุ่มล็อกธีมบอกสถานะด้วยข้อความ ไม่ใช่สี/ไอคอนอย่างเดียว", lockLabel + " / " + unlockLabel);
+    allErrs.push(...errs); await ctx.close();
+  }
+
+  /* ---- D7d เส้นทรงเสื้อผ้ายังคำนวณจากสีชิ้นนั้น ไม่ใช่จากพื้นหลังหน้า (ตู้ตัวอย่างเดิม) ---- */
   {
     const { ctx, page, errs } = await H.open(browser, null);
-    await page.click("#themeBtn"); await page.waitForTimeout(80);
-    const t1 = await page.getAttribute("html", "data-theme");
-    await page.click("#themeBtn"); await page.waitForTimeout(80);
-    const t2 = await page.getAttribute("html", "data-theme");
-    await page.reload(); await page.waitForTimeout(450);
-    const t3 = await page.getAttribute("html", "data-theme");
-    R.ok(t1 === "light" && t2 === "dark" && t3 === "dark",
-      "D7a · ธีม: สลับ light/dark ได้และจำค่าไว้หลังรีเฟรช", [t1,t2,t3].join(" -> "));
     const lines = await page.evaluate(() => {
       const out = {};
       document.querySelectorAll("#wardrobeSlot .gchip").forEach(el => {
@@ -198,7 +228,7 @@ const CONTRAST_PROBES = [
       return out;
     });
     R.ok(/^rgba\(0,0,0/.test(lines["เสื้อเชิ้ตขาว"]) && /^rgba\(255,255,255/.test(lines["กระโปรงดำ"]),
-      "D7b · ui §7: ในธีมมืด เส้นของเสื้อขาว/ดำ ยังคำนวณจากสีเสื้อ ไม่ใช่จากธีม");
+      "D7d · ui §7: เส้นของเสื้อขาว/ดำ คำนวณจากสีเสื้อ ไม่ใช่จากพื้นหลังของหน้า");
     allErrs.push(...errs); await ctx.close();
   }
 
