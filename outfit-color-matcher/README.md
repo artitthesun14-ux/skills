@@ -19,23 +19,27 @@
 ## เทสต์
 
 ```bash
-node tests/engine-test.js     # engine + คอนทราสต์ ไม่ต้องใช้เบราว์เซอร์
-node tests/browser-test.js    # acceptance criteria ผ่านเบราว์เซอร์จริง + เก็บภาพหน้าจอ
-node tests/image-test.js      # ดึงสีจากรูป, แก้ไขโดยไม่แตะรูป, localStorage เต็ม
+npm i playwright-core --no-save     # ครั้งแรกครั้งเดียว (browser test ต้องใช้)
+./build.sh                          # เทสต์เบราว์เซอร์วิ่งบนไฟล์ที่ build แล้ว
+
+node tests/engine-test.js       # engine + คอนทราสต์ ไม่ต้องใช้เบราว์เซอร์
+node tests/shape-test.js        # ทะเบียนทรง SVG, fallback, สีเส้นตามความสว่าง, invariant ของ engine
+node tests/migration-test.js    # ข้อมูลผู้ใช้เวอร์ชันเก่า, shapeId ที่ไม่รู้จัก
+node tests/ac-test.js           # acceptance criteria ของ FR-0/FR-1 และสถานะใน spec §7C
+node tests/a11y-test.js         # คอนทราสต์จริงในหน้า, คีย์บอร์ด, touch target, ธีม, responsive
+node tests/regress.js           # ยิงซ้ำ 700 แบตช์ ทุกโหมด x ทุกโอกาส ตรวจ invariant ทุกชุด
+node tests/browser-test.js      # acceptance ผ่านเบราว์เซอร์จริง + เก็บภาพหน้าจอ
 ```
 
-`engine-test.js` ใช้ node ล้วน วิ่งได้ทันที (มันดึงโค้ดจาก `app.html` โดยตรง จึงทดสอบของจริงเสมอ)
+`engine-test.js` ใช้ node ล้วน วิ่งได้ทันที (ดึงโค้ดจาก `app.html` โดยตรง จึงทดสอบของจริงเสมอ)
+ที่เหลือต้องมี `playwright-core` และ Chromium (หาที่ `/opt/pw-browsers/chromium`)
 
-อีกสองตัวต้องมี `playwright-core` และ Chromium:
-
-```bash
-npm i playwright-core --no-save
-node tests/browser-test.js     # จะหา Chromium ที่ /opt/pw-browsers/chromium
-```
+รวมทั้งหมด 331 ข้อ (engine 90 · shape 17 · migration 10 · ac 120 · a11y 20 · regress 2 · browser 72)
+ปัจจุบันผ่านหมด ต้องเขียวทุกชุดก่อนทุกครั้งที่จะ publish
 
 ## ขอบเขตตอนนี้
 
-เฟส 1: ตู้เสื้อผ้า + engine จับคู่สี + หน้าแนะนำชุดสองโหมด (`สีที่เราแนะนำ` / `จากตู้ของฉัน`)
-เฟส 2-3 (สลับทีละชิ้น, ชุดโปรด, วิเคราะห์ตู้) ดูแผนใน `PROJECT_STATE.md`
+เฟส 1-2: ตู้เสื้อผ้า + engine จับคู่สี + แนะนำชุดสองโหมด + สลับทีละชิ้น + บันทึกชุดโปรด (สูงสุด 20)
+เฟส 3 (วิเคราะห์ตู้ / เลือกสีก่อน / Generator) ดูแผนใน `PROJECT_STATE.md`
 
-เอกสารทั้งหมดอยู่ใน `docs/`
+เอกสารทั้งหมดอยู่ใน `docs/` ถ้าเป็นเซสชันใหม่ที่มาทำงานต่อ ให้อ่าน `HANDOFF.md` ก่อน

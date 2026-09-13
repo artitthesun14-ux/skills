@@ -28,6 +28,27 @@ const nCards=await page.locator('.card').count();
 t('แบตช์ 3-4 ชุด (AC6)', nCards>=3&&nCards<=4, nCards);
 t('ทุกการ์ดมีแถบสัดส่วน', await page.locator('.card .pbar__track').count()===nCards);
 t('ทุกการ์ดมีคำแนะนำ >=1', (await page.locator('.card .advice li').count())>=nCards);
+// สวอตช์สีล้วนต่อชิ้น: ทางขวาของแต่ละชิ้น แสดงสีจริง มี ring กันกลืน และ aria-hidden
+const chipCheck=await page.evaluate(()=>{
+  const card=document.querySelector('.card--focused');
+  const tiles=[...card.querySelectorAll('.clegend__row')];
+  const toRgb=h=>{h=h.replace('#','');const n=parseInt(h,16);return `rgb(${(n>>16)&255}, ${(n>>8)&255}, ${n&255})`;};
+  let missing=0,mismatch=0,notHidden=0,noRing=0;
+  tiles.forEach(t=>{
+    const chip=t.querySelector('.clegend__sw');
+    if(!chip){missing++;return;}
+    if(chip.getAttribute('aria-hidden')!=='true') notHidden++;
+    const cs=getComputedStyle(chip);
+    if(parseFloat(cs.borderTopWidth)<1) noRing++;
+    const hex=(t.querySelector('.tnum')||{}).textContent||'';
+    if(hex && cs.backgroundColor!==toRgb(hex)) mismatch++;
+  });
+  return {n:tiles.length,missing,mismatch,notHidden,noRing};
+});
+t('ทุกชิ้นในการ์ดมีสวอตช์สี .clegend__sw', chipCheck.missing===0, JSON.stringify(chipCheck));
+t('สวอตช์แสดงสีตรงกับสีจริงของชิ้น', chipCheck.mismatch===0, JSON.stringify(chipCheck));
+t('สวอตช์เป็น aria-hidden (ข้อความ ชื่อสี+hex เป็นตัวสื่อ)', chipCheck.notHidden===0);
+t('สวอตช์มีวงแหวน --data-ring กันกลืน', chipCheck.noRing===0);
 t('โหมดเริ่มต้น = จากตู้ของฉัน (ตู้ตัวอย่างพร้อม)',
   await page.locator('[data-mode="wardrobe"]').getAttribute('aria-checked')==='true');
 
@@ -130,7 +151,7 @@ t('และมีข้อความอธิบายการสลับ �
 t('โหมดไอเดียยังใช้ได้แม้ตู้ว่าง (AC8)', (await page.locator('.card').count())>=3);
 await page.locator('[data-mode="wardrobe"]').click(); await page.waitForTimeout(250);
 const insTxt=await page.locator('#resultsSlot').textContent();
-t('เลือกโหมดตู้เองทั้งที่ของไม่พอ -> บอกว่าขาดอะไร ไม่แนะนำมั่ว', /ยังขาด/.test(insTxt), insTxt.slice(0,60));
+t('เลือกโหมดตู้เองทั้งที่ของไม่พอ -> บอกเกณฑ์จริง ไม่แนะนำมั่ว', /เพิ่มอีกอย่างน้อย 1 ชิ้น/.test(insTxt), insTxt.slice(0,60));
 t('และมีทางออกให้กลับไปโหมดไอเดีย', (await page.locator('[data-setmode="idea"]').count())>0);
 
 // ---------- 7. ไม่มี horizontal scroll ----------
@@ -149,7 +170,6 @@ const small=await page.evaluate(()=>{
   const bad=[];
   document.querySelectorAll('button,input,select,a[href]').forEach(el=>{
     if(el.classList.contains('visually-hidden')||el.offsetParent===null) return;
-    if(el.classList.contains('pbar__seg')) return;      // segment ของกราฟ มี legend เป็นทางเข้าหลัก
     const r=el.getBoundingClientRect();
     if(!r.width||!r.height) return;
     if(r.height>=44) return;                 // กล่องใหญ่พออยู่แล้ว
@@ -162,10 +182,13 @@ const small=await page.evaluate(()=>{
   return bad;
 });
 t('touch target สูง >=44px ทุกตัว', small.length===0, small.join(' | '));
-t('ทุก segment ของแถบสัดส่วนโฟกัสด้วยคีย์บอร์ดได้ (เป็น button)',
-  await page.locator('.pbar__seg').first().evaluate(e=>e.tagName)==='BUTTON');
-t('segment มี aria-label บอกชื่อสี+%+role',
-  /%/.test(await page.locator('.pbar__seg').first().getAttribute('aria-label')));
+// เดิม segment เป็น <button> ที่โฟกัสได้ ซึ่งขัดกับ role="img" ของแถบทั้งอัน
+// (ผู้ใช้คีย์บอร์ด tab เข้าไปในสิ่งที่ AT ประกาศว่าเป็นภาพเดียว) และช่องสูง 12px
+// ก็ต่ำกว่าเกณฑ์ touch target ตอนนี้เป็น span ที่กดได้ ค่าทุกตัวอ่านได้จาก legend
+t('segment ไม่เป็น control ที่โฟกัสได้ (อยู่ใน role="img")',
+  await page.locator('.pbar__seg').first().evaluate(e=>e.tagName)!=='BUTTON');
+t('segment ไม่มี tabindex ที่ทำให้ tab เข้าไปได้',
+  await page.locator('.pbar__seg').first().evaluate(e=>!e.hasAttribute('tabindex')));
 t('แถบสัดส่วนมี aria-label สรุปทั้งแถบ',
   (await page.locator('.pbar__track').first().getAttribute('aria-label')).startsWith('สัดส่วนสี:'));
 t('ModeToggle เป็น radiogroup จริง', await page.locator('.modetoggle').getAttribute('role')==='radiogroup');
@@ -207,15 +230,19 @@ await bc.close();
 // ---------- 11. ภาพหน้าจอ ----------
 console.log('\n== 11. เก็บภาพหน้าจอ ==');
 for(const [name,opt] of [
-  ['desktop-light',{viewport:{width:1280,height:1000},colorScheme:'light'}],
-  ['desktop-dark', {viewport:{width:1280,height:1000},colorScheme:'dark'}],
-  ['mobile-light', {viewport:{width:390,height:844},colorScheme:'light',isMobile:true,hasTouch:true}],
-  ['mobile-dark',  {viewport:{width:390,height:844},colorScheme:'dark',isMobile:true,hasTouch:true}],
+  ['desktop',{viewport:{width:1280,height:1000}}],
+  ['mobile', {viewport:{width:390,height:844},isMobile:true,hasTouch:true}],
 ]){
   const c=await browser.newContext(opt); const p=await c.newPage();
   await p.goto(FILE); await p.waitForTimeout(500);
   await p.screenshot({path:`${SHOT}/${name}.png`,fullPage:false});
-  if(name==='desktop-light'){
+  // เฟส 4-D: เก็บภาพระบบภาพใหม่ไว้ตรวจด้วยตา (สแตกตัดแปะ + มุมมองจัดกลุ่มโทน)
+  await p.locator('#sec-suggest').scrollIntoViewIfNeeded(); await p.waitForTimeout(200);
+  await p.screenshot({path:`${SHOT}/${name}-collage.png`});
+  await p.locator('[data-tone="lock"]').click(); await p.waitForTimeout(250);
+  await p.screenshot({path:`${SHOT}/${name}-tonemodal.png`});
+  await p.keyboard.press('Escape'); await p.waitForTimeout(150);
+  if(name==='desktop'){
     await p.locator('#addBtn').click(); await p.waitForTimeout(200);
     await p.locator('#sec-wardrobe').scrollIntoViewIfNeeded(); await p.waitForTimeout(200);
     await p.screenshot({path:`${SHOT}/desktop-form.png`});
