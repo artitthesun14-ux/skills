@@ -7,7 +7,7 @@
   /* ธีมไดนามิก (เฟส 4-C): S/L ตรึงไว้ต่ำ/สูงมาก ความสว่างสัมพัทธ์ของพื้นหลังจึงแทบไม่ขยับ
      ไม่ว่า hue จะเป็นอะไร คอนทราสต์กับ --ink เลยยังอยู่แถว 16-17:1 เท่า #FBFAF7 เดิมทุกกรณี
      (ui doc §9.1) ก่อนมีชุดแรก ยังไม่มี hue ให้ยืม จึงใช้ #FBFAF7 เดิมเป๊ะ */
-  --theme-tint-s:6%; --theme-tint-l:95%;
+  --theme-tint-h:45; --theme-tint-s:6%; --theme-tint-l:95%;
   --bg:#FBFAF7;
   --surface:#FFFFFF; --surface-sunken:#F4F2EC;
   --ink:#17161A; --ink-muted:#6E6B66; --line:#ECE9E2;
@@ -253,17 +253,17 @@ body{padding-bottom:calc(var(--nav-h) + env(safe-area-inset-bottom))}
    หนึ่งคอลัมน์ทุกขนาดจอ: การ์ดกว้างสุดแค่ 480px แบ่งสองคอลัมน์แล้วชื่อชิ้นถูกตัดด้วย ellipsis
    ซึ่งขัดกฎ "ทุกชิ้นต้องมีชื่อ+hex อ่านได้ครบ" โดยตรง (เบี่ยงจาก ui doc §9.4 ด้วยเหตุผลนี้) */
 .clegend{display:flex;flex-direction:column;gap:var(--sp-2)}
-.clegend .tile__color{white-space:nowrap}
-.tile{display:flex;align-items:center;gap:var(--sp-3)}
-.tile__label{min-width:0;flex:1;overflow:hidden}
-.tile__cat,.tile__name,.tile__color{display:block;overflow:hidden}
-.tile__cat{font-size:var(--fs-xs);color:var(--ink-muted);text-transform:uppercase;letter-spacing:.06em;
+.clegend__color{white-space:nowrap}
+.clegend__row{display:flex;align-items:center;gap:var(--sp-3)}
+.clegend__txt{min-width:0;flex:1;overflow:hidden}
+.clegend__cat,.clegend__name,.clegend__color{display:block;overflow:hidden}
+.clegend__cat{font-size:var(--fs-xs);color:var(--ink-muted);text-transform:uppercase;letter-spacing:.06em;
   white-space:nowrap;text-overflow:ellipsis}
-.tile__name{font-size:var(--fs-sm);color:var(--ink);white-space:nowrap;text-overflow:ellipsis}
+.clegend__name{font-size:var(--fs-sm);color:var(--ink);white-space:nowrap;text-overflow:ellipsis}
 /* บรรทัดสีต้องอ่านครบเสมอ ห้ามตัด: ยอมขึ้นบรรทัดใหม่ดีกว่าเสียข้อมูล a11y */
-.tile__color{font-size:var(--fs-xs);color:var(--ink-muted);overflow-wrap:anywhere}
+.clegend__color{font-size:var(--fs-xs);color:var(--ink-muted);overflow-wrap:anywhere}
 /* เฟส 4-B: ป้าย "แนะนำ" บนหมวดที่วงวนมาหยุดที่ตัวคะแนนดีที่สุด (ความหมายอยู่ที่ aria-label ของปุ่มสลับ) */
-.tile__reco{margin-inline-start:var(--sp-2)}
+.clegend__reco{margin-inline-start:var(--sp-2)}
 /* สีที่น่าจะเข้ากันเพิ่ม: แถวใต้กลุ่มไทล์ สวอตช์เส้นประ = ยังไม่ใช่ของจริงในตู้ */
 .swapsugg{list-style:none;margin:var(--sp-3) 0 0;padding:0;display:flex;flex-direction:column;gap:var(--sp-2)}
 .swapsugg__row{display:flex;flex-direction:column;gap:2px;padding:var(--sp-2) var(--sp-3);
@@ -272,22 +272,22 @@ body{padding-bottom:calc(var(--nav-h) + env(safe-area-inset-bottom))}
 .swapsugg__item{display:flex;align-items:center;gap:var(--sp-2);font-size:var(--fs-xs);color:var(--ink)}
 .swapsugg__sw{flex:0 0 auto;width:14px;height:14px;border-radius:4px;
   border:1px dashed var(--ink-muted);box-shadow:0 0 0 1px var(--data-ring) inset}
-.tile__chip{flex:0 0 auto;width:44px;height:44px;border-radius:var(--r-sm);
+.clegend__sw{flex:0 0 auto;width:44px;height:44px;border-radius:var(--r-sm);
   border:1px solid var(--data-ring);align-self:center;order:-1}
 /* สีล้ำ ไม่บังคับผ่านคอนทราสต์ (คือค่าจริงของเสื้อผ้า) กันกลืนด้วย --data-ring;
    ข้อความ ชื่อสี+hex ข้างกันเป็นตัวสื่อ chip นี้จึง aria-hidden ไม่สื่อด้วยสีเดี่ยว (ux §9) */
 /* เฟส 2: ปุ่มสลับทีละชิ้น + หัวใจบันทึก (ui View C) */
-.tile__swap{flex:0 0 auto;width:44px;height:44px;border-radius:var(--r-sm);
+.clegend__swap{flex:0 0 auto;width:44px;height:44px;border-radius:var(--r-sm);
   border:1px solid var(--line);color:var(--ink-muted);font-size:16px;line-height:1;
   display:inline-flex;align-items:center;justify-content:center}
-.tile__swap:hover{background:var(--surface-sunken);color:var(--ink)}
-.tile__swap[disabled]{opacity:.4;pointer-events:none}
+.clegend__swap:hover{background:var(--surface-sunken);color:var(--ink)}
+.clegend__swap[disabled]{opacity:.4;pointer-events:none}
 .card__head .spacer{flex:1 1 auto;min-width:0}
 .card__fav{width:44px;height:44px;border-radius:var(--r-sm);border:1px solid var(--line);
   display:inline-flex;align-items:center;justify-content:center;font-size:18px;line-height:1}
 .card__fav:hover{background:var(--surface-sunken)}
 .card__fav[aria-pressed="true"]{border-color:var(--accent);color:var(--accent-solid)}
-.card--adjacent .tile__swap,.card--adjacent .card__fav{display:none}
+.card--adjacent .clegend__swap,.card--adjacent .card__fav{display:none}
 /* เฟส 2: ชุดที่บันทึกไว้ (View D) */
 .favgrid{display:grid;grid-template-columns:1fr;gap:var(--sp-4)}
 .favcard{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);
@@ -564,6 +564,10 @@ body{padding-bottom:calc(var(--nav-h) + env(safe-area-inset-bottom))}
   border:1px solid var(--line);border-radius:var(--r-sm);background:var(--surface);
   color:var(--ink);padding:0 var(--sp-3);cursor:pointer}
 .tonedlg__back:hover{background:var(--surface-sunken)}
+/* ปุ่มอยู่นอก radiogroup: มันไม่ใช่ตัวเลือกสีหนึ่งตัว ถ้าอยู่ในกลุ่ม screen reader
+   จะนับ "ตัวเลือกที่ N จาก M" ผิด และประกาศปุ่มที่ไม่ใช่ radio เป็นสมาชิกของกลุ่ม */
+.colorrow{display:flex;align-items:center;gap:var(--sp-2)}
+.colorrow .chips{flex:1;min-width:0}
 .morecolors{flex:0 0 auto;min-height:44px;white-space:nowrap;
   border:1px dashed var(--ink-muted);border-radius:var(--r-pill);
   background:var(--surface);color:var(--ink);padding:0 var(--sp-4);font-size:var(--fs-sm);cursor:pointer}
@@ -811,7 +815,7 @@ body{padding-bottom:calc(var(--nav-h) + env(safe-area-inset-bottom))}
       <button class="btn btn--primary" id="heroGen">วันนี้แต่งอะไรดี?</button>
       <button class="btn btn--ghost" data-jump="sec-wardrobe">ดูตู้เสื้อผ้าของฉัน</button>
       <button class="themelock" id="themeLockBtn" aria-pressed="false"
-        aria-label="ล็อกสีพื้นหลัง"><span aria-hidden="true">🔓</span></button>
+        aria-label="ล็อกธีมพื้นหลัง"><span id="themeLockIcon" aria-hidden="true">🔓</span></button>
     </div>
   </header>
 
@@ -833,7 +837,10 @@ body{padding-bottom:calc(var(--nav-h) + env(safe-area-inset-bottom))}
 
     <div role="radiogroup" aria-label="โอกาส" class="chips" id="occasionChips"></div>
     <p class="field__label" style="margin-top:var(--sp-3)">วันนี้อยากใส่สีอะไร?</p>
-    <div role="radiogroup" aria-label="สีที่อยากใส่" class="chips" id="colorLockChips"></div>
+    <div class="colorrow">
+      <div role="radiogroup" aria-label="สีที่อยากใส่" class="chips" id="colorLockChips"></div>
+      <button class="morecolors" type="button" data-tone="lock" id="lockMoreBtn">ดูสีในตู้ตามโทน</button>
+    </div>
 
     <div id="resultsSlot" style="margin-top:var(--sp-5)"></div>
 
@@ -1825,13 +1832,29 @@ function lockColorOptions(){
 function renderColorLock(){
   var slot = $("#colorLockChips"); if(!slot) return;
   var none = '<button class="chip" role="radio" data-lock="" aria-checked="'+(!state.lockedColor)+'">ไม่ระบุ</button>';
-  /* ปุ่มอยู่ท้ายแถวเสมอ เพราะแถวนี้เลื่อนแนวนอนจนสีท้ายๆ หลุดจอได้ (spec Decision #4)
-     ไม่ใช่ role="radio" เพราะมันไม่ใช่ตัวเลือกสีหนึ่งตัว แต่เป็นทางเข้าไปดูทั้งหมด */
-  var more = '<button class="morecolors" type="button" data-tone="lock">ดูสีเพิ่มเติม</button>';
   slot.innerHTML = none + lockColorOptions().map(function(h){
     return '<button class="preset" role="radio" data-lock="'+h+'" aria-checked="'+(state.lockedColor === h)+'" '+
       'style="background:'+h+'" aria-label="'+esc(colorNameTH(h)+" "+h)+'"></button>';
-  }).join("") + more;
+  }).join("");
+}
+/* ล็อกสีเพื่อจัดชุด (FR-5) มีทางเข้าสองทาง: สวอตช์ในแถว และการเลือกเฉดใน ColorToneModal
+   ทั้งคู่ต้องให้ผลเดียวกันเป๊ะ จึงผ่านฟังก์ชันนี้ตัวเดียว */
+function setLockedColor(hexOrNull){
+  state.lockedColor = isValidHex(hexOrNull || "") ? normHex(hexOrNull) : null;
+  renderColorLock(); persist(); regenerate(true);
+  say("#liveFeedback", state.lockedColor
+    ? "จัดชุดรอบสี" + colorNameTH(state.lockedColor) + "ให้แล้ว"
+    : "เอาสีที่ล็อกออกแล้ว กลับไปแนะนำจากทุกสี");
+}
+/* เช่นเดียวกับสีของชิ้นที่กำลังเพิ่ม: สวอตช์พรีเซ็ตกับ modal ต้องลงเอยที่ทางเดียวกัน
+   focusSel ต่างกันเพราะปุ่มที่ผู้ใช้กดมาคนละตัว ฟอร์มถูกเรนเดอร์ใหม่ทั้งก้อนทุกครั้ง */
+function setDraftColor(hex, focusSel){
+  if(!state.formDraft) return;
+  state.formDraft.color = normHex(hex);
+  renderForm();
+  say("#wardFeedback", "เลือกสี" + colorNameTH(hex) + " (" + normHex(hex) + ") ให้ชิ้นนี้แล้ว");
+  var back = document.querySelector(focusSel);
+  if(back) back.focus();
 }
 function renderOccasion(){
   $("#occasionChips").innerHTML = OCCASIONS.map(function(o){
@@ -1918,18 +1941,18 @@ function legendRowHTML(item, cat, opts){
        ring ถูกสร้างตอนกดสลับครั้งแรก จึงไม่ต้องคิดคะแนนทุกชิ้นทุกหมวดใหม่ทุกครั้งที่เรนเดอร์ */
     var ring = look && look._swap && look._swap[cat];
     var isTop = !!(ring && ring.length && ring[0].id === item.id);
-    if(isTop) reco = '<span class="badge tile__reco" aria-hidden="true">แนะนำ</span>';
-    swapBtn = '<button class="tile__swap" data-swap="'+opts.i+':'+cat+'" '+
+    if(isTop) reco = '<span class="badge clegend__reco" aria-hidden="true">แนะนำ</span>';
+    swapBtn = '<button class="clegend__swap" data-swap="'+opts.i+':'+cat+'" '+
       'aria-label="เปลี่ยน'+esc(CATEGORY_TH[cat]||cat)+(isTop ? " (ตอนนี้คือตัวที่แนะนำ เข้ากับชุดนี้ดีที่สุด)" : "")+'"'+
       (many ? '' : ' disabled title="มีชิ้นเดียวในหมวดนี้"')+'>🔄</button>';
   }
-  return '<li class="tile">'+
-    '<span class="tile__label">'+
-      '<span class="tile__cat">'+esc(CATEGORY_TH[cat])+reco+'</span>'+
-      '<span class="tile__name" title="'+esc(label)+'">'+esc(label)+'</span>'+
-      '<span class="tile__color">'+esc(name)+' · <span class="tnum">'+esc(hex)+'</span></span>'+
+  return '<li class="clegend__row">'+
+    '<span class="clegend__txt">'+
+      '<span class="clegend__cat">'+esc(CATEGORY_TH[cat])+reco+'</span>'+
+      '<span class="clegend__name" title="'+esc(label)+'">'+esc(label)+'</span>'+
+      '<span class="clegend__color">'+esc(name)+' · <span class="tnum">'+esc(hex)+'</span></span>'+
     '</span>'+
-    '<span class="tile__chip" aria-hidden="true" style="background:'+hex+'"></span>'+
+    '<span class="clegend__sw" aria-hidden="true" style="background:'+hex+'"></span>'+
     swapBtn+'</li>';
 }
 /* สแตกทรงตัดแปะ: --n คือจำนวนทรงจริง หมวดที่ชุดนี้ไม่มีของไม่กินตำแหน่งในสแตกเลย
@@ -2142,7 +2165,7 @@ function renderForm(){
           '<span id="fPrevColor">'+esc(colorNameTH(d.color))+' · <span class="tnum">'+esc(d.color)+'</span></span></span>'+
       '</div>'+
       '<div class="presets">'+presets+
-        '<button type="button" class="morecolors" data-tone="form">ดูสีเพิ่มเติม</button></div>'+
+        '<button type="button" class="morecolors" data-tone="form">ดูสีทั้งหมดตามโทน</button></div>'+
       '<div class="hexrow">'+
         '<span class="swatch swatch--md" id="fSwatch" style="background:'+d.color+'"></span>'+
         '<input class="input tnum" id="fHex" value="'+esc(d.color)+'" maxlength="7" spellcheck="false">'+
@@ -2164,12 +2187,25 @@ function renderForm(){
 /* ---------- ColorToneModal (เฟส 4-D) ---------- */
 /* สองทางเข้าจงใจใช้คนละแหล่งข้อมูล: แถว "วันนี้อยากใส่สีอะไร?" ตอบว่า "เรามีสีอะไรอยู่"
    ส่วนตัวเลือกสีในฟอร์มตอบว่า "ชิ้นใหม่นี้เป็นสีอะไรได้บ้าง" ถ้ากรองตามของที่มี
-   ทางเข้าหลังจะว่างเปล่าพอดีกับคนที่ตู้ยังว่าง ซึ่งเป็นคนที่ต้องใช้มันที่สุด (spec Decision #4) */
-function toneSourceHexes(src){
-  if(src === "form") return PRESET_COLORS.slice();
-  return state.wardrobe.map(function(g){ return normHex(g.color); });
-}
+   ทางเข้าหลังจะว่างเปล่าพอดีกับคนที่ตู้ยังว่าง ซึ่งเป็นคนที่ต้องใช้มันที่สุด (spec Decision #4)
+   เก็บความต่างทั้งหมดไว้ที่เดียวเป็นข้อมูล ไม่กระจายเป็น if(src==="form") ตามฟังก์ชันต่างๆ
+   เพิ่มทางเข้าที่สามเมื่อไร = เติมรายการนี้รายการเดียว */
+var TONE_ENTRY = {
+  lock: {
+    sub:   "จากตู้ของคุณ",
+    button:"#lockMoreBtn",
+    hexes: function(){ return state.wardrobe.map(function(g){ return normHex(g.color); }); },
+    apply: function(hex){ setLockedColor(hex); }
+  },
+  form: {
+    sub:   "สีทั้งหมดที่เลือกได้",
+    button:'#gForm [data-tone="form"]',
+    hexes: function(){ return PRESET_COLORS.slice(); },
+    apply: function(hex){ setDraftColor(hex, '#gForm [data-tone="form"]'); }
+  }
+};
 function openToneModal(src){
+  if(!TONE_ENTRY[src]) return;
   state.tone = { src:src, group:null };
   renderToneModal();
   var d = $("#toneDlg");
@@ -2182,11 +2218,11 @@ function closeToneModal(){
 }
 function renderToneModal(){
   var box = $("#toneBox"); if(!box || !state.tone) return;
-  var src = state.tone.src;
-  var groups = toneGroups(toneSourceHexes(src));
+  var entry = TONE_ENTRY[state.tone.src];
+  var groups = toneGroups(entry.hexes());
   var head = '<div class="tonedlg__head"><span>'+
       '<span class="tonedlg__title" id="toneTitle">เลือกสีตามโทน</span><br>'+
-      '<span class="tonedlg__sub">'+(src === "form" ? "สีทั้งหมดที่เลือกได้" : "จากตู้ของคุณ")+'</span>'+
+      '<span class="tonedlg__sub">'+esc(entry.sub)+'</span>'+
     '</span><button type="button" class="tonedlg__x" data-toneclose="1" aria-label="ปิด">✕</button></div>';
 
   if(!groups.length){
@@ -2216,20 +2252,17 @@ function renderToneModal(){
         '<span class="toneshade__txt">'+esc(nm)+' · <span class="tnum">'+esc(h)+'</span></span></button>';
     }).join("") + '</div>';
 }
-/* เลือกเฉดแล้วต้องให้ผลเหมือนแตะสวอตช์ในแถวที่เปิดมันมา ไม่ใช่เส้นทางพิเศษของ modal */
+/* เลือกเฉดแล้วต้องให้ผลเหมือนแตะสวอตช์ในแถวที่เปิดมันมาทุกประการ ไม่ใช่เส้นทางพิเศษของ modal
+   จึงเรียกฟังก์ชันตัวเดียวกับที่ปุ่มในแถวนั้นเรียก ไม่ใช่เขียนผลลัพธ์ซ้ำอีกชุด */
 function pickToneShade(hex){
-  var src = state.tone && state.tone.src;
+  var entry = state.tone && TONE_ENTRY[state.tone.src];
+  if(!entry) return;
   closeToneModal();
-  if(src === "form"){
-    if(!state.formDraft) return;
-    state.formDraft.color = normHex(hex);
-    renderForm();
-    say("#wardFeedback", "เลือกสี" + colorNameTH(hex) + " (" + normHex(hex) + ") ให้ชิ้นนี้แล้ว");
-    return;
-  }
-  state.lockedColor = normHex(hex);
-  renderColorLock(); persist(); regenerate(true);
-  say("#liveFeedback", "จัดชุดรอบสี" + colorNameTH(hex) + "ให้แล้ว");
+  entry.apply(hex);
+  /* <dialog> คืนโฟกัสไปปุ่มที่เปิดมันให้แล้ว แต่ถ้าการ apply เรนเดอร์แถวนั้นใหม่ ปุ่มตัวเดิมจะถูกทิ้ง
+     พาโฟกัสตกไปที่ body จึงต้องหาปุ่มตัวใหม่แล้วโฟกัสกลับเอง (ux §9 ต้องคืนโฟกัสเสมอ) */
+  var back = document.querySelector(entry.button);
+  if(back) back.focus();
 }
 
 /* ---------- ธีมพื้นหลังไดนามิก (เฟส 4-C) ---------- */
@@ -2263,8 +2296,10 @@ function applyThemeTint(){
 function renderThemeLock(){
   var b = $("#themeLockBtn"); if(!b) return;
   b.setAttribute("aria-pressed", String(state.themeLocked));
-  b.setAttribute("aria-label", state.themeLocked ? "ปลดล็อกสีพื้นหลัง" : "ล็อกสีพื้นหลัง");
-  b.firstChild.textContent = state.themeLocked ? "🔒" : "🔓";
+  /* คำว่า "ธีม" ต้องอยู่ในป้ายเสมอ ผู้ใช้ screen reader จะได้ไม่สับสนกับ "ล็อกสี" ของ FR-5 (ux §7) */
+  b.setAttribute("aria-label", state.themeLocked ? "ปลดล็อกธีมพื้นหลัง" : "ล็อกธีมพื้นหลัง");
+  var ico = $("#themeLockIcon");
+  if(ico) ico.textContent = state.themeLocked ? "🔒" : "🔓";
 }
 
 /* ---------- แบนเนอร์ (ux §7B no silent state change) ---------- */
@@ -2659,12 +2694,7 @@ document.addEventListener("click", function(e){
   if(t.dataset.occ)     { state.occasion = t.dataset.occ; renderOccasion(); persist(); regenerate(true);
                           say("#liveFeedback", "ปรับโทนตามโอกาสให้แล้ว"); return; }
   if(t.dataset.lock !== undefined){        /* FR-5 ล็อก/ปลดล็อกสี ต้องมีข้อความกำกับเสมอ (ux §7B) */
-    var lockVal = t.dataset.lock;
-    state.lockedColor = isValidHex(lockVal) ? normHex(lockVal) : null;
-    renderColorLock(); persist(); regenerate(true);
-    say("#liveFeedback", state.lockedColor
-      ? "จัดชุดรอบสี" + colorNameTH(state.lockedColor) + "ให้แล้ว"
-      : "เอาสีที่ล็อกออกแล้ว กลับไปแนะนำจากทุกสี");
+    setLockedColor(t.dataset.lock);
     return;
   }
   if(t.dataset.nav)     { goTo(parseInt(t.dataset.nav,10)); return; }
@@ -2700,10 +2730,7 @@ document.addEventListener("click", function(e){
     return;
   }
   if(t.dataset.preset){
-    state.formDraft.color = t.dataset.preset;
-    renderForm();
-    var backPre = document.querySelector('#gForm [data-preset="'+t.dataset.preset+'"]');
-    if(backPre) backPre.focus();
+    setDraftColor(t.dataset.preset, '#gForm [data-preset="'+t.dataset.preset+'"]');
     return;
   }
   if(t.dataset.migdone){ state.migrated = false; renderBanners(); return; }

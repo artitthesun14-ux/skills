@@ -234,7 +234,7 @@ const waitPersisted = (page, check) => page.waitForFunction(check, null, { timeo
     const after = await page.evaluate(() => state.index);
     R.ok(after !== before.i && await page.locator(".card--focused").count() === 1,
       "TF2 · ตั๋ว 06: แตะแล้วการ์ดนั้นเลื่อนมาโฟกัสจริง", before.i + " -> " + after);
-    R.ok(await page.locator(".card--focused .tile__swap").count() > 0,
+    R.ok(await page.locator(".card--focused .clegend__swap").count() > 0,
       "TF3 · ตั๋ว 06: พอโฟกัสแล้วสลับชิ้นในชุดนั้นได้ทันที (เป้าหมายจริงของตั๋วนี้)");
     R.ok(await page.locator(".cardslot__focus:not([hidden])[tabindex='-1']").count() ===
          await page.locator(".cardslot__focus:not([hidden])").count(),
@@ -251,21 +251,21 @@ const waitPersisted = (page, check) => page.waitForFunction(check, null, { timeo
       H.g("s4","bottom","chino","#C8B79B")
     ];
     const { ctx, page, errs } = await H.open(browser, H.store(seed, { mode:"wardrobe" }));
-    const topSwap = '.card--focused .tile__swap:not([disabled])';
+    const topSwap = '.card--focused .clegend__swap:not([disabled])';
     await page.waitForSelector(topSwap);
-    R.ok(await page.locator(".card--focused .tile__reco").count() === 0,
+    R.ok(await page.locator(".card--focused .clegend__reco").count() === 0,
       "SR1 · เฟส 4-B: ยังไม่กดสลับ = ยังไม่มีป้ายแนะนำ (ไม่ใช่ UI แยกถาวร)");
 
     /* วนจนครบทุกตัวในหมวดบน (3 ชิ้น) ต้องเจอป้าย "แนะนำ" อย่างน้อยหนึ่งครั้ง */
     let sawReco = false;
     for(let i = 0; i < 3; i++){
-      await page.locator('.card--focused .tile__swap[data-swap$=":top"]').click();
+      await page.locator('.card--focused .clegend__swap[data-swap$=":top"]').click();
       await page.waitForTimeout(120);
-      if(await page.locator(".card--focused .tile__reco").count() > 0) sawReco = true;
+      if(await page.locator(".card--focused .clegend__reco").count() > 0) sawReco = true;
     }
     R.ok(sawReco, "SR2 · เฟส 4-B: วนสลับจนเจอตัวอันดับ 1 แล้วมีป้าย 'แนะนำ'");
-    const recoLabel = await page.locator('.card--focused .tile__swap[data-swap$=":top"]').getAttribute("aria-label") || "";
-    const recoShown = await page.locator(".card--focused .tile__reco").count() > 0;
+    const recoLabel = await page.locator('.card--focused .clegend__swap[data-swap$=":top"]').getAttribute("aria-label") || "";
+    const recoShown = await page.locator(".card--focused .clegend__reco").count() > 0;
     R.ok(recoShown === /แนะนำ/.test(recoLabel),
       "SR3 · ux §9: ป้ายแนะนำประกาศผ่าน aria-label ของปุ่มเสมอ ไม่ใช่เห็นด้วยตาอย่างเดียว",
       "badge " + recoShown + " / label " + JSON.stringify(recoLabel));
@@ -283,7 +283,7 @@ const waitPersisted = (page, check) => page.waitForFunction(check, null, { timeo
     const s = await snap(page);
     R.ok(s.mode === "wardrobe" && s.n >= 1,
       "B6d · เฟส 4-A: ตู้ที่มีแค่เสื้อนอก+รองเท้า ยังได้ชุดแนะนำจากตู้จริง", "โหมด " + s.mode + " ได้ " + s.n + " ชุด");
-    const cats = await page.locator(".card--focused .tile .tile__cat").allTextContents();
+    const cats = await page.locator(".card--focused .clegend__row .clegend__cat").allTextContents();
     R.ok(cats.length === 2 && !cats.join("").includes("เสื้อ ") ,
       "B6e · เฟส 4-A: การ์ดโชว์เฉพาะหมวดที่มีของจริง ไม่กันช่องว่างของหมวดที่ขาด", cats.join(" / "));
     allErrs.push(...errs); await ctx.close();
@@ -294,14 +294,20 @@ const waitPersisted = (page, check) => page.waitForFunction(check, null, { timeo
     R.ok(s.mode === "idea" && s.n >= 3, "B7a · FR-1 AC8: ตู้ว่างแต่โหมดไอเดียยังโชว์ชุดได้ + ค่าเริ่มต้นเลือกให้เอง");
     const checked = await page.getAttribute('[data-mode="idea"]', "aria-checked");
     R.ok(checked === "true", "B7b · ux §7B: ตัวสลับแสดงสถานะโหมดที่ใช้อยู่ชัด");
+    allErrs.push(...errs); await ctx.close();
+  }
+  {   /* B7c แยก context: ตู้ต้องพร้อมจริง ไม่งั้นการจำโหมดจะแข่งกับ autoSwitchIfNeeded()
+         ที่ตั้งใจให้สลับกลับไปไอเดียเมื่อตู้ไม่พอ แล้วเทสต์จะวูบวาบโดยไม่ได้วัดสิ่งที่ตั้งใจวัด */
+    const ready = [H.g("m1","top","polo","#2B3A67"), H.g("m2","bottom","chino","#C8B79B")];
+    const { ctx, page, errs } = await H.open(browser, H.store(ready, { mode:"idea" }));
     await page.click('[data-mode="wardrobe"]');
     await waitPersisted(page, () => {
       try { return (JSON.parse(localStorage.getItem("outfit-color-matcher.v1")||"{}").settings||{}).mode === "wardrobe"; }
       catch(e){ return false; }
     });
     await page.reload(); await page.waitForTimeout(450);
-    s = await snap(page);
-    R.ok(s.mode === "wardrobe", "B7c · ux §7: โหมดที่เลือกถูกจำหลังรีเฟรช", "ได้ " + s.mode);
+    const s2 = await snap(page);
+    R.ok(s2.mode === "wardrobe", "B7c · ux §7: โหมดที่เลือกถูกจำหลังรีเฟรช", "ได้ " + s2.mode);
     allErrs.push(...errs); await ctx.close();
   }
   {   /* B8: auto mode switch ต้องไม่เงียบ */
@@ -407,7 +413,7 @@ const waitPersisted = (page, check) => page.waitForFunction(check, null, { timeo
   }
   {   /* โหมดไอเดียไม่มีปุ่มสลับ (ไม่มีตู้ให้เลือกตัวถัดไป) */
     const { ctx, page, errs } = await H.open(browser, H.store([], { mode:"idea" }));
-    R.ok(await page.locator('.card--focused .tile__swap').count() === 0,
+    R.ok(await page.locator('.card--focused .clegend__swap').count() === 0,
       "SW6 · โหมดไอเดียไม่โชว์ปุ่มสลับ");
     allErrs.push(...errs); await ctx.close();
   }
@@ -662,8 +668,13 @@ const waitPersisted = (page, check) => page.waitForFunction(check, null, { timeo
   {
     const { ctx, page, errs } = await H.open(browser, null);
     const owned = await page.evaluate(() => state.wardrobe.map(g => g.color.toUpperCase()));
-    R.ok(await page.$('#colorLockChips .morecolors') !== null && await page.$('[data-tone="lock"]') !== null,
-      "TN1 · มีปุ่ม ดูสีเพิ่มเติม ท้ายแถวสีของวันนี้");
+    /* ปุ่มต้องอยู่ "ข้าง" แถว ไม่ใช่ "ใน" radiogroup ไม่งั้น AT นับตัวเลือกสีผิด */
+    const moreBtn = await page.evaluate(() => {
+      const b = document.querySelector('.colorrow [data-tone="lock"]');
+      return b ? { txt:b.textContent.trim(), inGroup: !!b.closest('[role="radiogroup"]') } : null;
+    });
+    R.ok(moreBtn && moreBtn.txt.length > 0 && !moreBtn.inGroup,
+      "TN1 · มีปุ่มเปิดมุมมองโทนท้ายแถวสีของวันนี้ และอยู่นอก radiogroup", JSON.stringify(moreBtn));
 
     await page.click('[data-tone="lock"]'); await page.waitForTimeout(150);
     const open1 = await page.evaluate(() => {
@@ -703,6 +714,9 @@ const waitPersisted = (page, check) => page.waitForFunction(check, null, { timeo
     R.ok(!after.open && after.locked === firstShade && after.fb.length > 0,
       "TN8 · เลือกเฉด = ปิด modal + ใช้ค่าที่จุดเดิม + มีข้อความยืนยัน",
       JSON.stringify(after));
+    const focusBack = await page.evaluate(() => document.activeElement &&
+      document.activeElement.dataset && document.activeElement.dataset.tone === "lock");
+    R.ok(focusBack, "TN8b · เลือกเฉดแล้วโฟกัสกลับไปที่ปุ่มที่เปิด modal ไม่ตกไปที่ body");
 
     await page.click('[data-tone="lock"]'); await page.waitForTimeout(120);
     await page.keyboard.press("Escape"); await page.waitForTimeout(120);
@@ -713,6 +727,7 @@ const waitPersisted = (page, check) => page.waitForFunction(check, null, { timeo
   {   /* ทางเข้า (b): ตู้ว่างก็ยังต้องเลือกสีได้ครบทั้งจานสี */
     const { ctx, page, errs } = await H.open(browser, H.store([], { mode:"idea" }));
     await page.click("#addBtn"); await page.waitForTimeout(200);
+    await page.fill("#fName", "เสื้อทดสอบ");   /* ของที่กรอกค้างไว้ต้องไม่หายเพราะเปิด modal */
     await page.click('[data-tone="form"]'); await page.waitForTimeout(200);
     const d = await page.evaluate(() => {
       const dlg = document.querySelector("#toneDlg");
@@ -728,6 +743,11 @@ const waitPersisted = (page, check) => page.waitForFunction(check, null, { timeo
     await page.click('[data-toneshade="' + shade + '"]'); await page.waitForTimeout(250);
     R.ok(await page.evaluate(() => !document.querySelector("#toneDlg").open && state.formDraft.color) === shade,
       "TN11 · เลือกเฉดจากฟอร์ม = ตั้งเป็นสีของชิ้นที่กำลังเพิ่ม", shade);
+    const kept = await page.inputValue("#fName");
+    R.ok(kept === "เสื้อทดสอบ", "TN12 · ฟอร์มถูกเรนเดอร์ใหม่แต่ชื่อที่กรอกค้างไว้ไม่หาย", kept);
+    R.ok(await page.evaluate(() => document.activeElement &&
+      document.activeElement.dataset && document.activeElement.dataset.tone === "form"),
+      "TN13 · ทางเข้าฟอร์มก็คืนโฟกัสไปปุ่มที่เปิด modal เหมือนกัน");
     allErrs.push(...errs); await ctx.close();
   }
 
@@ -737,7 +757,7 @@ const waitPersisted = (page, check) => page.waitForFunction(check, null, { timeo
     const c = await page.evaluate(() => {
       const card = document.querySelector(".card--focused");
       const cuts = card.querySelectorAll(".cut").length;
-      const rows = [...card.querySelectorAll(".clegend .tile")];
+      const rows = [...card.querySelectorAll(".clegend__row")];
       const n = getComputedStyle(card.querySelector(".collage")).getPropertyValue("--n").trim();
       return { cuts, rows: rows.length, n,
                txt: rows.map(r => r.textContent.replace(/\s+/g," ").trim()) };
@@ -759,15 +779,15 @@ const waitPersisted = (page, check) => page.waitForFunction(check, null, { timeo
     const sp = await page.evaluate(() => {
       const card = document.querySelector(".card--focused");
       return { cuts: card.querySelectorAll(".cut").length,
-               rows: card.querySelectorAll(".clegend .tile").length,
-               empties: card.querySelectorAll(".cut:empty, .clegend .tile:empty").length };
+               rows: card.querySelectorAll(".clegend__row").length,
+               empties: card.querySelectorAll(".cut:empty, .clegend__row:empty").length };
     });
     R.ok(sp.cuts === 2 && sp.rows === 2 && sp.empties === 0,
       "CG3 · ชุด 2 หมวด: สแตกมี 2 ทรง ไม่เว้นช่องของหมวดที่ขาด", JSON.stringify(sp));
 
     /* ปุ่มสลับต้องยังกดโดนจริง ไม่ถูกทรงที่ซ้อนทับบังไว้ */
     const hit = await page.evaluate(() => {
-      const btns = [...document.querySelectorAll(".card--focused .tile__swap")];
+      const btns = [...document.querySelectorAll(".card--focused .clegend__swap")];
       return btns.map(b => {
         b.scrollIntoView({ block:"center" });   /* elementFromPoint ใช้ได้เฉพาะจุดที่อยู่ในจอ */
         const r = b.getBoundingClientRect();

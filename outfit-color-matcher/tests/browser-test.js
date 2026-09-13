@@ -31,11 +31,11 @@ t('ทุกการ์ดมีคำแนะนำ >=1', (await page.locator
 // สวอตช์สีล้วนต่อชิ้น: ทางขวาของแต่ละชิ้น แสดงสีจริง มี ring กันกลืน และ aria-hidden
 const chipCheck=await page.evaluate(()=>{
   const card=document.querySelector('.card--focused');
-  const tiles=[...card.querySelectorAll('.tile:not(.tile--empty)')];
+  const tiles=[...card.querySelectorAll('.clegend__row')];
   const toRgb=h=>{h=h.replace('#','');const n=parseInt(h,16);return `rgb(${(n>>16)&255}, ${(n>>8)&255}, ${n&255})`;};
   let missing=0,mismatch=0,notHidden=0,noRing=0;
   tiles.forEach(t=>{
-    const chip=t.querySelector('.tile__chip');
+    const chip=t.querySelector('.clegend__sw');
     if(!chip){missing++;return;}
     if(chip.getAttribute('aria-hidden')!=='true') notHidden++;
     const cs=getComputedStyle(chip);
@@ -45,7 +45,7 @@ const chipCheck=await page.evaluate(()=>{
   });
   return {n:tiles.length,missing,mismatch,notHidden,noRing};
 });
-t('ทุกชิ้นในการ์ดมีสวอตช์สี .tile__chip', chipCheck.missing===0, JSON.stringify(chipCheck));
+t('ทุกชิ้นในการ์ดมีสวอตช์สี .clegend__sw', chipCheck.missing===0, JSON.stringify(chipCheck));
 t('สวอตช์แสดงสีตรงกับสีจริงของชิ้น', chipCheck.mismatch===0, JSON.stringify(chipCheck));
 t('สวอตช์เป็น aria-hidden (ข้อความ ชื่อสี+hex เป็นตัวสื่อ)', chipCheck.notHidden===0);
 t('สวอตช์มีวงแหวน --data-ring กันกลืน', chipCheck.noRing===0);

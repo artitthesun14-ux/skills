@@ -10,8 +10,8 @@ const CONTRAST_PROBES = [
   [".card__rule",               "ชื่อ rule บนการ์ด",                      4.5],
   [".advice li",                "คำแนะนำในการ์ด",                         4.5],
   [".pbar__item",               "legend ของสัดส่วนสี",                    4.5],
-  [".tile__cat",                "ป้ายหมวดใต้ทรง",                         4.5],
-  [".tile__color",              "ชื่อสี + hex",                           4.5],
+  [".clegend__cat",                "ป้ายหมวดใต้ทรง",                         4.5],
+  [".clegend__color",              "ชื่อสี + hex",                           4.5],
   [".badge",                    "ป้าย 'ตัวอย่าง'",                        4.5],
   [".navrow__pos",              "ตัวบอกตำแหน่งชุด",                       4.5],
   [".modetoggle__opt[aria-checked='true']", "ตัวสลับโหมดที่เลือก",        4.5],
@@ -24,7 +24,7 @@ const CONTRAST_PROBES = [
   const R = H.reporter();
   const allErrs = [];
 
-  async function contrastTable(page, themeLabel){
+  async function contrastTable(page){
     return page.evaluate((probes) => {
       function rgb(s){ const m = s.match(/[\d.]+/g); return m ? m.slice(0,3).map(Number) : null; }
       function lum(c){ const a = c.map(v => { v/=255; return v <= .03928 ? v/12.92 : Math.pow((v+.055)/1.055, 2.4); });
@@ -56,9 +56,8 @@ const CONTRAST_PROBES = [
 
   /* ---- D1 คอนทราสต์จริง (เฟส 4-C: เหลือโหมดเดียว วนสองธีมไม่มีความหมายอีกต่อไป) ---- */
   {
-    const theme = "light";
-    const { ctx, page, errs } = await H.open(browser, null, { context:{ colorScheme: theme } });
-    const rows = await contrastTable(page, theme);
+    const { ctx, page, errs } = await H.open(browser, null);
+    const rows = await contrastTable(page);
     console.log("\n--- คอนทราสต์จริง ---");
     rows.forEach(r => {
       if(r.missing){ console.log("  (ไม่พบ) " + r.label); return; }
@@ -66,8 +65,8 @@ const CONTRAST_PROBES = [
     });
     const missing = rows.filter(r => r.missing).map(r => r.label);
     const bad = rows.filter(r => !r.missing && r.ratio < r.min);
-    R.ok(missing.length === 0, "D1-" + theme + "a · วัดคอนทราสต์ได้ครบทุกจุดที่ระบุ", missing.join(", "));
-    R.ok(bad.length === 0, "D1-" + theme + "b · ตัวอักษรทุกจุดผ่าน 4.5:1 จริง (" + theme + ")",
+    R.ok(missing.length === 0, "D1a · วัดคอนทราสต์ได้ครบทุกจุดที่ระบุ", missing.join(", "));
+    R.ok(bad.length === 0, "D1b · ตัวอักษรทุกจุดผ่าน 4.5:1 จริง",
       bad.map(b => b.label + " " + b.ratio + ":1").join(" | "));
     allErrs.push(...errs); await ctx.close();
   }
@@ -76,7 +75,7 @@ const CONTRAST_PROBES = [
   {
     const { ctx, page, errs } = await H.open(browser, null);
     const t = await page.evaluate(() => {
-      const tiles = [...document.querySelectorAll(".card--focused .tile")];
+      const tiles = [...document.querySelectorAll(".card--focused .clegend__row")];
       return tiles.map(x => ({ txt: x.textContent.replace(/\s+/g," ").trim(),
                                hex: /#[0-9A-F]{6}/i.test(x.textContent) }));
     });
@@ -211,8 +210,10 @@ const CONTRAST_PROBES = [
     const lockLabel = await page.getAttribute("#themeLockBtn", "aria-label");
     await page.click("#themeLockBtn"); await page.waitForTimeout(80);
     const unlockLabel = await page.getAttribute("#themeLockBtn", "aria-label");
-    R.ok(!!lockLabel && !!unlockLabel && lockLabel !== unlockLabel,
-      "D7c · ปุ่มล็อกธีมบอกสถานะด้วยข้อความ ไม่ใช่สี/ไอคอนอย่างเดียว", lockLabel + " / " + unlockLabel);
+    /* ต้องมีคำว่า "ธีม" เสมอ: ux §7 ห้ามให้ปุ่มนี้ฟังดูเหมือน "ล็อกสี" ของ FR-5 ที่คุมชุด ไม่ใช่พื้นหลัง */
+    R.ok(!!lockLabel && !!unlockLabel && lockLabel !== unlockLabel
+         && /ธีม/.test(lockLabel) && /ธีม/.test(unlockLabel),
+      "D7c · ปุ่มล็อกธีมบอกสถานะด้วยข้อความ และแยกจาก \"ล็อกสี\" ชัดเจน", lockLabel + " / " + unlockLabel);
     allErrs.push(...errs); await ctx.close();
   }
 
