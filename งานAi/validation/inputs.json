@@ -413,15 +413,191 @@
         "output กล่าวถึงการเชื่อมต่อกับอุปกรณ์ในห้องพัก",
         "output กล่าวถึงบริการต่างๆ ของโรงแรม ไม่ใช่แค่การเชื่อมต่ออุปกรณ์อย่างเดียว"
       ]
+    },
+
+    {
+      "id": "F02",
+      "provenance": "real",
+      "source": "Markdown export คำถามทั้งหมดในแชทเรื่องการลงทุน, ผู้ใช้ส่งมา",
+      "thai": "ช่วยจัดดอนให้หน่อยตอนนี้พอต ถือ mu tsmc goog tsla อยู่อยากเพิ่ม หุ้นอีก1ตัวที่ดีๆ",
+      "must_preserve": [
+        "wants help arranging a portfolio",
+        "currently holds MU, TSMC, GOOG, TSLA",
+        "wants to add one more good stock"
+      ],
+      "checks": [
+        "output กล่าวถึงหุ้นทั้ง 4 ตัวที่ถืออยู่ (MU, TSMC, GOOG, TSLA) โดยตรง",
+        "output เสนอหรือพูดถึงการเพิ่มหุ้นอีก 1 ตัว ไม่ใช่หลายตัวโดยไม่ถูกขอ",
+        "output ไม่ได้สมมติระดับความเสี่ยงหรือเป้าหมายการลงทุนที่ผู้ใช้ไม่ได้บอกในข้อความนี้"
+      ]
+    },
+    {
+      "id": "F03",
+      "provenance": "real",
+      "source": "Markdown export คำถามทั้งหมดในแชทเรื่องการลงทุน, ผู้ใช้ส่งมา",
+      "thai": "PWR (Quanta Services) ทำธุรกิจอะไร",
+      "must_preserve": ["asks what business PWR (Quanta Services) does"],
+      "checks": [
+        "output กล่าวถึง PWR หรือ Quanta Services โดยตรง",
+        "output อธิบายลักษณะธุรกิจ ไม่ใช่แค่ราคาหุ้นหรือข้อมูลการเงินล้วนๆ"
+      ]
+    },
+    {
+      "id": "F04",
+      "provenance": "real",
+      "source": "Markdown export คำถามทั้งหมดในแชทเรื่องการลงทุน, ผู้ใช้ส่งมา",
+      "thai": "SMRคืออะไร",
+      "must_preserve": ["asks what SMR is"],
+      "checks": ["output อธิบายว่า SMR คืออะไร"]
+    },
+    {
+      "id": "F05",
+      "provenance": "real",
+      "source": "Markdown export คำถามทั้งหมดในแชทเรื่องการลงทุน, ผู้ใช้ส่งมา",
+      "thai": "PWR มีสัดส่วนรายได้จากอะไรบ้างสัดส่วนลูกค้าเป็นยังไง PE และการคาดการในอนาคตดีแค่ไหน",
+      "must_preserve": [
+        "asks about PWR's revenue breakdown",
+        "asks about PWR's customer mix",
+        "asks about PWR's PE ratio",
+        "asks how good PWR's future outlook is"
+      ],
+      "checks": [
+        "output ตอบครบทั้ง 4 หัวข้อที่ถาม: สัดส่วนรายได้ สัดส่วนลูกค้า PE และแนวโน้มอนาคต",
+        "output ไม่ได้ตอบแค่ 1-2 หัวข้อแล้วข้ามที่เหลือไปเงียบๆ"
+      ]
+    },
+    {
+      "id": "F07",
+      "provenance": "real",
+      "source": "Markdown export คำถามทั้งหมดในแชทเรื่องการลงทุน, ผู้ใช้ส่งมา",
+      "thai": "GEVทำอะไรบ้าง ขอภาษาไทย สัดส่วนรายได้มาจากอะไรเก่งอะไรมากที่สุด",
+      "must_preserve": [
+        "asks what GEV does",
+        "explicitly asks for the answer in Thai",
+        "asks about GEV's revenue breakdown",
+        "asks what GEV is best at"
+      ],
+      "checks": [
+        "output ตอบเป็นภาษาไทย ตามที่ผู้ใช้ขอไว้ตรงๆ",
+        "output กล่าวถึงสัดส่วนรายได้และจุดแข็งหลักของ GEV"
+      ]
+    },
+    {
+      "id": "F10",
+      "provenance": "real",
+      "source": "Markdown export คำถามทั้งหมดในแชทเรื่องการลงทุน, ผู้ใช้ส่งมา",
+      "note": "'สเปส X' ในต้นฉบับกำกวม อาจหมายถึง SpaceX หรือพิมพ์ผิดจากคำอื่น เก็บความกำกวมนี้ไว้ตั้งใจ",
+      "thai": "ทำรายละเอียดสเปส X ให้อ่าหน่อยขอทุกอย่างในบริษัท",
+      "must_preserve": [
+        "wants a detailed profile of a company referred to as 'X' or 'สเปส X'",
+        "wants everything about the company"
+      ],
+      "checks": [
+        "output ระบุชัดเจนว่ากำลังพูดถึงบริษัทอะไร ไม่ว่าจะด้วยการถามกลับหรือระบุ assumption ชัดเจน แทนที่จะเดาเงียบๆ โดยไม่บอก",
+        "output ไม่ได้ตอบด้วยข้อมูลที่ไม่เกี่ยวกับบริษัทใดบริษัทหนึ่งโดยเฉพาะ"
+      ]
+    },
+    {
+      "id": "F11",
+      "provenance": "real",
+      "source": "Markdown export คำถามทั้งหมดในแชทเรื่องการลงทุน, ผู้ใช้ส่งมา",
+      "thai": "$1.8 trillion valuation คิดว่าแพงมั้ยลองคำนวณหลายแบบดูหน่อย",
+      "must_preserve": [
+        "states a $1.8 trillion valuation figure",
+        "asks whether that valuation is expensive",
+        "asks to calculate or evaluate it in several different ways"
+      ],
+      "checks": [
+        "output ใช้ตัวเลข 1.8 trillion ที่ระบุมา ไม่ได้เปลี่ยนเป็นตัวเลขอื่น",
+        "output เสนอวิธีคำนวณหรือประเมินมูลค่ามากกว่า 1 วิธี ตามที่ขอ",
+        "output ระบุหรือถามกลับว่ากำลังประเมินมูลค่าของบริษัทไหน แทนที่จะเดาเงียบๆ"
+      ]
+    },
+    {
+      "id": "F14",
+      "provenance": "real",
+      "source": "Markdown export คำถามทั้งหมดในแชทเรื่องการลงทุน, ผู้ใช้ส่งมา",
+      "thai": "คิดว่ามูลค่าของธุรกิจสตาลิงค์ ในอนาคตจะมีขนาดเท่าไหร่ถ้าทุกคนได้ใช้ครับ",
+      "must_preserve": [
+        "asks about Starlink's business value",
+        "in the future",
+        "under the hypothetical that everyone uses it"
+      ],
+      "checks": [
+        "output กล่าวถึง Starlink โดยตรง",
+        "output ตอบในกรอบสมมติฐาน 'ถ้าทุกคนได้ใช้' ตามที่ถาม ไม่ใช่แค่สถานะปัจจุบัน"
+      ]
+    },
+    {
+      "id": "F16",
+      "provenance": "real",
+      "source": "Markdown export คำถามทั้งหมดในแชทเรื่องการลงทุน, ผู้ใช้ส่งมา",
+      "note": "fragment สุดขั้ว อ้างอิงการเปรียบเทียบที่ไม่มีในข้อความนี้ ตั้งใจเก็บไว้ทดสอบ thin input",
+      "thai": "Pwr ล่ะ",
+      "must_preserve": ["asks about PWR, in relation to something being compared that is not stated in this message"],
+      "checks": [
+        "output ถามกลับว่ากำลังเทียบ PWR กับอะไรหรือในแง่มุมไหน แทนที่จะเดาบริบทเอง",
+        "output ไม่ได้ตอบยาวราวกับรู้คำถามเต็มที่ไม่ได้ถูกพูดในข้อความนี้"
+      ]
+    },
+    {
+      "id": "F19",
+      "provenance": "real",
+      "source": "Markdown export คำถามทั้งหมดในแชทเรื่องการลงทุน, ผู้ใช้ส่งมา",
+      "thai": "แบตเตอรี่ธุรกิจมันเป็นอะไรที่ย้อนแย้งมั้ยครับต้องทำแบตให้นานขึ้น อย่างงี้อัตราการซื้อซ้ำจะน้อยลงด้วย",
+      "must_preserve": [
+        "asks whether the battery business is contradictory",
+        "because batteries need to be made to last longer",
+        "which would reduce the repurchase rate"
+      ],
+      "checks": [
+        "output ตอบตรงประเด็นความย้อนแย้งระหว่างอายุการใช้งานแบตเตอรี่กับอัตราการซื้อซ้ำ",
+        "output ไม่ได้เลี่ยงตอบด้วยการพูดเรื่องแบตเตอรี่ทั่วไปที่ไม่เกี่ยวกับประเด็นนี้"
+      ]
+    },
+    {
+      "id": "F23",
+      "provenance": "real",
+      "source": "Markdown export คำถามทั้งหมดในแชทเรื่องการลงทุน, ผู้ใช้ส่งมา",
+      "thai": "อยากอ่านชีวะประวัติของคนเก่งๆหาให้อ่าน1คนทีครับ",
+      "must_preserve": [
+        "wants to read a biography",
+        "of a talented or accomplished person",
+        "just one person"
+      ],
+      "checks": [
+        "output เลือกมา 1 คน ไม่ใช่หลายคน",
+        "output ถามกลับถึงสาขาหรือประเภทของ 'คนเก่งๆ' ที่สนใจ หรือให้เหตุผลชัดเจนว่าทำไมเลือกคนนี้ แทนที่จะสุ่มเลือกเงียบๆ โดยไม่มีเหตุผล"
+      ]
+    },
+    {
+      "id": "F25",
+      "provenance": "real",
+      "source": "Markdown export คำถามทั้งหมดในแชทเรื่องการลงทุน, ผู้ใช้ส่งมา",
+      "thai": "วิเคราะห์ตัวQualcommหน่อยทำอะไรธุรกิจอะไรมีรายได้ทางไหนบ้างสำคัญแค่ไหนในอนาคต",
+      "must_preserve": [
+        "asks to analyze Qualcomm",
+        "what it does",
+        "what business it is in",
+        "where its revenue comes from",
+        "how important it will be in the future"
+      ],
+      "checks": [
+        "output กล่าวถึง Qualcomm โดยตรง",
+        "output ตอบครบทั้งเรื่องธุรกิจหลัก แหล่งรายได้ และความสำคัญในอนาคต"
+      ]
     }
   ],
 
   "_todo": [
-    "ตอนนี้มี real input 28 อัน (R01-R20 + P01-P08) เกินเกณฑ์ขั้นต่ำ 20 อันใน PREREGISTRATION.md",
-    "อันสั้นกว่า 15 คำ: R01 R02 R03 R04 R05 R20 P02 P03 (เกิน 5 อันตามที่กำหนด)",
-    "P01-P08 มาจากคำขอ 'สร้าง/ออกแบบ' จริง (สต็อก, 3D, เว็บเกม, เว็บโรงแรม) ซึ่งเติมช่องว่างที่ R01-R20 ขาด (R ชุดเอนไปทาง Q&A เรื่องใช้งาน AI)",
-    "P02, P03 เป็น fragment/short ที่มาจากบทสนทนาต่อเนื่อง อ้างอิง 'มัน'/context ก่อนหน้าที่ไม่มีในข้อความ เก็บไว้ตั้งใจเพื่อทดสอบว่า pipeline ถามกลับหรือไม่",
-    "ตัดออกจาก PDF ต้นฉบับ: ข้อ 4,5,7,10-13,15,17,18,20-25 เพราะอ้างอิงรูปภาพ/ไฟล์โค้ดเดิม/เป็น style-tag ต่อ scene เดิม ไม่ยืนด้วยตัวเอง",
+    "ตอนนี้มี real input 40 อัน (R01-R20, P01-P08, F02-F25 เลือกมา 12 อัน) เกินเกณฑ์ขั้นต่ำ 20 ใน PREREGISTRATION.md มาก",
+    "40 คือตัวเลขเดียวกับที่ PREREGISTRATION.md กำหนดไว้เป็น fallback รอบสองถ้าผล inconclusive จึงไม่ต้องเก็บเพิ่มอีกรอบถ้า margin ออกมาในช่วง +5 ถึง +15pp",
+    "อันสั้นกว่า 15 คำ: R01 R02 R03 R04 R05 R20 P02 P03 F03 F04 F16 (เกิน 5 อันตามที่กำหนดมาก)",
+    "โดเมนตอนนี้ครอบคลุม 3 กลุ่ม: AI/Claude Code usage (R, 20 อัน), สร้าง/ออกแบบระบบ (P, 8 อัน), วิเคราะห์การลงทุน/หุ้น (F, 12 อัน)",
+    "ทั้ง 3 กลุ่มมาจากบทสนทนาคนละเรื่องของผู้ใช้คนเดียวกัน ยังเป็น single-person sample ไม่ใช่ผู้ใช้หลายคน ข้อจำกัดนี้ยังอยู่ ให้ระบุไว้ตอนสรุปผล",
+    "F16 เป็น fragment สุดขั้ว ('Pwr ล่ะ') ตั้งใจเก็บไว้ทดสอบ thin/ambiguous input เหมือน P02 P03",
+    "F10 มีความกำกวมในตัวข้อความเอง ('สเปส X') ตั้งใจเก็บไว้เป็นกรณีทดสอบว่า pipeline จัดการคำกำกวมที่มาจากการพิมพ์ผิดยังไง",
+    "ตัดออกจาก markdown ต้นฉบับ: ข้อ 3,30,41 (เป็น Q&A แบบเลือกปุ่มสำเร็จรูป ไม่ใช่ natural language ดิบ), ข้อ 72 (อ้างอิงรูปภาพ), และอีกหลายข้อที่ซ้ำโครงสร้างกับที่เลือกมาแล้วเพื่อไม่ให้ input กระจุกตัวในหัวข้อ 'วิเคราะห์หุ้นตัวหนึ่ง' มากเกินไป",
     "ก่อนรัน confirmatory ให้ตรวจ checks เหล่านี้อีกรอบว่าตรงกับสิ่งที่อยากวัดจริง"
   ]
 }
