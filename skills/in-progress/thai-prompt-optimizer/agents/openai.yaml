@@ -1,0 +1,5 @@
+interface:
+  display_name: "Thai Prompt Optimizer"
+  short_description: "Thai request -> clear, assumption-flagged AI instruction"
+policy:
+  allow_implicit_invocation: false
