@@ -1,25 +1,151 @@
-Skills are organized into bucket folders under `skills/`:
+# CLAUDE.md
 
-- `engineering/`: daily code work
-- `productivity/`: daily non-code workflow tools
-- `misc/`: kept around but rarely used, not promoted
-- `in-progress/`: beta: public on purpose, feedback wanted, not shipped in the plugin
-- `deprecated/`: no longer used
+## Project
 
-Every skill in `engineering/` or `productivity/` (the **promoted** buckets) must have a reference in the top-level `README.md` and an entry in `.claude-plugin/plugin.json`'s `skills` array (the Claude Code plugin ships exactly the promoted set). Skills in `misc/`, `in-progress/`, and `deprecated/` must not appear in either.
+Collection of agent skills for Claude Code and Codex.
 
-Install commands are copied verbatim from [.agents/install-block.md](./.agents/install-block.md). `.claude-plugin/marketplace.json` makes the repo its own single-plugin marketplace (a fallback the install block explains, not the documented route). Run `claude plugin validate . --strict` after touching either manifest. Why a Claude plugin but not (yet) a Codex one lives in [.agents/adr/0002-ship-as-a-claude-code-plugin.md](./.agents/adr/0002-ship-as-a-claude-code-plugin.md).
+Skills are written in Markdown + YAML and distributed through:
+- Claude Code plugin
+- `npx skills@latest add mattpocock/skills`
 
-Each skill entry in the top-level `README.md` must link the skill name to its `SKILL.md`.
+This repo contains no application code, build system, or application tests.
 
-Each bucket folder has a `README.md` that lists every skill in the bucket with a one-line description, with the skill name linked to its `SKILL.md`. The promoted buckets' `README.md`s and the top-level `README.md` group entries into **User-invoked** and **Model-invoked**; non-promoted bucket `README.md`s (`misc/`, `in-progress/`) use a flat list.
+Correctness means:
+- Skill manifests are valid.
+- Skills are in the correct buckets.
+- Promotion requirements are complete.
+- Cross-references remain consistent.
 
-Skills in `engineering/` and `productivity/` also have a human-facing docs page at `docs/<bucket>/<skill-name>.md` (the docs tree mirrors those two bucket folders under `skills/`). The published URL is `https://aihero.dev/skills-<skill-name>` regardless of bucket: the docs path is repo organisation only. When you add, rename, or change the behaviour of a skill in `engineering/` or `productivity/`, create or re-sync its docs page following [.agents/writing-docs.md](./.agents/writing-docs.md). A finished page carries four sections: **What it does**, **When to reach for it**, **Common questions**, and **It's working if**. `writing-docs.md` holds the template, the section order, and where to hunt for the questions. Skills in the non-promoted buckets (`misc/`, `in-progress/`, `deprecated/`) get **no** docs page.
+## Commands
 
-Every `SKILL.md` is either user-invoked (`disable-model-invocation: true` plus `policy.allow_implicit_invocation: false` in `agents/openai.yaml`, reachable only by the human) or model-invoked (model- or user-reachable). See [.agents/invocation.md](./.agents/invocation.md).
+Use only when relevant to the current task.
 
-[`ask-matt`](./skills/engineering/ask-matt/SKILL.md) is the router that maps every user-reachable skill and how they relate. The same trigger that re-syncs a docs page applies to it: whenever you add, rename, remove, or change how a user-reachable skill fits the flows, re-read `ask-matt`'s `SKILL.md` and update it so the map stays accurate: a new skill it never mentions, or a stale one it still routes to, is a router that lies.
+- `npm run changeset` — record user-facing skill changes.
+- `npm run version` — apply changesets and sync plugin version.
+- `npm run check-plugin-version` — verify plugin version, read-only.
+- `claude plugin validate . --strict` — validate plugin manifests after manifest changes.
+- `scripts/link-skills.sh` — update local skill symlinks after adding, removing, or renaming skills.
+- `scripts/list-skills.sh` — list all `SKILL.md` paths.
 
-To (re)link every skill outside `deprecated/` and `misc/` into the local harness skill directories (`~/.claude/skills`, `~/.agents/skills`), run `scripts/link-skills.sh`. Each entry is a symlink into this repo, so a `git pull` keeps installed skills current; re-run the script after adding, removing, or renaming a skill.
+Do not run unrelated commands.
 
-No em-dashes anywhere in this repo's prose (`SKILL.md` files, docs, `README.md`, `CHANGELOG.md`, ADRs, changesets, code comments). Where a sentence reaches for one, rewrite it instead with a comma, colon, period, parentheses, or a conjunction, whichever the sentence actually wants; never do a blind character substitution.
+## Architecture
+
+Skills live under `skills/` and belong to one bucket:
+
+- `engineering/` — promoted, shipped in plugin.
+- `productivity/` — promoted, shipped in plugin.
+- `misc/` — kept but not promoted.
+- `in-progress/` — public beta, excluded from plugin.
+- `deprecated/` — normally empty. Delete skills instead of archiving them.
+
+### Promotion Contract
+
+Every promoted skill must have all three:
+
+1. Entry in top-level `README.md`.
+2. Path in `.claude-plugin/plugin.json` under `skills`.
+3. Documentation page at `docs/<bucket>/<skill-name>.md`.
+
+When adding, removing, renaming, or promoting a skill, check all affected references.
+
+## Skill Rules
+
+Every skill is either:
+
+- User-invoked
+- Model-invoked
+
+Follow `.agents/invocation.md` for invocation behavior.
+
+### User-invoked Skills
+
+Must have:
+
+- `disable-model-invocation: true`
+- Matching `openai.yaml` configuration.
+
+User-invoked skills must never call another user-invoked skill.
+
+### Router
+
+Update `ask-matt` whenever a user-reachable skill is:
+
+- Added
+- Renamed
+- Removed
+
+## Context Discipline
+
+Optimize for minimal context.
+
+- Read only files required for the current task.
+- Do not read every `SKILL.md` by default.
+- Do not read every documentation page unless cross-skill consistency requires it.
+- Prefer targeted search over reading entire directories.
+- Load a skill's `SKILL.md` only when working on that skill.
+- When modifying a skill, inspect only directly affected manifests, docs, routers, and cross-references.
+- Reuse existing project conventions instead of rediscovering them.
+- Do not duplicate information from other project files into this file.
+- Do not restate repository rules in responses unless relevant.
+- If a task affects multiple skills, identify the affected files first, then load only those files.
+- Treat source files as the source of truth. Do not create duplicate versions of the same information.
+
+## Change Workflow
+
+For a new or modified skill:
+
+1. Identify affected files.
+2. Read the relevant `SKILL.md`.
+3. Check invocation rules.
+4. Update required manifests, README, docs, and routers.
+5. Run only relevant validation commands.
+6. Record user-facing changes with a changeset when required.
+
+For a promoted skill, verify the full Promotion Contract.
+
+For an add/remove/rename operation, also run:
+
+`scripts/link-skills.sh`
+
+when local symlinks are affected.
+
+## Validation
+
+Use the smallest relevant validation set.
+
+If plugin manifests changed:
+
+`claude plugin validate . --strict`
+
+If skill paths changed:
+
+`scripts/list-skills.sh`
+
+If plugin versioning changed:
+
+`npm run check-plugin-version`
+
+Do not run the full validation suite when the change does not require it.
+
+## Cross-References
+
+When changing a skill name, path, invocation mode, or promotion status, search for references across:
+
+- `README.md`
+- `.claude-plugin/plugin.json`
+- `.agents/`
+- `docs/`
+- `skills/`
+- `ask-matt`
+- `openai.yaml`
+
+Do not assume a reference is safe to leave unchanged.
+
+## Style
+
+- No em-dashes anywhere in this repo.
+- Use commas, colons, periods, or parentheses instead.
+- Preserve existing Markdown and YAML conventions.
+- Prefer concise documentation.
+- Do not introduce new conventions when an existing convention already exists.
