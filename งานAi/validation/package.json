@@ -1,0 +1,16 @@
+{
+  "name": "thai-prompt-validation",
+  "private": true,
+  "type": "module",
+  "description": "Validation experiment for the Thai to AI-ready instruction hypothesis",
+  "scripts": {
+    "generate": "node run.mjs generate",
+    "execute": "node run.mjs execute",
+    "judge": "node run.mjs judge",
+    "sheet": "node run.mjs sheet",
+    "tally": "node run.mjs tally"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.70.0"
+  }
+}
