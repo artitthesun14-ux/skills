@@ -12,7 +12,12 @@
     "checks = คำถามใช่ไม่ใช่ เกี่ยวกับ OUTPUT สุดท้ายที่ model ตอบกลับมา",
     "  ต้องตรวจได้โดยไม่ต้องใช้วิจารณญาณ",
     "  ดี: 'output มี SQL constraint ที่กันไม่ให้ช่างคนเดียวถูกจองซ้อนเวลาเดียวกัน'",
-    "  แย่: 'output มีคุณภาพดี'"
+    "  แย่: 'output มีคุณภาพดี'",
+    "",
+    "R01-R20 มาจาก export บทสนทนาจริงของผู้ใช้กับ Grok (2026-09-16)",
+    "ตัดข้อความที่อ้างอิงรูปภาพ/ไฟล์แนบออก เพราะ optimized prompt ต้องยืนได้ด้วยตัวเองโดยไม่มีสิ่งแนบ",
+    "หลายข้อสั้นและกำกวมโดยธรรมชาติ (อ้างถึงบริบทก่อนหน้าที่ไม่มีในข้อความนี้)",
+    "นั่นคือของจริง ไม่ใช่บั๊ก checks ของข้อเหล่านี้เลยเน้นตรวจว่า pipeline ถามกลับ แทนที่จะสมมติคำตอบ"
   ],
 
   "inputs": [
@@ -41,7 +46,6 @@
         "output กล่าวถึงทั้ง SMS และ LINE ไม่ได้เลือกให้เองเงียบๆ เพียงช่องทางเดียวโดยไม่บอก"
       ]
     },
-
     {
       "id": "seed-short",
       "provenance": "seed",
@@ -55,14 +59,253 @@
         "output ไม่ได้ระบุ tech stack เจาะจงราวกับว่าผู้ใช้เป็นคนเลือก",
         "output ไม่ได้สมมติว่าขายสินค้าประเภทใดประเภทหนึ่งเป็นข้อเท็จจริง"
       ]
+    },
+
+    {
+      "id": "R01",
+      "provenance": "real",
+      "source": "Grok chat export ของผู้ใช้",
+      "thai": "ทำอะไรได้บ้างครับในโมเดลนี้",
+      "must_preserve": ["asks what this AI model or plan can do"],
+      "checks": [
+        "output ถามกลับว่า 'โมเดลนี้' หมายถึงผลิตภัณฑ์หรือแผนไหน แทนที่จะสมมติเอง",
+        "output ไม่ได้อ้างชื่อผลิตภัณฑ์หรือบริษัทที่ผู้ใช้ไม่ได้พูดถึง"
+      ]
+    },
+    {
+      "id": "R02",
+      "provenance": "real",
+      "source": "Grok chat export ของผู้ใช้",
+      "thai": "เริ่มsetupยังไงดี",
+      "must_preserve": ["asks how to begin a setup"],
+      "checks": [
+        "output ถามกลับว่ากำลัง setup อะไร แทนที่จะสมมติเอาเอง",
+        "output ไม่ได้ระบุชื่อเครื่องมือเฉพาะเจาะจงที่ผู้ใช้ไม่ได้พูดถึง"
+      ]
+    },
+    {
+      "id": "R03",
+      "provenance": "real",
+      "source": "Grok chat export ของผู้ใช้",
+      "thai": "ใช้บนมือถือได้ทุกฟังชั่นมั้ยย",
+      "must_preserve": ["asks whether every function is available on mobile"],
+      "checks": [
+        "output ถามกลับว่ากำลังพูดถึงแอปหรือบริการอะไร แทนที่จะสมมติเอง",
+        "output ไม่ได้ตอบราวกับรู้ว่ากำลังพูดถึงผลิตภัณฑ์ใดผลิตภัณฑ์หนึ่งเจาะจง"
+      ]
+    },
+    {
+      "id": "R04",
+      "provenance": "real",
+      "source": "Grok chat export ของผู้ใช้",
+      "thai": "ควรเปิดprมั้ย",
+      "must_preserve": ["asks whether they should open a PR"],
+      "checks": [
+        "output กล่าวถึง pull request หรือ PR ตรงๆ",
+        "output ถามกลับถึงสถานะของงานปัจจุบัน แทนที่จะสมมติว่างานเสร็จแล้ว"
+      ]
+    },
+    {
+      "id": "R05",
+      "provenance": "real",
+      "source": "Grok chat export ของผู้ใช้",
+      "thai": "อธิบายตัวskillsกับMainหน่อย",
+      "must_preserve": ["asks for an explanation of 'skills' and 'Main'"],
+      "checks": [
+        "output กล่าวถึงทั้งคำว่า skills และ Main",
+        "output ถามกลับหรือระบุขอบเขตชัดเจนว่ากำลังอธิบายในบริบทของระบบอะไร แทนที่จะเดาเงียบๆ"
+      ]
+    },
+    {
+      "id": "R06",
+      "provenance": "real",
+      "source": "Grok chat export ของผู้ใช้",
+      "thai": "สร้างหน้าเว็ปพรีเซ็น แล้วส่งมาเป็นลิงก์หรือHTMLได้มั้ย",
+      "must_preserve": ["build a presentation webpage", "deliver it as a link or as an HTML file"],
+      "checks": [
+        "output กล่าวถึงการส่งมอบเป็นลิงก์หรือไฟล์ HTML",
+        "output ไม่ได้ทิ้งคำขอเรื่องหน้าเว็บพรีเซนต์ไปเฉยๆ"
+      ]
+    },
+    {
+      "id": "R07",
+      "provenance": "real",
+      "source": "Grok chat export ของผู้ใช้",
+      "thai": "ไหนลองสร้างพรีเซนเตชั่นความแตกต่างของแต่ละโมเดลของGrokหน่อย",
+      "must_preserve": ["create a presentation", "comparing the differences between Grok's models"],
+      "checks": [
+        "output กล่าวถึงการเปรียบเทียบโมเดลต่างๆ ของ Grok โดยตรง",
+        "output ไม่ได้แต่งตัวเลขหรือชื่อรุ่นของ Grok ที่ผู้ใช้ไม่ได้พูดถึง"
+      ]
+    },
+    {
+      "id": "R08",
+      "provenance": "real",
+      "source": "Grok chat export ของผู้ใช้",
+      "thai": "เทียบกับเจ้าอื่นคุ้มกว่าในมุมไหนบ้าง",
+      "must_preserve": ["asks for a comparison against other providers on which dimensions it is a better deal"],
+      "checks": [
+        "output ถามกลับว่า 'เจ้าอื่น' หมายถึงบริษัทใดบ้าง แทนที่จะสมมติชื่อคู่แข่งเอง",
+        "output ไม่ได้อ้างชื่อบริษัทคู่แข่งที่ผู้ใช้ไม่ได้ระบุ ราวกับเป็นข้อเท็จจริงที่รู้กันอยู่แล้ว"
+      ]
+    },
+    {
+      "id": "R09",
+      "provenance": "real",
+      "source": "Grok chat export ของผู้ใช้",
+      "thai": "แอป Grok Bot บนมือถือทำอะไรได้บ้าง",
+      "must_preserve": ["asks what the Grok Bot mobile app can do"],
+      "checks": [
+        "output กล่าวถึง Grok Bot และแพลตฟอร์มมือถือโดยตรง"
+      ]
+    },
+    {
+      "id": "R10",
+      "provenance": "real",
+      "source": "Grok chat export ของผู้ใช้",
+      "thai": "บอกวิธีใช้Aiให้ประหยัดโทเคนมากที่สุดหน่อย",
+      "must_preserve": ["asks for the most token-efficient way to use AI"],
+      "checks": [
+        "output กล่าวถึงคำว่า token หรือโทเคนโดยตรง",
+        "output ให้คำแนะนำเชิงปฏิบัติ ไม่ใช่แค่คำอธิบายทั่วไปว่า token คืออะไร"
+      ]
+    },
+    {
+      "id": "R11",
+      "provenance": "real",
+      "source": "Grok chat export ของผู้ใช้",
+      "thai": "CLAUDE.md คืออะไรหลักการใช้งานยังไงช่วยอะไร",
+      "must_preserve": ["asks what CLAUDE.md is", "asks the principle of how to use it", "asks what it helps with"],
+      "checks": [
+        "output อธิบายว่า CLAUDE.md คืออะไร",
+        "output อธิบายวิธีใช้งานหรือประโยชน์ของมัน"
+      ]
+    },
+    {
+      "id": "R12",
+      "provenance": "real",
+      "source": "Grok chat export ของผู้ใช้",
+      "thai": "ผมมีตัวสกิลกับตัวเมนอยู่แล้ว เวลาเริ่มแชทใหม่โปรเจกเก่าๆจะตามมามั้ย",
+      "must_preserve": ["already has skills and a main file set up", "asks whether old project context carries over when starting a new chat"],
+      "checks": [
+        "output ตอบคำถามว่าบริบทโปรเจกต์เก่าจะติดตามมาในแชทใหม่หรือไม่",
+        "output ไม่ได้สมมติชื่อโปรเจกต์หรือรายละเอียดที่ผู้ใช้ไม่ได้บอก"
+      ]
+    },
+    {
+      "id": "R13",
+      "provenance": "real",
+      "source": "Grok chat export ของผู้ใช้",
+      "thai": "ถ้าCLAUDE.md มีอยู่แล้วแต่อยากเริ่มsetupใหม่ทำยังไง",
+      "must_preserve": ["CLAUDE.md already exists", "wants to start the setup over"],
+      "checks": [
+        "output กล่าวถึง CLAUDE.md ที่มีอยู่แล้วโดยตรง",
+        "output ให้ขั้นตอนที่เกี่ยวกับการเริ่ม setup ใหม่ ไม่ใช่การสร้างจากศูนย์ราวกับไม่มีไฟล์เดิม"
+      ]
+    },
+    {
+      "id": "R14",
+      "provenance": "real",
+      "source": "Grok chat export ของผู้ใช้",
+      "thai": "อยากรู้ว่าผมถามอะไรคุณบ้างตั่งแต่แรก ส่งมาเป็นไฟล์ให้หน่อยครับ",
+      "must_preserve": ["wants a list of everything asked from the start of the conversation", "wants it delivered as a file"],
+      "checks": [
+        "output กล่าวถึงการส่งออกเป็นไฟล์",
+        "output ไม่ได้ตอบด้วยเนื้อหาอื่นที่ไม่เกี่ยวกับการสรุปคำถามที่ผ่านมา"
+      ]
+    },
+    {
+      "id": "R15",
+      "provenance": "real",
+      "source": "Grok chat export ของผู้ใช้",
+      "thai": "แล้วสามารถcoworkeทำagenได้มั้ย",
+      "must_preserve": ["asks whether it can do 'cowork' and build or run an 'agent'"],
+      "checks": [
+        "output ถามกลับความหมายของ cowork และ agent ในบริบทนี้ แทนที่จะเดาผลิตภัณฑ์เจาะจง",
+        "output ไม่ได้ตอบราวกับรู้แน่ชัดว่าผู้ใช้หมายถึงฟีเจอร์ชื่อเฉพาะที่ไม่ได้ถูกพูดถึง"
+      ]
+    },
+    {
+      "id": "R16",
+      "provenance": "real",
+      "source": "Grok chat export ของผู้ใช้",
+      "thai": "แล้วGrokมีสิ่งที่เรียกว่า artifact มั้ยที่เวลาทำงาน3Dหรือweb ไม่ต้องไปรันที่ไหนเก็บไว้ที่Grokได้",
+      "must_preserve": [
+        "asks whether Grok has something called 'artifact'",
+        "for 3D or web work",
+        "that does not need to be run elsewhere",
+        "and is stored within Grok"
+      ],
+      "checks": [
+        "output กล่าวถึงคำว่า artifact โดยตรง",
+        "output กล่าวถึงทั้งกรณี 3D และกรณี web",
+        "output ตอบเรื่องการเก็บหรือรันโดยไม่ต้องออกไปที่อื่น"
+      ]
+    },
+    {
+      "id": "R17",
+      "provenance": "real",
+      "source": "Grok chat export ของผู้ใช้",
+      "thai": "ถ้าเสร็จโปรเจ็ควรทำยังไงกับ CLAUDE.md แล้วเราเช็ค CLAUDE.mdของเรายังไงว่ามีอะไรอยู่บ้าง",
+      "must_preserve": [
+        "asks what to do with CLAUDE.md when a project is finished",
+        "asks how to check what is currently inside their CLAUDE.md"
+      ],
+      "checks": [
+        "output ตอบทั้งสองคำถาม: จัดการ CLAUDE.md ตอนโปรเจกต์เสร็จ และวิธีเช็คเนื้อหาปัจจุบัน",
+        "output ไม่ได้ตอบแค่ข้อเดียวแล้วละเลยอีกข้อ"
+      ]
+    },
+    {
+      "id": "R18",
+      "provenance": "real",
+      "source": "Grok chat export ของผู้ใช้",
+      "thai": "เวลาผมเริ่มsession /clear แล้วแต่พิมไปสักพักก็มันก็โหลดcontext เก่าๆเองหมดแก้ยังไง",
+      "must_preserve": [
+        "runs /clear to start a session",
+        "after typing for a while, old context loads back in on its own",
+        "asks how to fix this"
+      ],
+      "checks": [
+        "output ระบุถึงพฤติกรรมที่ context เก่ากลับมาโหลดเองหลัง /clear",
+        "output เสนอวิธีแก้ปัญหานี้โดยตรง ไม่ใช่คำอธิบายทั่วไปเรื่อง /clear คืออะไร"
+      ]
+    },
+    {
+      "id": "R19",
+      "provenance": "real",
+      "source": "Grok chat export ของผู้ใช้",
+      "thai": "อยากให้ช่วยปรับปรุงโดยใช้หลักandrej-karpathy และออกแบบClaude.mdให้กินโทนเคนน้อยแต่ใช้งานอย่างมีประสิทธิภาพให้หน่อย",
+      "must_preserve": [
+        "wants improvement based on Andrej Karpathy's principles",
+        "wants a CLAUDE.md design",
+        "that uses fewer tokens",
+        "while staying effective to use"
+      ],
+      "checks": [
+        "output กล่าวถึง Andrej Karpathy หรือหลักการที่มาจากเขาโดยตรง",
+        "output พูดถึงการลดโทเคนของ CLAUDE.md",
+        "output ไม่ได้ทิ้งเป้าหมายเรื่องประสิทธิภาพการใช้งานไปเพื่อแลกกับการลดโทเคนอย่างเดียว"
+      ]
+    },
+    {
+      "id": "R20",
+      "provenance": "real",
+      "source": "Grok chat export ของผู้ใช้",
+      "thai": "โอเคทีนี้ขอตัวsetupอีกครั้งครับต้องทำอะไรบ้าง",
+      "must_preserve": ["asks for the setup steps again"],
+      "checks": [
+        "output ถามกลับว่ากำลัง setup อะไร แทนที่จะสมมติหัวข้อเดิมที่ไม่ได้ถูกพูดซ้ำในข้อความนี้",
+        "output ให้คำตอบเป็นขั้นตอน ไม่ใช่คำถามเดียวไม่มีเนื้อหา"
+      ]
     }
   ],
 
   "_todo": [
-    "แทนที่ด้วย input จริงอย่างน้อย 20 อัน ก่อนรัน confirmatory",
-    "แหล่งที่ใช้ได้: ประวัติ ChatGPT ของตัวเอง, คำถามที่เพื่อน dev เคยถาม,",
-    "โพสต์ขอความช่วยเหลือในกลุ่ม dev ไทย (ขออนุญาตเจ้าของก่อน),",
-    "ข้อความที่ลูกค้าหรือ non-technical stakeholder เคยส่งมา",
-    "ห้ามให้ AI สร้าง input ให้ ห้ามเขียนเองโดยรู้ว่า pipeline ทำงานยังไง"
+    "ตอนนี้มี real input 20 อัน (R01-R20) ครบตามเกณฑ์ใน PREREGISTRATION.md แล้ว",
+    "มีอันสั้นกว่า 15 คำ: R01 R02 R03 R04 R05 R20 (เกิน 5 อันตามที่กำหนด)",
+    "สังเกต: ชุดนี้เอนไปทาง Q&A เกี่ยวกับการใช้ AI/Claude Code มากกว่าการขอ build ฟีเจอร์ซอฟต์แวร์แบบ spec",
+    "ถ้าอยากได้ input ที่เป็นการขอ 'สร้าง/ออกแบบระบบ' มากขึ้น ควรหาจากบทสนทนาอื่นมาเสริม",
+    "ก่อนรัน confirmatory ให้ตรวจ checks เหล่านี้อีกรอบว่าตรงกับสิ่งที่อยากวัดจริง"
   ]
 }
