@@ -1,7 +1,7 @@
 # PROJECT_STATE: Outfit Color Matcher
 
 > ไฟล์นี้เป็น "ตัวชี้ทาง" สำหรับทำงานต่อ ไม่ใช่สำเนาเอกสาร รายละเอียดเต็มอยู่ในไฟล์ที่อ้างถึง
-> อัปเดตล่าสุด: หลังสร้างเฟส 1 (ระบบทรงเสื้อผ้า SVG) และ publish ทับ artifact เดิม
+> อัปเดตล่าสุด: เฟส 1-4 ปิดครบหมดแล้ว (2026-09-13, Version 14) เอกสารนี้คือจุดเริ่มอ่านเดียวสำหรับเซสชันใหม่
 
 ## 1. โปรเจกต์คืออะไร
 เว็บไซต์หน้าเดียว (single-page website) ช่วยแต่งตัว: เสนอชุดที่สีเข้ากันให้ทันที พร้อมคำแนะนำอิงทฤษฎีสีและสัดส่วนสีของลุค **โดยไม่ให้คะแนน/ไม่ตัดสินการแต่งตัว**
@@ -15,12 +15,15 @@
 | `docs/spec-outfit-color-matcher.md` | **สเปกหลัก** (ปัญหา, non-goals, engine 4.1-4.7, FR-0..FR-6 + AC, data model, 7A สี, 7B การ์ด/carousel, 7C states, เฟส, backlog) | เสร็จ ใช้อ้างอิงหลัก |
 | `docs/ux-outfit-color-matcher.md` | UX (target user, IA, screen/state map A-E, flows, interaction rules, 7B micro-copy, a11y) | เสร็จ |
 | `docs/ui-outfit-color-matcher.md` | UI (tokens, component inventory + states, §3.7 ระบบทรงเสื้อผ้า, responsive, a11y พร้อมคอนทราสต์ที่วัดจริง) | เสร็จ |
-| `docs/plan-phase1-shape-migration.md` | แผนย้ายจากระบบรูปถ่ายมาเป็นทรง SVG + บันทึกผลหลังลงมือ | เสร็จ |
+| `docs/plan-phase1-shape-migration.md` | แผนย้ายจากระบบรูปถ่ายมาเป็นทรง SVG + บันทึกผลหลังลงมือ | เสร็จ อ้างอิงย้อนหลัง |
 | `docs/outfit-color-matcher-grill-summary.md` | บันทึกผลการ grill (12 ข้อตัดสิน) | อ้างอิงย้อนหลัง |
-| `docs/outfit-color-matcher.md` | สรุปโปรเจกต์ฉบับผู้ใช้อ่าน (ก่อนแปลงเป็นสเปกวิศวกรรม) | ถูกแทนที่โดย spec-* |
 | `docs/working-guidelines.md` | แนวทางการทำงานที่ตกลงยึด (Karpathy 4 หลัก) | ใช้ตลอดการสร้าง |
-| `HANDOFF.md` | เอกสารส่งต่อสำหรับเซสชันใหม่ | อ่านก่อนเริ่มงานต่อ |
 | `../research/color-matching-for-outfit-website.md` | งานวิจัยสี | อ้างอิง |
+| `../research/film-and-fashion-color-palette-principles.md` | งานวิจัยพาเลตต์สี (อ้างในกติกาโหมดไอเดีย spec §4.1/4.7/9) | อ้างอิง |
+
+**ตัดออกแล้ว (จบโปรเจกต์แล้ว ไม่จำเป็นอีก):** `docs/outfit-color-matcher.md` (สรุปโปรเจกต์ก่อนแปลงเป็นสเปกวิศวกรรม
+ถูกแทนที่โดย spec-* มานานแล้ว), `HANDOFF.md` (ซ้ำซ้อนกับไฟล์นี้และค้างที่สถานะเฟส 3 ไม่ตรงของจริงแล้ว
+เอกสารนี้ทำหน้าที่แทน), `tests/olive.png` (fixture เทสต์ของฟีเจอร์อัปโหลดรูปที่ย้ายไปใช้ทรง SVG แล้ว ไม่มีจุดอ้างอิงเหลือ)
 
 ## 3. การตัดสินใจ/ข้อจำกัดที่ต้องรักษาไว้ (ห้ามหลุด)
 **ผลิตภัณฑ์**
