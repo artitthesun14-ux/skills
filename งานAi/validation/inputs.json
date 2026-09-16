@@ -1,0 +1,68 @@
+{
+  "_readme": [
+    "ทุก input ต้องมี provenance บอกว่ามาจากไหน",
+    "provenance: 'real' เท่านั้นที่นับเข้าการทดลองตาม PREREGISTRATION.md",
+    "provenance: 'seed' คือตัวอย่างที่ AI เขียน ใช้ debug harness ได้ แต่ห้ามนับผล",
+    "ต้องมี input ที่สั้นกว่า 15 คำ อย่างน้อย 5 อัน ที่เป็น real",
+    "",
+    "must_preserve = ข้อเท็จจริงที่ผู้ใช้พูดออกมาจริงๆ ในข้อความไทย",
+    "  เขียนเป็นภาษาอังกฤษสั้นๆ เพราะจะไปตรวจกับ block <optimized> ซึ่งเป็นอังกฤษ",
+    "  ห้ามใส่สิ่งที่ผู้ใช้ไม่ได้พูด ถ้าใส่ จะกลายเป็นการบังคับให้ pipeline เดา",
+    "",
+    "checks = คำถามใช่ไม่ใช่ เกี่ยวกับ OUTPUT สุดท้ายที่ model ตอบกลับมา",
+    "  ต้องตรวจได้โดยไม่ต้องใช้วิจารณญาณ",
+    "  ดี: 'output มี SQL constraint ที่กันไม่ให้ช่างคนเดียวถูกจองซ้อนเวลาเดียวกัน'",
+    "  แย่: 'output มีคุณภาพดี'"
+  ],
+
+  "inputs": [
+    {
+      "id": "seed-barbershop",
+      "provenance": "seed",
+      "note": "มาจาก research.md §4 เขียนโดย AI ห้ามนับผล ใช้ debug harness เท่านั้น",
+      "thai": "สวัสดีครับพี่ คือผมอยากจะขอรบกวนปรึกษาหน่อยนะครับ พอดีว่าตอนนี้ผมกำลังทำเว็บร้านตัดผมอยู่ แล้วก็อยากจะได้ระบบจองคิวออนไลน์ด้วยอ่ะครับ คือลูกค้าน่าจะเข้ามาเลือกวันเวลาที่ว่างได้ แล้วก็เลือกช่างที่ต้องการได้ด้วย แล้วก็ถ้าเป็นไปได้อยากให้มันส่ง SMS หรือไม่ก็ LINE แจ้งเตือนลูกค้าก่อนถึงคิวสักหนึ่งชั่วโมงด้วยครับ ตอนนี้ผมใช้ Next.js กับ Postgres อยู่นะครับ ไม่รู้ว่าจะเริ่มยังไงดี ถ้าพี่พอจะมีเวลาช่วยแนะนำหน่อยได้ไหมครับว่าควรออกแบบ database schema ยังไง แล้วก็ API endpoint ควรมีอะไรบ้าง ขอบคุณมากๆ เลยครับ",
+      "must_preserve": [
+        "barbershop website",
+        "online queue booking",
+        "customer picks an available date and time",
+        "customer picks a specific barber",
+        "reminder sent one hour before the appointment",
+        "reminder via SMS or LINE",
+        "Next.js",
+        "Postgres",
+        "asks for database schema design",
+        "asks what API endpoints are needed"
+      ],
+      "checks": [
+        "output มี SQL schema หรือ DDL ที่ระบุตารางและคอลัมน์",
+        "output มีรายการ API endpoint พร้อม method และ path",
+        "schema มี constraint หรือ unique index ที่กันช่างคนเดียวถูกจองซ้อนช่วงเวลาเดียวกัน",
+        "output กล่าวถึงการแจ้งเตือนล่วงหน้าหนึ่งชั่วโมง",
+        "output กล่าวถึงทั้ง SMS และ LINE ไม่ได้เลือกให้เองเงียบๆ เพียงช่องทางเดียวโดยไม่บอก"
+      ]
+    },
+
+    {
+      "id": "seed-short",
+      "provenance": "seed",
+      "note": "input สั้นมาก ทดสอบว่า pipeline แต่งเรื่องไหม ห้ามนับผล",
+      "thai": "ทำเว็บขายของหน่อย",
+      "must_preserve": [
+        "build an online store"
+      ],
+      "checks": [
+        "output ถามกลับเพื่อขอรายละเอียด แทนที่จะสมมติ requirement ขึ้นมาเอง",
+        "output ไม่ได้ระบุ tech stack เจาะจงราวกับว่าผู้ใช้เป็นคนเลือก",
+        "output ไม่ได้สมมติว่าขายสินค้าประเภทใดประเภทหนึ่งเป็นข้อเท็จจริง"
+      ]
+    }
+  ],
+
+  "_todo": [
+    "แทนที่ด้วย input จริงอย่างน้อย 20 อัน ก่อนรัน confirmatory",
+    "แหล่งที่ใช้ได้: ประวัติ ChatGPT ของตัวเอง, คำถามที่เพื่อน dev เคยถาม,",
+    "โพสต์ขอความช่วยเหลือในกลุ่ม dev ไทย (ขออนุญาตเจ้าของก่อน),",
+    "ข้อความที่ลูกค้าหรือ non-technical stakeholder เคยส่งมา",
+    "ห้ามให้ AI สร้าง input ให้ ห้ามเขียนเองโดยรู้ว่า pipeline ทำงานยังไง"
+  ]
+}
