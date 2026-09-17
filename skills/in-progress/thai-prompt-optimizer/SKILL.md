@@ -7,7 +7,7 @@ argument-hint: "A request written in Thai"
 
 Convert the Thai text given as the argument into an English instruction that an LLM can act on without guessing. This is not a translator and not an analyst who fills in blanks: restate what the user said, in English, in a form that removes ambiguity about *what they want done*, while adding nothing they did not say.
 
-**Status: beta, unvalidated.** This prompt has not yet been measured against a baseline (see `../../../งานAi/validation/` in this repo for the pre-registered experiment designed to test it). Treat its output as a draft to review, not a verified transformation.
+**Status: beta, measured and not yet shown to help.** Three rounds against a baseline of the raw Thai plus one instruction to ask before acting are recorded in `../../../งานAi/validation/`. On the cleanest round (a randomly drawn sample, a baseline of matching instruction strength) this prompt scored 15/17 against the baseline's 16/17. It reliably wins where the user's words already name the shape of what they want, and it loses where naming a shape makes the model manufacture criteria the user never gave. Treat its output as a draft to review, not a verified transformation.
 
 ## Output format
 
@@ -37,20 +37,24 @@ The English instruction. Self-contained.
 
    A **fragment** fails that test in one of three ways: it names no action at all, only a state or a piece of context; it points at something outside this message and nothing inside the message resolves it (มัน, อันนี้, นี่, นั่น, ล่ะ, ต่อ, อีกครั้ง, แบบเดิม, โมเดลนี้, เจ้าอื่น); or the thing it acts on is named so vaguely that two competent readers would act on different subjects.
 
-   For an **actionable request**, follow rules 1 to 11 and write a real instruction.
+   For an **actionable request**, follow rules 1 to 13 and write a real instruction.
 
    For a **fragment**, do not write an instruction. A fragment rewritten as fluent English reads finished, and a reader who believes it is finished guesses the rest instead of asking. That is worse than leaving it in Thai. Emit `<optimized>` in exactly this shape instead:
 
    ```
    <optimized>
    INCOMPLETE REQUEST. The user wrote, in full: "<literal English of their words, nothing added, nothing resolved>"
-   This is not enough to act on. Do not begin the task and do not assume what is missing. Ask the user these questions first:
+   Their message does not say <name what is missing>. Do not invent it, and do not proceed as though it were settled.
+   Answer whatever part you can answer without it, clearly marked as general rather than specific to their case, then ask:
    1. <question>
    2. <question>
+   Respond in Thai.
    </optimized>
    ```
 
    The literal line must contain every word of theirs and no word of yours. If they wrote a pronoun with no antecedent, keep the pronoun.
+
+   Note what the middle line does and does not forbid. It forbids **filling the gap**: choosing a subject, a number, a technology or a scope the user did not choose. It does not forbid **helping around the gap**: naming the tradeoffs that hold whichever way the answer goes, or explaining what they would need to know to answer the question. A reply that withholds help it could have given is as much a failure as one that guesses.
 
    When you cannot tell which kind you have, treat it as a fragment. A question costs one turn; a wrong guess costs the whole task.
 
@@ -76,6 +80,10 @@ The English instruction. Self-contained.
 
 11. **Thai particles that mark a relation are content, not politeness.** Rule 7 deletes ครับ, ค่ะ, นะ, หน่อย, อ่ะ, จัง. It must not delete particles that state how this message relates to something else. "ล่ะ" and "แล้ว...ล่ะ" mark a comparison or a turn to a new item in a series. "ต่อ", "อีก", "แทน", "เหมือนเดิม" mark continuation or substitution. "ก็ได้" marks acceptance of a fallback. Name the relation in English, or, if the thing being related to is missing, that is rule 0's second fragment test.
 
+12. **End `<optimized>` with `Respond in Thai.`** The instruction is in English so the reader acts on it precisely. The answer is for a person who wrote to you in Thai. Both requirements must be met. The line is the last line of the block, on its own. The only exception is when the user themselves asked for another language, in which case name the one they asked for.
+
+13. **Keep the user's own spelling for any name you cannot resolve.** When they write a company, product, ticker, place or technical term in Thai script or in Thai transliteration, put the English rendering first and their exact original in parentheses after it: `a company the user wrote as "สเปส X"`, `PWR (written "Pwr")`. The Thai spelling is often the only evidence of what they meant. Drop the parenthetical only when the name is unambiguous in English (Qualcomm, Starlink, Next.js).
+
 ## Worked examples
 
 ### An actionable request
@@ -91,6 +99,7 @@ Correct output:
 ```
 <optimized>
 Notify the customer via SMS or LINE when their payment fails.
+Respond in Thai.
 </optimized>
 
 <assumptions_th>
@@ -120,10 +129,12 @@ Correct output:
 ```
 <optimized>
 INCOMPLETE REQUEST. The user wrote, in full: "It is a coffee shop with a single branch."
-This is not enough to act on. Do not begin the task and do not assume what is missing. Ask the user these questions first:
+Their message does not say what they want done. Do not invent it, and do not proceed as though it were settled.
+Answer whatever part you can answer without it, clearly marked as general rather than specific to their case, then ask:
 1. What do you want done: something built, something designed, or advice given?
 2. What problem are you trying to solve at this shop?
 3. Who will use the result?
+Respond in Thai.
 </optimized>
 
 <assumptions_th>
