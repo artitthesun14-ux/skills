@@ -10,8 +10,6 @@ Skills are written in Markdown + YAML and distributed through:
 
 This repo contains no application code, build system, or application tests.
 
-`AGENTS.md` is a symlink to this file. Edit `CLAUDE.md` only; never create a separate `AGENTS.md`.
-
 Correctness means:
 - Skill manifests are valid.
 - Skills are in the correct buckets.
@@ -22,12 +20,12 @@ Correctness means:
 
 Use only when relevant to the current task.
 
-- `npm run changeset`: record user-facing skill changes.
-- `npm run version`: apply changesets and sync plugin version.
-- `npm run check-plugin-version`: verify plugin version, read-only.
-- `claude plugin validate . --strict`: validate plugin manifests after manifest changes.
-- `scripts/link-skills.sh`: update local skill symlinks after adding, removing, or renaming skills.
-- `scripts/list-skills.sh`: list all `SKILL.md` paths.
+- `npm run changeset` — record user-facing skill changes.
+- `npm run version` — apply changesets and sync plugin version.
+- `npm run check-plugin-version` — verify plugin version, read-only.
+- `claude plugin validate . --strict` — validate plugin manifests after manifest changes.
+- `scripts/link-skills.sh` — update local skill symlinks after adding, removing, or renaming skills.
+- `scripts/list-skills.sh` — list all `SKILL.md` paths.
 
 Do not run unrelated commands.
 
@@ -35,11 +33,11 @@ Do not run unrelated commands.
 
 Skills live under `skills/` and belong to one bucket:
 
-- `engineering/`: promoted, shipped in plugin.
-- `productivity/`: promoted, shipped in plugin.
-- `misc/`: kept but not promoted.
-- `in-progress/`: public beta, excluded from plugin.
-- `deprecated/`: normally empty. Delete skills instead of archiving them.
+- `engineering/` — promoted, shipped in plugin.
+- `productivity/` — promoted, shipped in plugin.
+- `misc/` — kept but not promoted.
+- `in-progress/` — public beta, excluded from plugin.
+- `deprecated/` — normally empty. Delete skills instead of archiving them.
 
 ### Promotion Contract
 
@@ -50,12 +48,6 @@ Every promoted skill must have all three:
 3. Documentation page at `docs/<bucket>/<skill-name>.md`.
 
 When adding, removing, renaming, or promoting a skill, check all affected references.
-
-### Other reference files
-
-- `CONTEXT.md` holds the project's domain vocabulary (issue tracker, issue, decision ticket, triage role). Treat it as the source of truth; do not restate its definitions here.
-- `.out-of-scope/` records feature requests this project has deliberately declined, with rationale. Check it before proposing or implementing a similar feature.
-- `.agents/install-block.md` holds the canonical install instructions. `README.md`, `.changeset/*`, and `docs/` pages must match it verbatim; update it first, then propagate.
 
 ## Skill Rules
 
