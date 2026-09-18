@@ -1,0 +1,3 @@
+interface:
+  display_name: "Karpathy Guidelines"
+  short_description: "Reduce common LLM coding mistakes"
