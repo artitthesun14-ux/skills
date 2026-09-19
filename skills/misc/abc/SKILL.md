@@ -32,7 +32,7 @@ Work through these steps in order. Do not skip ahead to a company before the val
 
 ## Output Format
 
-Print the result in the chat, in Thai, using these sections. The chat text itself is not saved to a file.
+Print the result in the chat, in Thai, using these sections. Do not save a file automatically.
 
 ### Executive Summary
 Trend, core thesis, key mechanism, most important bottleneck, major unknowns.
@@ -51,9 +51,6 @@ Table with columns: Thesis, Evidence for, Counter-thesis, Evidence against, Key 
 
 ### Sources
 List what was used, grouped as: primary sources / filings, technical documentation, industry sources, reliable secondary research.
-
-### Diagram (Artifact)
-In addition to the sections above, publish a branching diagram of the Causal Chain (fall back to the Value Chain if it has more layers worth showing) as an Artifact. Before writing it, call the Skill tool with "artifact-design", then call the Skill tool with "artifact-diagramming". Draw one branch per link in the chain, with a short callout beside each node giving its role and its FACT / ASSUMPTION / INFERENCE / UNKNOWN tag, in Thai. Publish it and give the user the link.
 
 ## Evidence Rules
 
