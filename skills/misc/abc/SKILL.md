@@ -53,7 +53,13 @@ Table with columns: Thesis, Evidence for, Counter-thesis, Evidence against, Key 
 List what was used, grouped as: primary sources / filings, technical documentation, industry sources, reliable secondary research.
 
 ### Diagram (Artifact)
-In addition to the sections above, publish a branching diagram of the Causal Chain (fall back to the Value Chain if it has more layers worth showing) as an Artifact. Before writing it, call the Skill tool with "artifact-design", then call the Skill tool with "artifact-diagramming". Draw one branch per link in the chain, with a short callout beside each node giving its role and its FACT / ASSUMPTION / INFERENCE / UNKNOWN tag, in Thai. Publish it and give the user the link.
+In addition to the sections above, publish a branching diagram of the Causal Chain (fall back to the Value Chain if it has more layers worth showing) as an Artifact. Before writing it, call the Skill tool with "artifact-design", then call the Skill tool with "artifact-diagramming". Draw one branch per link in the chain, with a short callout beside each node giving its role and its FACT / ASSUMPTION / INFERENCE / UNKNOWN tag, in Thai.
+
+Reuse one artifact across runs instead of publishing a new one each time: check `~/.cache/abc/artifact-url` for a saved URL first.
+- If it exists, republish to that URL (this overwrites its previous diagram with the current one).
+- If it doesn't, publish a new artifact, then save the returned URL to `~/.cache/abc/artifact-url` (create the directory if needed).
+
+Give the user the link either way.
 
 ## Evidence Rules
 
