@@ -57,6 +57,10 @@ In addition to the sections above, publish a branching diagram of the Causal Cha
 
 Each node also names the companies sitting in that layer, so the chain reads as a map of who is where. Keep the node itself to the two or three that matter most, and make every node clickable: selecting one opens a detail panel carrying that layer's function, why it is or is not a bottleneck, its full company list with each one's exposure and why it is listed, the economics, and the evidence behind the claims. The panel is where the depth goes; the drawing stays readable without it. This is plain client-side JavaScript in the page, not a runtime capability.
 
+Carry a second reading beside the evidence tag: your own judgment of how much each node and company matters, and why it is worth attention. The two layers answer different questions and must stay visually separate. The evidence tag says how well supported a claim is; the judgment says how much it matters if true. A node can be UNKNOWN and critical at once, and that pair is usually the most valuable thing on the page.
+
+Rate every node and company as one of: critical (a chokepoint with no substitute, the chain breaks without it), watch (a risk or assumption that could break the thesis), interesting (an asymmetry worth digging into next), or context (background, not a decision point). Colour those four red, amber, green and neutral, and move the evidence tags to a quiet monochrome ramp so the two encodings never compete for the same red. Write the judgment in your own voice, one or two sentences, saying what makes the point worth attention and what would change your mind. It explains reasoning and never recommends buying or selling.
+
 Reuse one artifact across runs instead of publishing a new one each time: check `~/.cache/abc/artifact-url` for a saved URL first.
 - If it exists, republish to that URL (this overwrites its previous diagram with the current one).
 - If it doesn't, publish a new artifact, then save the returned URL to `~/.cache/abc/artifact-url` (create the directory if needed).
