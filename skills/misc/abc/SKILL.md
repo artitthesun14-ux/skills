@@ -55,6 +55,8 @@ List what was used, grouped as: primary sources / filings, technical documentati
 ### Diagram (Artifact)
 In addition to the sections above, publish a branching diagram of the Causal Chain (fall back to the Value Chain if it has more layers worth showing) as an Artifact. Before writing it, call the Skill tool with "artifact-design", then call the Skill tool with "artifact-diagramming". Draw one branch per link in the chain, with a short callout beside each node giving its role and its FACT / ASSUMPTION / INFERENCE / UNKNOWN tag, in Thai.
 
+Each node also names the companies sitting in that layer, so the chain reads as a map of who is where. Keep the node itself to the two or three that matter most, and make every node clickable: selecting one opens a detail panel carrying that layer's function, why it is or is not a bottleneck, its full company list with each one's exposure and why it is listed, the economics, and the evidence behind the claims. The panel is where the depth goes; the drawing stays readable without it. This is plain client-side JavaScript in the page, not a runtime capability.
+
 Reuse one artifact across runs instead of publishing a new one each time: check `~/.cache/abc/artifact-url` for a saved URL first.
 - If it exists, republish to that URL (this overwrites its previous diagram with the current one).
 - If it doesn't, publish a new artifact, then save the returned URL to `~/.cache/abc/artifact-url` (create the directory if needed).
