@@ -27,8 +27,9 @@ Work through these steps in order. Do not skip ahead to a company before the val
 7. **Discover companies.** Only after the value chain is understood. Cover public, private, incumbent, challenger, supplier, customer, and substitute. For each: Layer, Exposure, Revenue relevance, Competitive advantage, Capacity, Customer concentration, Economics. Name real companies in every layer, the bottleneck layer first: a layer left as "not researched yet" is the one the thesis most depends on. Name the chokepoints between layers too, where a sole source or a three-player oligopoly gates everything downstream. When a search is unavailable, name them from what is already known about the industry's structure and tag it as such, keeping the two decay speeds under Evidence Rules apart.
 8. **Validate economics.** Check revenue mix, growth, gross margin, operating margin, FCF, ROIC, capex, customer concentration, market share, switching cost, network effects, IP, scale, qualification barriers.
 9. **Find second-order effects.** Ask who is affected at the second and third order if the thesis plays out (for example: AI inference up, GPU utilization up, memory bandwidth importance up, HBM demand up, packaging complexity up, yield importance up, testing/inspection importance up).
-10. **Build counter-thesis.** Check for: demand not growing as expected, technology shift, efficiency gains, supply growing faster than expected, substitutes entering, customers building in-house, margin compression, bottleneck disappearing.
-11. **Identify key indicators.** List the numbers and events worth watching to confirm or break the thesis. Report them as part of the output; do not set up any tracking or monitoring.
+10. **Name the advantaged and the overlooked.** Two questions the finished chain can answer that a company list cannot. *Advantaged*: whose position is hardest to attack. Rank by the bottleneck test from step 5 (gates the chain and captures the value), then by whether this chain is significant to that company's own revenue, then by margin durability and switching cost. A company that is advantaged and obvious to everyone is still advantaged: say so rather than reaching for a less crowded name. *Overlooked*: who carries more of the chain than their visibility suggests. Hunt where attention does not go: layers deep enough that nobody prices them against this trend, the second-order beneficiaries from step 9, sole sources hidden behind a famous customer, and real exposure buried inside a much larger business. An overlooked name needs both halves, evidence that it matters and a reason attention misses it; with only the first it is just another company. This ranks structural position, not attractiveness at a price, so say nothing about valuation, entry, or timing. When a slot cannot be evidenced, leave it empty and name what would fill it.
+11. **Build counter-thesis.** Check for: demand not growing as expected, technology shift, efficiency gains, supply growing faster than expected, substitutes entering, customers building in-house, margin compression, bottleneck disappearing.
+12. **Identify key indicators.** List the numbers and events worth watching to confirm or break the thesis. Report them as part of the output; do not set up any tracking or monitoring.
 
 ## Output Format
 
@@ -46,6 +47,12 @@ Table with columns: Layer, Function, Bottleneck, Companies, Evidence.
 ### Company Map
 Table with columns: Company, Layer, Exposure, Business relevance, Key risk.
 
+### Most Advantaged
+Up to three, strongest first. For each: company, layer, what makes the position hard to attack, how significant this chain is to its own revenue, and what would erode the advantage. Mark which of them are already obvious to the market.
+
+### Overlooked but Critical
+Up to three. For each: company or layer, what it actually carries in the chain, why attention misses it, what the exposure is worth to its own revenue, and what would confirm or kill the case. A slot left empty with the gap named beats a slot filled with plausible prose.
+
 ### Counter-Thesis
 Table with columns: Thesis, Evidence for, Counter-thesis, Evidence against, Key unknown, Thesis breaker.
 
@@ -59,7 +66,7 @@ Each node also names the companies sitting in that layer, so the chain reads as 
 
 Carry a second reading beside the evidence tag: your own judgment of how much each node and company matters, and why it is worth attention. The two layers answer different questions and must stay visually separate. The evidence tag says how well supported a claim is; the judgment says how much it matters if true. A node can be UNKNOWN and critical at once, and that pair is usually the most valuable thing on the page.
 
-Rate every node and company as one of: critical (a chokepoint with no substitute, the chain breaks without it), watch (a risk or assumption that could break the thesis), interesting (an asymmetry worth digging into next), or context (background, not a decision point). Colour those four red, amber, green and neutral, and move the evidence tags to a quiet monochrome ramp so the two encodings never compete for the same red. Write the judgment in your own voice, one or two sentences, saying what makes the point worth attention and what would change your mind. It explains reasoning and never recommends buying or selling.
+Rate every node and company as one of: critical (a chokepoint with no substitute, the chain breaks without it), watch (a risk or assumption that could break the thesis), interesting (an asymmetry worth digging into next), or context (background, not a decision point). Colour those four red, amber, green and neutral, and move the evidence tags to a quiet monochrome ramp so the two encodings never compete for the same red. Write the judgment in your own voice, one or two sentences, saying what makes the point worth attention and what would change your mind. It explains reasoning and never recommends buying or selling. Flag in the detail panel the companies the Most Advantaged and Overlooked but Critical sections named, so the drawing and the chat output carry the same shortlist.
 
 Reuse one artifact across runs instead of publishing a new one each time: check `~/.cache/abc/artifact-url` for a saved URL first.
 - If it exists, read the artifact at that URL, then republish to it (this overwrites its previous diagram with the current one).
@@ -110,7 +117,7 @@ Don't:
 - Treat a score as an investment recommendation.
 - Substitute a pile of news for a causal model.
 
-Before finalizing a thesis, the analysis should be able to answer: what the trend is, why it's happening now, how demand flows through the value chain, which layer matters most, where the bottleneck is, what causes it, who controls it, which companies have exposure, whether that exposure is significant to their business, where the economics sit, who has a substitute, who could lose out, what the second-order effects are, what would break the thesis, what to monitor, and which claims are fact versus inference. If it can't answer these yet, say so explicitly instead of forcing a conclusion.
+Before finalizing a thesis, the analysis should be able to answer: what the trend is, why it's happening now, how demand flows through the value chain, which layer matters most, where the bottleneck is, what causes it, who controls it, which companies have exposure, whether that exposure is significant to their business, where the economics sit, who has a substitute, who could lose out, who holds the strongest position and why, who is carrying more of the chain than their visibility suggests, what the second-order effects are, what would break the thesis, what to monitor, and which claims are fact versus inference. If it can't answer these yet, say so explicitly instead of forcing a conclusion.
 
 ## Compliance
 
