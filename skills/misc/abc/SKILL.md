@@ -25,11 +25,21 @@ Work through these steps in order. Do not skip ahead to a company before the val
 5. **Find bottlenecks.** Check supply constraint, capacity expansion difficulty, qualification barrier, switching cost, supplier concentration, geographic concentration, technology complexity, capital intensity. Use this to prioritize research, not as a trade recommendation. When several layers look constrained, rank them: a bottleneck outranks another when more of the chain has to pass through it (every alternative downstream still routes through this one rather than around it), when adding supply takes longer and money cannot shorten it (a qualification cycle or a line booked years out beats a shortage capital can clear), and when fewer suppliers are qualified to serve it. Then separate gating from capturing, because they are not the same layer: whoever controls the queue is not always whoever keeps the profit, and a regulated gatekeeper can hold total control on a capped return. The bottleneck that decides the thesis is the one that gates the chain and captures the value.
 6. **Recursive deep dive.** For the layers that matter, keep asking "what does this consist of?" and go one level deeper (for example GPU to HBM to DRAM to Wafer to Manufacturing Equipment). Stop when the next layer stops adding meaningful economic understanding, or evidence runs out.
 7. **Discover companies.** Only after the value chain is understood. Cover public, private, incumbent, challenger, supplier, customer, and substitute. For each: Layer, Exposure, Revenue relevance, Competitive advantage, Capacity, Customer concentration, Economics. Name real companies in every layer, the bottleneck layer first: a layer left as "not researched yet" is the one the thesis most depends on. Name the chokepoints between layers too, where a sole source or a three-player oligopoly gates everything downstream. When a search is unavailable, name them from what is already known about the industry's structure and tag it as such, keeping the two decay speeds under Evidence Rules apart.
-8. **Validate economics.** Check revenue mix, growth, gross margin, operating margin, FCF, ROIC, capex, customer concentration, market share, switching cost, network effects, IP, scale, qualification barriers.
+8. **Validate economics.** Check revenue mix, growth, gross margin, operating margin, FCF, ROIC, capex, customer concentration, market share, switching cost, network effects, IP, scale, qualification barriers. Close the loop from step 5 by name: pricing power that leaves no trace in revenue mix, margin, or ROIC is a claim about the layer, not yet about the company holding it.
 9. **Find second-order effects.** Ask who is affected at the second and third order if the thesis plays out (for example: AI inference up, GPU utilization up, memory bandwidth importance up, HBM demand up, packaging complexity up, yield importance up, testing/inspection importance up).
 10. **Name the advantaged and the overlooked.** Two questions the finished chain can answer that a company list cannot. *Advantaged*: whose position is hardest to attack. Rank by the bottleneck test from step 5 (gates the chain and captures the value), then by whether this chain is significant to that company's own revenue, then by margin durability and switching cost. A company that is advantaged and obvious to everyone is still advantaged: say so rather than reaching for a less crowded name. *Overlooked*: who carries more of the chain than their visibility suggests. Hunt where attention does not go: layers deep enough that nobody prices them against this trend, the second-order beneficiaries from step 9, sole sources hidden behind a famous customer, and real exposure buried inside a much larger business. An overlooked name needs both halves, evidence that it matters and a reason attention misses it; with only the first it is just another company. This ranks structural position, not attractiveness at a price, so say nothing about valuation, entry, or timing. When a slot cannot be evidenced, leave it empty and name what would fill it.
 11. **Build counter-thesis.** Check for: demand not growing as expected, technology shift, efficiency gains, supply growing faster than expected, substitutes entering, customers building in-house, margin compression, bottleneck disappearing.
 12. **Identify key indicators.** List the numbers and events worth watching to confirm or break the thesis. Report them as part of the output; do not set up any tracking or monitoring.
+
+## Decision Log
+
+The artifact is overwritten on every run, so it carries only the current read. The decision log is what survives: `~/.cache/abc/decision-log.md`, append-only (create the directory if needed).
+
+Read it before step 1. Earlier entries already name what would invalidate them, so they say where this run starts looking, and a run that only re-derives what the log already holds is a run spent twice.
+
+Append one entry at the end of the run, dated, covering the judgments the run actually turned on: the thesis, the bottleneck call, and any evidence tag that moved. Carry each one over with the evidence and the invalidation conditions step 3 already attached to it, in a few lines each. Leave the rest out.
+
+Let earlier entries stand as written. When a run overturns one, write the reversal as a new entry naming the entry it overturns and what changed the read. The log is then a record of how the thesis moved, which is the thing a later run cannot reconstruct from the artifact.
 
 ## Output Format
 
@@ -39,7 +49,7 @@ The artifact carries the analysis; the chat carries a short brief pointing at it
 
 In Thai, roughly 150 to 250 words, in this order:
 
-1. What changed since the last run, when the artifact covered the same subject: evidence that moved a tag, judgments that changed and why, figures that went stale. The artifact holds only the current read, so this is the only place the previous one survives. On a new subject, say in one line that the artifact held a different one.
+1. What changed since the last run, when the artifact covered the same subject: evidence that moved a tag, judgments that changed and why, figures that went stale. Build this by diffing against the decision log rather than from memory. On a new subject, say in one line that the artifact held a different one.
 2. The thesis in two or three sentences: the mechanism, the bottleneck, who gates it and who captures the value.
 3. The unknown that matters most, and what would settle it.
 4. What you stopped short of, so a later run starts there instead of repeating this one.
@@ -96,7 +106,7 @@ Never build a causal relationship from a headline alone. Every important conclus
 
 Facts here decay at two speeds, and mixing them is the easiest way to be confidently wrong. Industry structure (who is sole-source, how concentrated a layer is, what a qualification cycle demands) holds for years. Figures (lead times, backlogs, market shares, capex guidance, prices) can be stale within a quarter. State structure plainly, and give every figure the date it was true along with where it came from. A figure older than the pace of its own layer is a lead to verify, not evidence.
 
-Stop searching when another search stops changing the shape of the chain, not when it stops returning results. Then say what you stopped short of, so a later run starts there instead of repeating this one.
+Stop searching when another search stops changing the shape of the chain, not when it stops returning results. A counter-thesis still unresolved keeps the search open even once the chain has settled: a stable shape and an answered objection are different things, and step 11 is where this one is owed. Then say what you stopped short of, so a later run starts there instead of repeating this one.
 
 When a layer cannot be evidenced at all, say so and name what would settle it. Put durable structure in its place where the structure is known, tagged as structure. Never fill the gap with plausible prose: an unsupported paragraph reads exactly like a researched one, which is what makes it dangerous.
 
