@@ -43,7 +43,7 @@ Let earlier entries stand as written. When a run overturns one, write the revers
 
 ## Output Format
 
-The artifact carries the analysis; the chat carries a short brief pointing at it. A table that sits in the artifact is never reprinted in chat: one reading, not two.
+The artifact carries the analysis; the chat carries a short brief pointing at it. What sits in the artifact is never reprinted in chat, tables and cards alike: one reading, not two.
 
 ### Chat brief
 
@@ -76,7 +76,7 @@ Below the diagram, carry the rest of the analysis as sections on the same page:
 - **Company Map**: Company, Layer, Exposure, Business relevance, Key risk.
 - **Most Advantaged**: up to three, strongest first. For each: company, layer, what makes the position hard to attack, how significant this chain is to its own revenue, and what would erode the advantage. Mark which of them are already obvious to the market.
 - **Overlooked but Critical**: up to three. For each: company or layer, what it actually carries in the chain, why attention misses it, what the exposure is worth to its own revenue, and what would confirm or kill the case. A slot left empty with the gap named beats a slot filled with plausible prose.
-- **Counter-Thesis**: Thesis, Evidence for, Counter-thesis, Evidence against, Key unknown, Thesis breaker.
+- **Counter-Thesis**: one card per claim the thesis rests on, never a row in a wide table. A six column row lays the supporting and the opposing reading end to end and asks the reader to hold the first half in memory while scanning the second; the opposition is the content here, so the layout carries it. Each card puts the claim at the top, the evidence for it and the evidence against it in two columns facing each other, and closes with the key unknown sitting between them and the thesis breaker that would settle it. Keep each card compact enough that several stack on one page: the count follows the claims the thesis actually rests on. When a claim has no opposing column yet, it is not a counter-thesis but an unchallenged assumption, so label it that way and name the evidence that would fill the column.
 - **Key Indicators**: the numbers and events worth watching to confirm or break the thesis.
 - **Sources**: grouped as primary sources / filings, technical documentation, industry sources, reliable secondary research.
 
