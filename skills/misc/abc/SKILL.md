@@ -102,13 +102,15 @@ Steps for a run:
 2. Read `topics/index.json` from the artifact. Match the subject against the slugs already there before minting a new one, so a refresh lands on the existing topic instead of forking it into a near-duplicate.
 3. Publish `topics/<slug>.json`, the updated `topics/index.json`, and the shell. Pass no other topic file.
 
+A saved URL pointing at an artifact built before the library existed is the one case that needs a migration, and it happens once. List the artifact's files: no `topics/index.json` means the URL holds a single-page report from an earlier run. Read that page, lift the analysis it already carries into `topics/<slug>.json` under the current shape, and publish it together with the new shell and index, before the topic this run researched. Two things keep the migration honest. Date the migrated topic by the run that produced it, never by today, because its figures are as old as they were. And carry across only what the page actually says: a field the old page has no answer for is left absent, which the shell already renders as a missing section, rather than filled in from a guess. Nothing is re-researched here, the page is only moved onto the shelf. Head the decision log entries that pre-date slugs with that topic's slug at the same time.
+
 Two rules keep the older topics from rotting as the shell moves on. Add fields, never repurpose one, because a field that quietly changes meaning corrupts every topic written before the change. And render defensively, so a topic missing a field the shell now knows about drops that section instead of failing to draw. The shell holds the rendering, so a later improvement to the diagram or the counter-thesis cards reaches topics researched months earlier.
 
 Where a company or a layer appears in more than one topic, say so on its detail panel and link across to the other topic. This is the part a stack of separate pages cannot do: the same chokepoint surfacing in two unrelated chains is a finding, not a coincidence.
 
 The shelf carries each topic's title, the date of its last run, the thesis in a line, and a mark where that date is old enough that its figures need re-checking under Evidence Rules.
 
-Give the user the link to the topic either way.
+Give the user the link to the topic, not to the shelf.
 
 ## Evidence Rules
 
