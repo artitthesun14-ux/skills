@@ -110,6 +110,12 @@ For an add/remove/rename operation, also run:
 
 when local symlinks are affected.
 
+## Coding Behavior
+
+- State assumptions before editing. Ask if unclear.
+- Prefer the smallest change that solves the request.
+- Touch only files required by the task.
+
 ## Validation
 
 Use the smallest relevant validation set.
