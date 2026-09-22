@@ -108,8 +108,8 @@ Stack: `Inter, "Helvetica Neue", system-ui, "Noto Sans Thai", sans-serif`
 | **SecondaryButton** | โปร่ง, ขอบ 1px `--line`, ตัวอักษร `--ink` | hover→พื้น `--surface-sunken` · อื่นๆ เหมือนบน |
 | **GhostButton** | ไม่มีขอบ, ตัวอักษร `--ink-muted` | hover→`--ink` |
 | **IconSquareButton** (`<` `>`) | สี่เหลี่ยมจัตุรัส 44×44, `--r-sm`, ขอบ 1px `--line`, ไอคอน `--ink` | hover→พื้น `--surface-sunken` · disabled→opacity .4 (ใช้เมื่อมีชุดเดียว) · focus→ring |
-| **FavoriteButton** [P2] | ไอคอนหัวใจ 44×44 | off→เส้นขอบ `--ink-muted` · **on→เติม `--accent`** · focus→ring · disabled (เต็ม 20)→opacity .45 + tooltip |
-| **SwapControl** [P2] | ปุ่มเล็ก 🔄 มุม CategoryTile | disabled เมื่อหมวดนั้นมีชิ้นเดียว + hint |
+| **FavoriteButton** (เฟส 2) | ไอคอนหัวใจ `.iconbtn` 44×44 บน `card__head` | off→♡ ขอบ `--line` · **on→♥ สี `--accent-solid`** (ไม่ใช้ `--accent` เพราะปุ่มนี้มีไอคอนอยู่บนพื้น ต้องผ่านคอนทราสต์ 4.5:1 ไม่ใช่ 3:1) · toggle ได้ (กดซ้ำ = เอาออก) · ครบ 20 ชุด→ข้อความเตือนแทนการดรอปเงียบ (spec §7C) แทน tooltip/disabled |
+| **SwapControl** (เฟส 2) | ไม่ใช่ปุ่มเล็กแยกมุม tile ตามที่ร่างไว้ตอนเฟส 1 — **ทั้ง CategoryTile เป็นปุ่มเดียว** (`.tile__btn` ครอบ box+label) | disabled เมื่อหมวดนั้นมีตัวเลือกให้สลับแค่ตัวเดียว + `aria-label` บอกเหตุผล; ช่องว่างของหมวดเสริมใช้ปุ่มเดียวกันเป็น "+ เพิ่ม" |
 
 ### 3.2 ตัวเลือก (Selection)
 
@@ -130,11 +130,10 @@ Stack: `Inter, "Helvetica Neue", system-ui, "Noto Sans Thai", sans-serif`
 - ทรง: `--surface`, `--r-lg`, ขอบ 1px `--line`, padding `--sp-5`
 - **มุมตัด (dog-ear)** มุมขวาบน 28px ตามคลิปอ้างอิง ทำด้วย `clip-path` (ตกแต่ง, ปิดได้)
 - โครงใน (บนลงล่าง):
-  1. แถวหัว: `SampleBadge` (ถ้าเป็นตัวอย่าง) + ชื่อ rule เช่น "Analogous" เป็น eyebrow
-  2. **CategoryTile stack** (บน → ล่าง → รองเท้า → [นอก] → [แอกเซส])
+  1. แถวหัว: `SampleBadge` (ถ้าเป็นตัวอย่าง) + ชื่อ rule เช่น "Analogous" เป็น eyebrow + `FavoriteButton` ชิดขวา (เฟส 2: อยู่แถวหัว ไม่ใช่แถวปุ่มท้ายการ์ดตามที่ร่างไว้ตอนเฟส 1 เพื่อให้เห็น/กดได้ทันทีโดยไม่ต้องเลื่อนผ่าน advice ก่อน)
+  2. **CategoryTile stack** (บน → ล่าง → รองเท้า → [นอก] → [แอกเซส]) ทุกหมวดแสดงเสมอ ว่างก็เป็น "+ เพิ่ม"/"ไม่มี" (Swap อยู่บน tile)
   3. `ProportionBar`
   4. `AdviceList` (1-3 บรรทัด)
-  5. แถวปุ่ม: FavoriteButton [P2] · (Swap อยู่บน tile)
 - **variants:** `focused` (scale 1, opacity 1, `--shadow-raised`) · `adjacent` (scale .92, opacity .4, ไม่รับ pointer, `aria-hidden`) · `idea` (tile เป็นบล็อกสี) · `wardrobe` (tile เป็นรูป/บล็อกสี)
 
 **CategoryTile**: ช่องสี่เหลี่ยมต่อหมวด
@@ -144,7 +143,7 @@ Stack: `Inter, "Helvetica Neue", system-ui, "Noto Sans Thai", sans-serif`
   1. ชื่อหมวด (`--fs-xs`, `--ink-muted`, ตัดด้วย ellipsis ได้)
   2. ชื่อชิ้น (`--fs-sm`, `--ink`, ตัดด้วย ellipsis + `title` เต็ม) เฉพาะโหมด wardrobe; โหมด idea ไม่มีบรรทัดนี้
   3. ชื่อสี + hex (`--fs-xs`, `--ink-muted`) **ห้ามตัดทิ้ง** ยอมขึ้นบรรทัดใหม่ดีกว่าเสียข้อมูลที่กฎ "ไม่สื่อด้วยสีอย่างเดียว" ต้องการ
-- สถานะ: default · hover (ring หนา 2px + ปุ่ม Swap โผล่) · focus-visible (ring accent) · **empty** (พื้น `--surface-sunken`, ขอบเส้นประ, ข้อความ "+ เพิ่ม") · **locked** (ไอคอนแม่กุญแจจาง ระหว่าง Swap หมวดอื่น) · disabled-swap (opacity ปุ่ม .4)
+- สถานะ: default · hover (ขอบ `.tile__box` เปลี่ยนเป็น `--accent` เพราะทั้ง tile เป็นปุ่มเดียวอยู่แล้ว ไม่มีปุ่ม Swap แยกให้ "โผล่") · focus-visible (ring accent) · **empty** (พื้น `--surface-sunken`, ขอบเส้นประ, ข้อความ "+ เพิ่ม" ถ้ามีตัวเลือกให้เติม ไม่งั้น "ไม่มี" เฉยๆ) · **disabled-swap** (`<button disabled>` + `aria-label` บอกว่ามีชิ้นเดียวในหมวดนี้ — เฟส 2 ไม่ได้ทำสถานะ "locked" ระหว่างสลับหมวดอื่นตามที่ร่างไว้ เพราะ AC ต้องการแค่ไม่ให้ข้อมูลหมวดอื่นเปลี่ยน ไม่ได้ต้องการภาพสื่อว่ากำลังล็อก)
 
 ### 3.4 คอมโพเนนต์แสดงข้อมูลสี (ใช้กฎ dataviz)
 
@@ -294,7 +293,7 @@ Stack: `Inter, "Helvetica Neue", system-ui, "Noto Sans Thai", sans-serif`
 
 **ต้องมีในเฟส 1:** tokens ทั้งชุด · PrimaryButton/SecondaryButton/GhostButton/IconSquareButton · ModeToggle + AutoSwitchNotice · OccasionChips · Carousel + PositionIndicator · OutfitCard + CategoryTile · ColorSwatch · ProportionBar (+legend, tooltip) · AdviceList · GarmentChip/GarmentGrid · GarmentForm (ImageDropzone, HexInput, CategorySelect) · Banner · SampleBadge · EmptyState · InlineFeedback · ConfirmDialog
 
-**เลื่อนไปเฟสหลัง:** FavoriteButton/SwapControl [P2] · ColorShareBar/DiversityBar [P3]
+**เลื่อนไปเฟสหลัง:** ColorShareBar/DiversityBar [P3] (FavoriteButton/SwapControl ส่งมอบแล้วในเฟส 2 ดู §9b)
 
 ---
 *ทุกค่าที่ระบุมีเหตุผลกำกับ ไม่มีการตั้งค่าตามอำเภอใจ ถ้าจะเปลี่ยนค่าไหน ให้เปลี่ยนที่ token แล้วมันจะไหลทั้งระบบ*
@@ -318,3 +317,16 @@ Stack: `Inter, "Helvetica Neue", system-ui, "Noto Sans Thai", sans-serif`
 | 8 | ค่าคอนทราสต์เป็นค่าประมาณ | ตารางค่าจริงใน §6 | ตามที่เอกสารเดิมสั่งไว้ว่า "ตรวจจริงตอนสร้าง" |
 
 **ที่ยังไม่ปิด:** dog-ear มุมการ์ดยังไม่ได้ใส่ (ตัดสินว่าเพิ่มความซับซ้อนของ `clip-path` โดยไม่ได้เพิ่มความเข้าใจให้ผู้ใช้ ถ้าอยากได้ค่อยเปิดทีหลัง) · "ผ่อนเงื่อนไข" ใน No-match (A4) ยังเป็นแค่ปุ่มสลับโหมด เพราะ No-match เกิดจริงตอนมี FR-5 ในเฟส 3
+
+---
+
+## 9b. สิ่งที่เปลี่ยนตอนสร้างจริง (เฟส 2: FR-2 Swap + FR-3 Favorites)
+
+| # | เดิม (ร่างไว้ตอนเฟส 1) | หลังสร้าง | ทำไม |
+|---|---|---|---|
+| 1 | `SwapControl` เป็นปุ่มเล็ก 🔄 แยกมุม `CategoryTile` | ทั้ง `CategoryTile` เป็นปุ่มเดียว (`.tile__btn`) | tile กว้างแค่ 72-104px ปุ่มเล็กมุมจะเบียดพื้นที่แตะ 44px; ปุ่มเดียวครอบทั้งช่องยังคงหน้าตาเดิมทุกอย่าง (`display:contents`-ish ผ่านการ mirror flex rule แทน) แค่เพิ่ม `<button>` ครอบ |
+| 2 | ช่องหมวดเสริมที่ว่าง (นอก/แอกเซส) ไม่แสดงถ้าไม่มีของ | แสดงเสมอเป็น "+ เพิ่ม"/"ไม่มี" ตาม spec §7B | ไม่มีที่ให้กด "+ เพิ่ม" ถ้าซ่อนช่องไปเลย |
+| 3 | `FavoriteButton` เติมสี `--accent` ตอน on | ใช้ `--accent-solid` แทน | `--accent` ผ่านคอนทราสต์แค่ 3:1 (องค์ประกอบไม่มีตัวอักษร/ไอคอน) ปุ่มนี้เป็นไอคอนบนพื้น ต้องผ่าน 4.5:1 ตามกฎเดิมของโปรเจกต์ (§0 ข้อ 2) |
+| 4 | `FavoriteButton` อยู่แถวปุ่มท้ายการ์ด | ย้ายไปแถวหัวการ์ด (ชิดขวาของชื่อ rule) | กดบันทึกได้ทันทีโดยไม่ต้องเลื่อนผ่าน tiles/ProportionBar/advice ก่อน |
+| 5 | สถานะ `locked` บน tile อื่นระหว่าง Swap หมวดหนึ่ง | ไม่ได้ทำ | AC1 ต้องการแค่ไม่ให้ข้อมูลหมวดอื่นเปลี่ยน ไม่ได้ระบุว่าต้องมีภาพสื่อว่ากำลังล็อก เพิ่มสถานะนี้ทีหลังได้ถ้าผู้ใช้จริงสับสน |
+| 6 | ปุ่มการ์ดข้างเคียง (`.card--adjacent`) ไม่ถูกพูดถึงเรื่องขนาดปุ่ม | ปุ่มจริงมีแค่การ์ดที่โฟกัส การ์ดข้างเป็น `<span>` ตกแต่งเฉยๆ | `.card--adjacent{transform:scale(.92)}` ทำให้ปุ่ม 44px จริงเหลือ ~40px ผ่านการวัด `getBoundingClientRect()` ซึ่งไม่ผ่านเกณฑ์ touch target แม้จะเป็น `inert` อยู่แล้วก็ตาม |

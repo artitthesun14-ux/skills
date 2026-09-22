@@ -91,7 +91,9 @@ img{max-width:100%;display:block}
 }
 .section__title{font-size:var(--fs-h1);font-weight:700;letter-spacing:-.01em}
 .section__count{font-size:var(--fs-sm);color:var(--ink-muted)}
-.section__head .spacer{flex:1 1 auto;min-width:0}
+.section__head .spacer,.card__head .spacer{flex:1 1 auto;min-width:0}
+/* FR-3: ปุ่มบันทึกชุดโปรดบนการ์ด (spec 3A "เลือกชุด -> ❤️ Favorite") */
+.iconbtn--fav[aria-pressed="true"]{color:var(--accent-solid);border-color:var(--accent-solid)}
 .eyebrow{
   font-size:var(--fs-xs);font-weight:700;letter-spacing:.08em;
   text-transform:uppercase;color:var(--accent-solid)   /* accent เป็นตัวอักษรต้องผ่าน 4.5:1 */
@@ -151,7 +153,7 @@ body{padding-bottom:calc(var(--nav-h) + env(safe-area-inset-bottom))}
 @keyframes spin{to{transform:rotate(360deg)}}
 
 .iconbtn{
-  width:44px;height:44px;display:inline-flex;align-items:center;justify-content:center;
+  width:44px;height:44px;flex:0 0 44px;display:inline-flex;align-items:center;justify-content:center;
   border:1px solid var(--line);border-radius:var(--r-sm);color:var(--ink);
   font-size:18px;line-height:1;transition:background var(--dur-fast) var(--ease)
 }
@@ -219,7 +221,13 @@ body{padding-bottom:calc(var(--nav-h) + env(safe-area-inset-bottom))}
 
 .tiles{display:flex;flex-direction:column;gap:var(--sp-3)}
 /* sm: tile 72px + ป้ายข้าง (plan §0.3 ยึดตาม ui doc §5) */
-.tile{display:flex;align-items:center;gap:var(--sp-3)}
+.tile,.tile__btn{display:flex;align-items:center;gap:var(--sp-3);width:100%}
+/* FR-2: ช่องหมวดในการ์ดที่โฟกัสแตะเปลี่ยนได้ (spec §7B "การแก้ทีละชิ้น") ปุ่มต้องไม่เปลี่ยนหน้าตาเดิม */
+.tile__btn{background:none;border:none;padding:0;margin:0;font:inherit;color:inherit;text-align:left;cursor:pointer;border-radius:var(--r-sm)}
+.tile__btn:hover .tile__box{border-color:var(--accent)}
+.tile__btn:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.tile__btn:disabled{cursor:default}
+.tile__btn:disabled:hover .tile__box{border-color:var(--data-ring)}
 .tile__box{
   flex:0 0 72px;width:72px;aspect-ratio:1;border-radius:var(--r-sm);
   border:1px solid var(--data-ring);   /* วงแหวนกันกลืน บังคับ (ui doc §0 ข้อ 2) */
@@ -315,6 +323,9 @@ body{padding-bottom:calc(var(--nav-h) + env(safe-area-inset-bottom))}
 }
 .gchip__pop button:hover{background:var(--surface-sunken)}
 .gchip__pop button[data-del]{color:var(--danger)}
+/* FR-3: การ์ดชุดโปรด ใช้โครง .gchip เดิม ต่างแค่ไม่มีรูปเดียว แต่เป็นแถบสีต่อหมวด (snapshot ไม่เก็บรูป) */
+.favcard__swatches{display:flex;aspect-ratio:1;border-radius:var(--r-sm);overflow:hidden;border:1px solid var(--data-ring);margin-bottom:var(--sp-3)}
+.favcard__swatch{flex:1 1 0;min-width:0}
 /* พื้นที่แตะ 44px โดยไม่ทำให้ตัวคอนโทรลบวมทางสายตา (ui doc §6)
    ขยายแนวตั้งเท่านั้น กันพื้นที่แตะของปุ่มข้างกันทับกันเอง */
 .chip::after,.modetoggle__opt::after{
@@ -412,7 +423,8 @@ body{padding-bottom:calc(var(--nav-h) + env(safe-area-inset-bottom))}
   body{padding-bottom:0;padding-top:var(--nav-h)}
   /* md/lg: ป้ายอยู่ใต้ tile (plan §0.3) */
   .tiles{flex-direction:row;flex-wrap:wrap;gap:var(--sp-4)}
-  .tile{flex-direction:column;align-items:stretch;gap:var(--sp-2);flex:0 0 96px}
+  .tile,.tile__btn{flex-direction:column;align-items:stretch;gap:var(--sp-2)}
+  .tile{flex:0 0 96px}
   .tile__box{flex:none;width:96px}
 
   .carousel-wrap{
@@ -444,6 +456,7 @@ body{padding-bottom:calc(var(--nav-h) + env(safe-area-inset-bottom))}
   <ul class="nav__list">
     <li style="display:contents"><button class="nav__btn" data-jump="sec-suggest" aria-current="true"><span class="nav__icon" aria-hidden="true">✨</span>แนะนำ</button></li>
     <li style="display:contents"><button class="nav__btn" data-jump="sec-wardrobe"><span class="nav__icon" aria-hidden="true">👕</span>ตู้เสื้อผ้า</button></li>
+    <li style="display:contents"><button class="nav__btn" data-jump="sec-favorites"><span class="nav__icon" aria-hidden="true">❤️</span>ชุดโปรด</button></li>
     <li style="display:contents"><button class="nav__btn" id="themeBtn"><span class="nav__icon" aria-hidden="true">◐</span><span id="themeLabel">ธีม</span></button></li>
   </ul>
 </nav>
@@ -486,6 +499,16 @@ body{padding-bottom:calc(var(--nav-h) + env(safe-area-inset-bottom))}
     <p class="feedback" id="liveFeedback" aria-live="polite"></p>
   </section>
 
+  <!-- ============ SECTION A2 · ชุดโปรด (FR-3) ============ -->
+  <section class="section" id="sec-favorites" aria-labelledby="favTitle">
+    <div class="section__head">
+      <h2 class="section__title" id="favTitle">ชุดโปรด</h2>
+      <span class="section__count" id="favCount"></span>
+    </div>
+    <div id="favoritesSlot"></div>
+    <p class="feedback" id="favFeedback" aria-live="polite"></p>
+  </section>
+
   <!-- ============ SECTION B · ตู้เสื้อผ้า ============ -->
   <section class="section" id="sec-wardrobe" aria-labelledby="wardTitle">
     <div class="section__head">
@@ -504,7 +527,7 @@ body{padding-bottom:calc(var(--nav-h) + env(safe-area-inset-bottom))}
   <footer class="section" style="padding-block:var(--sp-6)">
     <p style="font-size:var(--fs-sm);color:var(--ink-muted)">
       ข้อมูลทั้งหมดถูกบันทึกไว้ในเครื่องนี้เท่านั้น ไม่ถูกส่งออกไปที่ใด
-      · เฟส 1: ตู้เสื้อผ้า + แนะนำชุด (บันทึกชุดโปรดและสลับทีละชิ้นจะมาในเฟสถัดไป)
+      · เฟส 2: ตู้เสื้อผ้า + แนะนำชุด + สลับทีละชิ้น + บันทึกชุดโปรด
     </p>
   </footer>
 </main>
@@ -535,6 +558,7 @@ var IDEA_S_RANGE       = [35, 75];
 var IDEA_L_RANGE       = [30, 70];
 var COMBO_CAP          = 400;     /* spec §7C large wardrobe */
 var BATCH_MIN = 3, BATCH_MAX = 4;
+var FAV_MAX = 20;                  /* spec §9: Favorite สูงสุด 20 ชุด */
 
 /* น้ำหนักพื้นที่ตามหมวด (spec §4.4): บน+ล่าง 60 · นอก 30 · รองเท้า+แอกเซส 10 */
 var CATEGORY_WEIGHT = { top:30, bottom:30, outer:30, shoes:7, accessory:3 };
@@ -874,6 +898,25 @@ function buildOutfit(items, mode, occasion){
 }
 var SCORES = new WeakMap();
 function scoreOf(o){ return SCORES.get(o) || 0; }
+
+/* ============================================================
+   C'. FR-3 Favorite Outfit: snapshot สี+ชื่อ ไม่ผูกกับ garment/id จริง
+   (spec §6 SavedOutfit, §7C "Deleted Garment" -> favorite ต้องโชว์สีได้เสมอแม้ garment ต้นทางถูกลบ)
+   ============================================================ */
+function itemsSnapshot(items){
+  var out = {};
+  CATEGORY_ORDER.forEach(function(c){
+    var it = items[c];
+    if(it) out[c] = { name:it.name, category:c, color:normHex(it.color) };
+  });
+  return out;
+}
+function snapshotKey(items){
+  return CATEGORY_ORDER.map(function(c){
+    var it = items[c];
+    return it ? (normHex(it.color).toUpperCase()+":"+it.name) : "-";
+  }).join("|");
+}
 </script>
 
 <script>
@@ -894,6 +937,64 @@ function shuffle(a){
 }
 function outfitKey(o){
   return CATEGORY_ORDER.map(function(c){ return o.items[c] ? o.items[c].id : "-"; }).join("|");
+}
+
+/* ============================================================
+   D'. FR-2 Swap One Item: ตัวเลือกแทนของหมวดเดียว ล็อกหมวดอื่น
+   ============================================================ */
+/* ตัวเลือกที่เอามาแทนได้ในหมวดหนึ่ง: โหมด wardrobe = garment จริงในตู้,
+   โหมด idea = สุ่มสีใหม่ตามช่วงเดียวกับ generateIdeaBatch (ไม่มีแนวคิด "เสื้อนอก" ในสูตรสุ่ม จึงไม่มีพูลให้) */
+function categoryPool(outfit, category){
+  if(outfit.sourceMode === "wardrobe") return groupByCategory(state.wardrobe)[category] || [];
+  if(category === "outer") return [];
+  var tone = OCCASION_TONE[state.occasion] || OCCASION_TONE.unspecified;
+  var out = [];
+  for(var n=0; n<6; n++){
+    var h = Math.random()*360;
+    var s = clamp((IDEA_S_RANGE[0]+IDEA_S_RANGE[1])/2 + (Math.random()*30-15) + tone.s*24, 18, 90);
+    var l = clamp((IDEA_L_RANGE[0]+IDEA_L_RANGE[1])/2 + (Math.random()*28-14) + tone.l*20, 14, 88);
+    var hex = ideaColor(h, s, l);
+    out.push({ id:"i-"+category+"-"+uid(), name:colorNameTH(hex), category:category, color:hex, isIdea:true });
+  }
+  return out;
+}
+/* คัดตัวเลือกในหมวด แล้วประกอบเป็น outfit ทดลองทีละตัว จัดเรียงด้วยคะแนนเงียบ (AC2) */
+function buildSwapList(outfit, category){
+  var pool = categoryPool(outfit, category);
+  var curId = outfit.items[category] ? outfit.items[category].id : null;
+  var scored = pool.map(function(cand){
+    var items = {};
+    CATEGORY_ORDER.forEach(function(c){ items[c] = (c === category) ? cand : outfit.items[c]; });
+    var cOutfit = buildOutfit(items, outfit.sourceMode, state.occasion);
+    return cOutfit ? { item:cand, outfit:cOutfit, score:scoreOf(cOutfit) } : null;
+  }).filter(function(x){ return x; });
+  scored.sort(function(a,b){ return b.score - a.score; });
+  return { scored:scored, curId:curId };
+}
+/* กดครั้งแรก = ตัวถัดไปจากของปัจจุบันตามคะแนน, กดซ้ำ = วนตัวถัดไปในรายการเดิม (AC1-AC3) */
+function swapCategory(i, category){
+  var o = state.batch[i]; if(!o) return;
+  var key = i + ":" + category;
+  var st = state.swapState[key];
+  var justBuilt = false;
+  if(!st){
+    var built = buildSwapList(o, category);
+    if(!built.scored.length) return;
+    var pos = built.scored.findIndex(function(s){ return s.item.id === built.curId; });
+    st = { list:built.scored, pos:pos };
+    state.swapState[key] = st;
+    justBuilt = true;
+  }
+  /* spec §7C: มีชิ้นเดียวในหมวดนี้ วนต่อไม่ได้ (UI ปิดปุ่มไว้แล้วปกติ) แต่ยังต้องยอมให้ "+ เพิ่ม" ครั้งแรกผ่าน */
+  if(!justBuilt && st.list.length <= 1) return;
+  st.pos = (st.pos + 1) % st.list.length;
+  state.batch[i] = st.list[st.pos].outfit;
+  /* หมวดอื่นของการ์ดนี้ถืออ้างอิง items เดิมก่อนสลับ ต้องล้างทิ้งกันคืนค่าเก่าทับ (AC1) */
+  Object.keys(state.swapState).forEach(function(k){
+    if(k !== key && k.indexOf(i+":") === 0) delete state.swapState[k];
+  });
+  renderResults();
+  say("#liveFeedback", "เปลี่ยน" + CATEGORY_TH[category] + "แล้ว");
 }
 
 /* --- โหมด "จากตู้ของฉัน": จับคู่จาก garment จริง --- */
@@ -1075,9 +1176,11 @@ function uid(){ return "g" + Date.now().toString(36) + Math.random().toString(36
 var state = {
   mode:null,                         /* null = ยังไม่เคยเลือก -> ให้ความพร้อมของตู้ตัดสิน (spec §4.6) */
   occasion:"unspecified", theme:"system",
-  wardrobe:[], batch:[], index:0, result:null,
+  wardrobe:[], favorites:[], batch:[], index:0, result:null,
   autoSwitchedTo:null, quotaWarned:false, seenStorageNote:false,
-  formOpen:false, editingId:null, formDraft:null, openMenuId:null
+  formOpen:false, editingId:null, formDraft:null, openMenuId:null,
+  favMenuId:null, renamingFavId:null,
+  swapState:{}                       /* FR-2: แคชรายการตัวเลือกเปลี่ยนต่อ "การ์ด:หมวด" เคลียร์ทุกครั้งที่แบตช์เปลี่ยน */
 };
 
 /* ---------- โหลดสถานะ ---------- */
@@ -1085,6 +1188,7 @@ function init(){
   var saved = loadStore();
   if(saved){
     state.wardrobe = Array.isArray(saved.wardrobe) ? saved.wardrobe : [];
+    state.favorites = Array.isArray(saved.favorites) ? saved.favorites : [];
     var st = saved.settings || {};
     state.occasion       = st.occasion || "unspecified";
     state.theme          = st.theme || "system";
@@ -1099,6 +1203,7 @@ function init(){
   renderOccasion();
   regenerate(true);
   renderWardrobe();
+  renderFavorites();
   renderBanners();
   renderMode();
   observeSections();
@@ -1110,7 +1215,7 @@ function wardrobeReady(){
 function persist(opts){
   var res = saveStore({
     wardrobe: state.wardrobe,
-    favorites: [],
+    favorites: state.favorites,
     settings: {
       mode:state.mode, occasion:state.occasion, theme:state.theme,
       seenStorageNote:state.seenStorageNote
@@ -1141,6 +1246,7 @@ function renderOccasion(){
 
 /* ---------- สร้างแบตช์ ---------- */
 function regenerate(silent){
+  state.swapState = {};                /* ตัวเลือกเปลี่ยนของแบตช์เก่าใช้กับแบตช์ใหม่ไม่ได้ */
   var avoid = {};
   state.batch.forEach(function(o){ avoid[outfitKey(o)] = 1; });
   var res = (state.mode === "wardrobe")
@@ -1165,22 +1271,38 @@ function say(sel, msg){
 }
 
 /* ---------- การ์ดชุด ---------- */
-function tileHTML(item, cat){
+/* interactive = true เฉพาะการ์ดที่โฟกัส (การ์ดข้างเป็น inert อยู่แล้ว ไม่ต้องคำนวณพูลให้เปลือง) */
+function tileHTML(o, cat, cardIdx, interactive){
+  var item = o.items[cat];
   if(!item){
-    return '<li class="tile tile--empty"><span class="tile__box">ไม่มี</span>'+
-      '<span class="tile__label"><span class="tile__cat">'+esc(CATEGORY_TH[cat])+'</span>'+
-      '<span class="tile__color">ไม่ได้ใส่ในชุดนี้</span></span></li>';
+    var canAdd = interactive && categoryPool(o, cat).length > 0;
+    var box = '<span class="tile__box">'+(canAdd ? '+ เพิ่ม' : 'ไม่มี')+'</span>';
+    var label = '<span class="tile__label"><span class="tile__cat">'+esc(CATEGORY_TH[cat])+'</span>'+
+      '<span class="tile__color">'+(canAdd ? 'แตะเพื่อเพิ่ม' : 'ไม่ได้ใส่ในชุดนี้')+'</span></span>';
+    if(!canAdd) return '<li class="tile tile--empty">'+box+label+'</li>';
+    return '<li class="tile tile--empty"><button type="button" class="tile__btn" '+
+      'data-swap-card="'+cardIdx+'" data-swap-cat="'+cat+'" aria-label="เพิ่ม'+esc(CATEGORY_TH[cat])+'">'+
+      box+label+'</button></li>';
   }
   var hex = normHex(item.color), name = colorNameTH(hex);
   var inner = item.photo
     ? '<img src="'+esc(item.photo)+'" alt="" loading="lazy">'
     : '<span style="display:block;width:100%;height:100%;background:'+hex+'"></span>';
-  return '<li class="tile"><span class="tile__box">'+inner+'</span>'+
+  var body = '<span class="tile__box">'+inner+'</span>'+
     '<span class="tile__label">'+
       '<span class="tile__cat">'+esc(CATEGORY_TH[cat])+'</span>'+
       (item.isIdea ? '' : '<span class="tile__name" title="'+esc(item.name)+'">'+esc(item.name)+'</span>')+
       '<span class="tile__color">'+esc(name)+' · <span class="tnum">'+esc(hex)+'</span></span>'+
-    '</span></li>';
+    '</span>';
+  if(!interactive) return '<li class="tile">'+body+'</li>';
+  var single = categoryPool(o, cat).length <= 1;
+  if(single){
+    return '<li class="tile"><button type="button" class="tile__btn" disabled '+
+      'aria-label="เปลี่ยน'+esc(CATEGORY_TH[cat])+' (มีชิ้นเดียวในหมวดนี้)">'+body+'</button></li>';
+  }
+  return '<li class="tile"><button type="button" class="tile__btn" '+
+    'data-swap-card="'+cardIdx+'" data-swap-cat="'+cat+'" aria-label="เปลี่ยน'+esc(CATEGORY_TH[cat])+'">'+
+    body+'</button></li>';
 }
 function pbarHTML(breakdown, cardId){
   var segs = breakdown.map(function(b,i){
@@ -1210,15 +1332,21 @@ function pbarHTML(breakdown, cardId){
 function cardHTML(o, i, focused){
   var isSample = CATEGORY_ORDER.some(function(c){ return o.items[c] && o.items[c].isExample; });
   var cardId = "c"+i;
-  var tiles = CATEGORY_ORDER
-    .filter(function(c){ return o.items[c] || c === "top" || c === "bottom"; })
-    .map(function(c){ return tileHTML(o.items[c], c); }).join("");
+  /* ทุกหมวดแสดงเสมอ (spec §7B): ช่องเสริมที่ว่างเป็นเส้นประ "+ เพิ่ม/ไม่มี" แทนการซ่อนไปเลย */
+  var tiles = CATEGORY_ORDER.map(function(c){ return tileHTML(o, c, i, focused); }).join("");
   return '<article class="card '+(focused ? "card--focused" : "card--adjacent")+'" '+
       'role="group" aria-roledescription="ชุดแนะนำ" aria-label="ชุดที่ '+(i+1)+' จาก '+state.batch.length+'" '+
       (focused ? '' : 'aria-hidden="true" inert')+'>'+
     '<div class="card__head">'+
       (isSample ? '<span class="badge">ตัวอย่าง</span>' : '')+
       '<span class="card__rule">'+esc(RULE_TH[o.ruleUsed] || o.ruleUsed)+'</span>'+
+      '<span class="spacer"></span>'+
+      /* การ์ดข้างถูก transform:scale ย่อ + เป็น inert อยู่แล้ว ปุ่มจริงมีแค่การ์ดที่โฟกัส (เหมือนช่องหมวด) */
+      (focused
+        ? '<button type="button" class="iconbtn iconbtn--fav" data-fav-save="'+i+'" '+
+            'aria-pressed="'+isFavorited(o)+'" aria-label="'+(isFavorited(o) ? "เอาออกจากชุดโปรด" : "บันทึกเป็นชุดโปรด")+'" '+
+            'title="บันทึกเป็นชุดโปรด">'+(isFavorited(o) ? "♥" : "♡")+'</button>'
+        : '<span class="iconbtn iconbtn--fav" aria-hidden="true">'+(isFavorited(o) ? "♥" : "♡")+'</span>')+
     '</div>'+
     '<ul class="tiles">'+tiles+'</ul>'+
     pbarHTML(o.colorBreakdown, cardId)+
@@ -1260,6 +1388,118 @@ function renderResults(){
       '<button class="iconbtn" data-nav="1" aria-label="ชุดถัดไป"'+(state.batch.length<2?" disabled":"")+'>›</button>'+
       '<button class="btn btn--primary" data-gen="1">✨ เจนชุดใหม่</button>'+
     '</div>';
+}
+
+/* ---------- FR-3 ชุดโปรด ---------- */
+function isFavorited(o){
+  var key = snapshotKey(o.items);
+  return state.favorites.some(function(f){ return snapshotKey(f.items) === key; });
+}
+function defaultFavName(o){
+  return (RULE_TH[o.ruleUsed] || o.ruleUsed) + " " + (state.favorites.length + 1);
+}
+function toggleFavorite(i){
+  var o = state.batch[i]; if(!o) return;
+  var key = snapshotKey(o.items);
+  var existing = state.favorites.filter(function(f){ return snapshotKey(f.items) === key; })[0];
+  if(existing){                                        /* หัวใจเต็มอยู่แล้ว -> กดซ้ำ = เอาออก (AC3) */
+    state.favorites = state.favorites.filter(function(f){ return f.id !== existing.id; });
+    persist(); renderFavorites(); renderResults();
+    say("#liveFeedback", "เอาออกจากชุดโปรดแล้ว");
+    return;
+  }
+  if(state.favorites.length >= FAV_MAX){               /* spec §7C: เตือน ไม่เงียบๆ ดรอป */
+    say("#liveFeedback", "บันทึกครบ " + FAV_MAX + " ชุดแล้ว ลบชุดเก่าก่อนเพื่อเซฟใหม่");
+    return;
+  }
+  state.favorites.push({
+    id: "f" + uid(), name: defaultFavName(o),
+    items: itemsSnapshot(o.items),                     /* snapshot สี+ชื่อ ไม่เก็บรูป/ไม่ผูก id จริง */
+    colorBreakdown: o.colorBreakdown, ruleUsed: o.ruleUsed, advice: o.advice,
+    createdAt: Date.now()
+  });
+  var res = persist();
+  renderFavorites(); renderResults();
+  say("#liveFeedback", res.ok ? "บันทึกเป็นชุดโปรดแล้ว" : "บันทึกไว้ในเซสชันนี้ (จำถาวรไม่ได้)");
+}
+function favCardHTML(f){
+  var swatches = CATEGORY_ORDER.map(function(c){
+    var it = f.items[c];
+    return it ? '<span class="favcard__swatch" style="background:'+esc(normHex(it.color))+'" '+
+      'title="'+esc(CATEGORY_TH[c]+": "+it.name)+'"></span>' : '';
+  }).join("");
+  var renaming = state.renamingFavId === f.id;
+  var nameBlock = renaming
+    ? '<input class="input" id="favRenameInput" value="'+esc(f.name)+'" '+
+        'data-fav-rename-input="'+esc(f.id)+'" aria-label="ตั้งชื่อชุดโปรด">'
+    : '<h3 class="gchip__name" title="'+esc(f.name)+'">'+esc(f.name)+'</h3>';
+  return '<article class="gchip">'+
+    '<div class="gchip__menu">'+
+      '<button class="gchip__more" data-fav-more="'+esc(f.id)+'" aria-haspopup="true" '+
+        'aria-expanded="'+(state.favMenuId === f.id)+'" aria-label="ตัวเลือกของ '+esc(f.name)+'">⋯</button>'+
+      (state.favMenuId === f.id
+        ? '<div class="gchip__pop" role="menu">'+
+            '<button role="menuitem" data-fav-rename="'+esc(f.id)+'">✏️ ตั้งชื่อ</button>'+
+            '<button role="menuitem" data-fav-dup="'+esc(f.id)+'">⧉ ทำสำเนา</button>'+
+            '<button role="menuitem" data-fav-del="'+esc(f.id)+'">🗑 ลบ</button>'+
+          '</div>'
+        : '')+
+    '</div>'+
+    '<div class="favcard__swatches">'+swatches+'</div>'+
+    nameBlock+
+    '<p class="gchip__meta">'+esc(RULE_TH[f.ruleUsed] || f.ruleUsed)+'</p>'+
+  '</article>';
+}
+function renderFavorites(){
+  var slot = $("#favoritesSlot");
+  $("#favCount").textContent = state.favorites.length ? state.favorites.length + " / " + FAV_MAX + " ชุด" : "";
+  if(!state.favorites.length){
+    slot.innerHTML = '<div class="empty"><h3 class="empty__title">ยังไม่มีชุดโปรด</h3>'+
+      '<p class="empty__body">กด ♡ บนการ์ดชุดที่ชอบในหน้าแนะนำ เพื่อบันทึกไว้ดูภายหลัง</p></div>';
+    return;
+  }
+  slot.innerHTML = '<div class="grid">' + state.favorites.map(favCardHTML).join("") + '</div>';
+}
+function commitFavRename(id, val){
+  /* กันซ้ำ: ถ้า Escape เคลียร์ renamingFavId ไปแล้ว focusout ที่ตามหลังมาไม่ต้องเขียนทับด้วยค่าที่ยกเลิกไป */
+  if(state.renamingFavId !== id) return;
+  var f = state.favorites.filter(function(x){ return x.id === id; })[0];
+  if(f){
+    var name = (val || "").trim();
+    if(name) f.name = name;                            /* ว่าง = คงชื่อเดิม เหมือน saveGarment */
+    persist();
+  }
+  state.renamingFavId = null;
+  renderFavorites();
+}
+function duplicateFavorite(id){                        /* AC2 */
+  var f = state.favorites.filter(function(x){ return x.id === id; })[0]; if(!f) return;
+  if(state.favorites.length >= FAV_MAX){
+    say("#favFeedback", "บันทึกครบ " + FAV_MAX + " ชุดแล้ว ลบชุดเก่าก่อนเพื่อเซฟใหม่"); return;
+  }
+  state.favorites.push({
+    id: "f" + uid(), name: f.name + " (สำเนา)",
+    items: JSON.parse(JSON.stringify(f.items)),
+    colorBreakdown: JSON.parse(JSON.stringify(f.colorBreakdown)),
+    ruleUsed: f.ruleUsed, advice: f.advice.slice(), createdAt: Date.now()
+  });
+  persist(); renderFavorites();
+  say("#favFeedback", "ทำสำเนา " + f.name + " แล้ว");
+}
+function deleteFavorite(id){                            /* AC3 */
+  var f = state.favorites.filter(function(x){ return x.id === id; })[0]; if(!f) return;
+  $("#dlgTitle").textContent = "ลบ " + f.name + "?";
+  $("#dlgBody").textContent  = "ชุดโปรดนี้จะถูกลบออกจากรายการ";
+  var dlg = $("#confirmDlg");
+  dlg.returnValue = "";
+  dlg.showModal();
+  dlg.addEventListener("close", function onc(){
+    dlg.removeEventListener("close", onc);
+    if(dlg.returnValue !== "ok") return;
+    state.favorites = state.favorites.filter(function(x){ return x.id !== id; });
+    persist(); renderFavorites(); renderResults();
+    say("#favFeedback", "ลบ " + f.name + " แล้ว");
+  }, false);
 }
 </script>
 
@@ -1515,10 +1755,15 @@ function deleteGarment(id){
 document.addEventListener("click", function(e){
   var t = e.target.closest("[data-jump],[data-mode],[data-occ],[data-nav],[data-gen],[data-setmode],"+
     "[data-add],[data-edit],[data-del],[data-more],[data-cat],[data-photo],[data-cancel],"+
-    "[data-clearsample],[data-notedone],.pbar__seg");
+    "[data-clearsample],[data-notedone],[data-swap-cat],[data-fav-save],[data-fav-more],"+
+    "[data-fav-rename],[data-fav-dup],[data-fav-del],.pbar__seg");
   /* คลิกที่อื่น = ปิดเมนูของชิ้นเสื้อผ้า */
   if(state.openMenuId && (!t || (!t.dataset.more && !t.dataset.edit && !t.dataset.del))){
     state.openMenuId = null; renderWardrobe();
+  }
+  /* คลิกที่อื่น = ปิดเมนูของชุดโปรด */
+  if(state.favMenuId && (!t || (!t.dataset.favMore && !t.dataset.favRename && !t.dataset.favDup && !t.dataset.favDel))){
+    state.favMenuId = null; renderFavorites();
   }
   if(!t) return;
   if(t.dataset.more){
@@ -1526,6 +1771,13 @@ document.addEventListener("click", function(e){
     renderWardrobe();
     var reopened = document.querySelector('[data-more="'+t.dataset.more+'"]');
     if(reopened) reopened.focus();
+    return;
+  }
+  if(t.dataset.favMore){
+    state.favMenuId = (state.favMenuId === t.dataset.favMore) ? null : t.dataset.favMore;
+    renderFavorites();
+    var favReopened = document.querySelector('[data-fav-more="'+t.dataset.favMore+'"]');
+    if(favReopened) favReopened.focus();
     return;
   }
 
@@ -1542,6 +1794,15 @@ document.addEventListener("click", function(e){
   if(t.dataset.occ)     { state.occasion = t.dataset.occ; renderOccasion(); persist(); regenerate(true);
                           say("#liveFeedback", "ปรับโทนตามโอกาสให้แล้ว"); return; }
   if(t.dataset.nav)     { goTo(parseInt(t.dataset.nav,10)); return; }
+  if(t.dataset.swapCat) { swapCategory(parseInt(t.dataset.swapCard,10), t.dataset.swapCat); return; }
+  if(t.dataset.favSave) { toggleFavorite(parseInt(t.dataset.favSave,10)); return; }
+  if(t.dataset.favRename){
+    state.favMenuId = null; state.renamingFavId = t.dataset.favRename; renderFavorites();
+    var favInput = $("#favRenameInput"); if(favInput){ favInput.focus(); favInput.select(); }
+    return;
+  }
+  if(t.dataset.favDup)  { state.favMenuId = null; duplicateFavorite(t.dataset.favDup); return; }
+  if(t.dataset.favDel)  { state.favMenuId = null; deleteFavorite(t.dataset.favDel); return; }
   if(t.dataset.gen)     { regenerate(false); return; }
   if(t.dataset.add)     { openForm(null); return; }
   if(t.dataset.edit)    { state.openMenuId = null; renderWardrobe(); openForm(t.dataset.edit); return; }
@@ -1618,12 +1879,24 @@ document.addEventListener("change", function(e){
 
 /* คีย์บอร์ด: ลูกศรซ้าย-ขวาเมื่อโฟกัสอยู่ในแทร็ก */
 document.addEventListener("keydown", function(e){
+  if(e.target.dataset && e.target.dataset.favRenameInput){
+    if(e.key === "Enter"){ e.preventDefault(); commitFavRename(e.target.dataset.favRenameInput, e.target.value); }
+    else if(e.key === "Escape"){ state.renamingFavId = null; renderFavorites(); }
+    return;
+  }
   if(e.key === "Escape" && state.openMenuId){ state.openMenuId = null; renderWardrobe(); return; }
+  if(e.key === "Escape" && state.favMenuId){ state.favMenuId = null; renderFavorites(); return; }
   if(e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
   if(!e.target.closest || !e.target.closest("#sec-suggest")) return;
   if(/^(INPUT|TEXTAREA)$/.test(e.target.tagName)) return;
   e.preventDefault();
   goTo(e.key === "ArrowRight" ? 1 : -1);
+}, false);
+/* focusout เพื่อ commit ชื่อชุดโปรดตอนคลิกออกจากช่อง (เหตุการณ์นี้ bubble ได้ ต่างจาก blur) */
+document.addEventListener("focusout", function(e){
+  if(e.target && e.target.dataset && e.target.dataset.favRenameInput){
+    commitFavRename(e.target.dataset.favRenameInput, e.target.value);
+  }
 }, false);
 
 /* ปัดซ้าย-ขวา */
@@ -1671,7 +1944,7 @@ $("#addBtn").addEventListener("click", function(){ openForm(null); });
 
 /* nav active ตาม section ที่อยู่ในจอ */
 function observeSections(){
-  var ids = ["sec-suggest","sec-wardrobe"];
+  var ids = ["sec-suggest","sec-favorites","sec-wardrobe"];
   if(!("IntersectionObserver" in window)) return;
   var io = new IntersectionObserver(function(entries){
     entries.forEach(function(en){

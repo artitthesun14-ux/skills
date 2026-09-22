@@ -204,8 +204,136 @@ await bp.locator('#gForm button[type=submit]').click(); await bp.waitForTimeout(
 t('ยังเพิ่มของในเซสชันได้', (await bp.locator('.gchip').count())===11);
 await bc.close();
 
-// ---------- 11. ภาพหน้าจอ ----------
-console.log('\n== 11. เก็บภาพหน้าจอ ==');
+// ---------- 11. FR-2 Swap One Item ----------
+console.log('\n== 11. FR-2 Swap One Item ==');
+let swCtx=await browser.newContext({viewport:{width:1280,height:900}});
+let swPage=await swCtx.newPage();
+await swPage.goto(FILE); await swPage.waitForTimeout(400);
+t('เริ่มที่โหมดจากตู้ของฉัน (ตู้ตัวอย่างพร้อม)',
+  await swPage.locator('[data-mode="wardrobe"]').getAttribute('aria-checked')==='true');
+
+const focusedTop=()=>swPage.locator('.card--focused [data-swap-cat="top"]');
+t('ช่องหมวด "เสื้อ" ในการ์ดที่โฟกัสแตะได้ (มี garment หลายตัวในตู้)', await focusedTop().count()===1);
+const topBefore=await swPage.locator('.card--focused .tile').nth(0).textContent();
+const bottomBefore=await swPage.locator('.card--focused .tile').nth(1).textContent();
+await focusedTop().click(); await swPage.waitForTimeout(150);
+const topAfter=await swPage.locator('.card--focused .tile').nth(0).textContent();
+const bottomAfter=await swPage.locator('.card--focused .tile').nth(1).textContent();
+t('AC1 กดเปลี่ยนเสื้อแล้วเสื้อเปลี่ยน', topAfter!==topBefore);
+t('AC1 กดเปลี่ยนเสื้อแล้วกางเกงไม่เปลี่ยน (ล็อกหมวดอื่น)', bottomAfter===bottomBefore);
+t('AC3 สัดส่วนสี/คำแนะนำอัปเดตตามชุดใหม่',
+  (await swPage.locator('.card--focused .pbar__track').getAttribute('aria-label')).startsWith('สัดส่วนสี:'));
+t('มีข้อความบอกว่าเปลี่ยนแล้ว (no silent state change)',
+  (await swPage.locator('#liveFeedback').textContent()).includes('เปลี่ยน'));
+
+// AC2: กดซ้ำวนตัวถัดไป -- ตู้ตัวอย่างมีเสื้อ 3 ตัว กดสามครั้งต้องเห็นมากกว่า 1 ค่า
+const seen=new Set([topAfter]);
+for(let i=0;i<3;i++){
+  await focusedTop().click(); await swPage.waitForTimeout(150);
+  seen.add(await swPage.locator('.card--focused .tile').nth(0).textContent());
+}
+t('AC2 กดซ้ำวนตัวถัดไปได้หลายตัว (ไม่ค้างค่าเดียว)', seen.size>1);
+
+// พูลระดับฟังก์ชัน: หมวดที่ตู้มีของชิ้นเดียว (นอก/แอกเซสซอรี ในตู้ตัวอย่างมีอย่างละ 1) ต้องมีพูลแค่ 1
+const singlePools=await swPage.evaluate(()=>{
+  var o=state.batch[state.index];
+  return { outer:categoryPool(o,'outer').length, accessory:categoryPool(o,'accessory').length };
+});
+t('หมวดที่ตู้มีของชิ้นเดียว (นอก) พูลมีแค่ 1', singlePools.outer===1);
+t('หมวดที่ตู้มีของชิ้นเดียว (แอกเซสซอรี) พูลมีแค่ 1', singlePools.accessory===1);
+
+// บังคับช่อง "นอก" ให้ว่าง แล้วตรวจ "+ เพิ่ม" (spec §7B) -> กดแล้วเติมของได้ -> เหลือของชิ้นเดียว ปุ่มต้องถูกปิด (spec §7C)
+await swPage.evaluate(()=>{
+  var i=state.index, o=state.batch[i];
+  var items=Object.assign({}, o.items); delete items.outer;
+  state.batch[i]=buildOutfit(items, o.sourceMode, state.occasion);
+  state.swapState={};
+  renderResults();
+});
+await swPage.waitForTimeout(100);
+const outerTile=()=>swPage.locator('.card--focused .tile').nth(3);
+t('ช่องว่างที่ตู้มีของพอเติมโชว์ "+ เพิ่ม" แทนการซ่อนไปเลย (spec §7B)',
+  (await swPage.locator('.card--focused [data-swap-cat="outer"]').textContent()).includes('เพิ่ม'));
+await swPage.locator('.card--focused [data-swap-cat="outer"]').click(); await swPage.waitForTimeout(150);
+t('กด "+ เพิ่ม" แล้วมีของใส่ในช่องจริง',
+  !(await outerTile().evaluate(el=>el.classList.contains('tile--empty'))));
+t('เติมแล้วปุ่มถูกปิดเพราะมีชิ้นเดียวในหมวดนี้ (spec §7C)',
+  await outerTile().locator('button').getAttribute('disabled')!==null);
+await swCtx.close();
+
+// ---------- 12. FR-3 Favorite Outfit ----------
+console.log('\n== 12. FR-3 Favorite Outfit ==');
+let fvCtx=await browser.newContext({viewport:{width:1280,height:900}});
+let fvPage=await fvCtx.newPage();
+await fvPage.goto(FILE); await fvPage.waitForTimeout(400);
+
+const favBtn=()=>fvPage.locator('.card--focused [data-fav-save]');
+t('เริ่มต้นการ์ดที่โฟกัสยังไม่ถูกบันทึกเป็นชุดโปรด', await favBtn().getAttribute('aria-pressed')==='false');
+await favBtn().click(); await fvPage.waitForTimeout(150);
+t('AC1 กด ♡ แล้วกลายเป็น ♥ (บันทึกแล้ว)', await favBtn().getAttribute('aria-pressed')==='true');
+t('มีข้อความบอกว่าบันทึกแล้ว (no silent state change)',
+  (await fvPage.locator('#liveFeedback').textContent()).includes('บันทึก'));
+
+// กด ♥ ซ้ำ = เอาออกจากชุดโปรด (toggle) -- ต้องเช็กตอนการ์ดยังเป็นชุดเดิม (ก่อนรีเฟรชที่จะสุ่มชุดใหม่)
+await favBtn().click(); await fvPage.waitForTimeout(150);
+t('กดซ้ำเอาออกจากชุดโปรดได้ (toggle)', await favBtn().getAttribute('aria-pressed')==='false');
+await favBtn().click(); await fvPage.waitForTimeout(150);   /* บันทึกกลับไว้ใช้ต่อขั้นถัดไป */
+t('บันทึกกลับได้อีกครั้งหลัง toggle', await favBtn().getAttribute('aria-pressed')==='true');
+
+await fvPage.locator('[data-jump="sec-favorites"]').click(); await fvPage.waitForTimeout(300);
+t('AC1 ชุดที่บันทึกโผล่ในหน้าชุดโปรด', (await fvPage.locator('#sec-favorites .gchip').count())===1);
+t('นับจำนวนชุดโปรดถูกต้อง', (await fvPage.locator('#favCount').textContent())==='1 / 20 ชุด');
+
+// AC2: ทำสำเนา
+await fvPage.locator('#sec-favorites [data-fav-more]').click(); await fvPage.waitForTimeout(150);
+await fvPage.locator('#sec-favorites [data-fav-dup]').click(); await fvPage.waitForTimeout(200);
+t('AC2 Duplicate ได้สำเนาแยกเป็นชุดใหม่', (await fvPage.locator('#sec-favorites .gchip').count())===2);
+t('สำเนาแยกจากต้นฉบับ (แก้ชื่อไม่กระทบกัน)',
+  (await fvPage.locator('#sec-favorites .gchip__name').last().textContent()).includes('สำเนา'));
+
+// ตั้งชื่อ (ระบุไว้ใน FR-3 หัวข้อ แม้ไม่มี AC เลขกำกับ)
+await fvPage.locator('#sec-favorites .gchip').first().locator('[data-fav-more]').click(); await fvPage.waitForTimeout(150);
+await fvPage.locator('#sec-favorites .gchip').first().locator('[data-fav-rename]').click(); await fvPage.waitForTimeout(150);
+await fvPage.fill('#favRenameInput', 'ชุดออกเดตสุดโปรด');
+await fvPage.keyboard.press('Enter'); await fvPage.waitForTimeout(150);
+t('ตั้งชื่อชุดโปรดได้', (await fvPage.locator('#sec-favorites .gchip').first().textContent()).includes('ชุดออกเดตสุดโปรด'));
+
+// AC1: รอดหลังรีเฟรช
+await fvPage.reload(); await fvPage.waitForTimeout(400);
+t('AC1 ชุดโปรดคงอยู่หลังรีเฟรช (2 ชุด)', (await fvPage.locator('#sec-favorites .gchip').count())===2);
+t('ชื่อที่ตั้งไว้รอดหลังรีเฟรชด้วย',
+  (await fvPage.locator('#sec-favorites .gchip__name').first().textContent()).includes('ชุดออกเดตสุดโปรด'));
+
+// AC3: ลบเฉพาะชุดนั้น (ผ่าน ConfirmDialog เหมือน wardrobe)
+await fvPage.locator('#sec-favorites .gchip').last().locator('[data-fav-more]').click(); await fvPage.waitForTimeout(150);
+await fvPage.locator('#sec-favorites .gchip').last().locator('[data-fav-del]').click(); await fvPage.waitForTimeout(150);
+t('การลบชุดโปรดมี ConfirmDialog', await fvPage.locator('#confirmDlg').isVisible());
+await fvPage.locator('#dlgOk').click(); await fvPage.waitForTimeout(250);
+t('AC3 ลบแล้วเหลือชุดเดียว (ลบเฉพาะชุดนั้นจริง)', (await fvPage.locator('#sec-favorites .gchip').count())===1);
+t('ชุดที่เหลือยังเป็นชุดที่ตั้งชื่อไว้ (ไม่ได้ลบผิดตัว)',
+  (await fvPage.locator('#sec-favorites .gchip__name').first().textContent()).includes('ชุดออกเดตสุดโปรด'));
+
+await fvPage.locator('[data-jump="sec-suggest"]').click(); await fvPage.waitForTimeout(300);
+
+// spec §7C: ครบ 20 ชุดแล้วห้ามดรอปเงียบๆ (การ์ดหลังรีเฟรชเป็นชุดสุ่มใหม่ จึงตั้งด้วยสีที่ไม่ชนของจริงแน่ๆ)
+await fvPage.evaluate(()=>{
+  state.favorites = Array.from({length:20},(_,i)=>({
+    id:'f-cap-'+i, name:'ชุดทดสอบ '+i,
+    items:{ top:{name:'ทดสอบบน',category:'top',color:'#010203'}, bottom:{name:'ทดสอบล่าง',category:'bottom',color:'#040506'} },
+    colorBreakdown:[], ruleUsed:'monochrome', advice:[], createdAt:Date.now()
+  }));
+  persist(); renderFavorites();
+});
+await fvPage.waitForTimeout(100);
+t('ตั้งสถานการณ์ครบ 20 ชุดสำเร็จ', (await fvPage.locator('#favCount').textContent())==='20 / 20 ชุด');
+await favBtn().click(); await fvPage.waitForTimeout(150);
+t('ครบ 20 แล้วกด Save ใหม่ -> มีข้อความเตือน ไม่เงียบๆ ดรอป',
+  (await fvPage.locator('#liveFeedback').textContent()).includes('ครบ 20 ชุดแล้ว'));
+t('จำนวนชุดโปรดยังคง 20 (ไม่ถูกเพิ่มเกิน)', (await fvPage.locator('#favCount').textContent())==='20 / 20 ชุด');
+await fvCtx.close();
+
+// ---------- 13. ภาพหน้าจอ ----------
+console.log('\n== 13. เก็บภาพหน้าจอ ==');
 for(const [name,opt] of [
   ['desktop-light',{viewport:{width:1280,height:1000},colorScheme:'light'}],
   ['desktop-dark', {viewport:{width:1280,height:1000},colorScheme:'dark'}],
