@@ -33,11 +33,11 @@ Work through these steps in order. Do not skip ahead to a company before the val
 
 ## Decision Log
 
-The artifact is overwritten on every run, so it carries only the current read. The decision log is what survives: `~/.cache/abc/decision-log.md`, append-only (create the directory if needed).
+The artifact carries the current read of each topic, and a refresh overwrites that topic's page. The decision log is what survives underneath it: `~/.cache/abc/decision-log.md`, append-only (create the directory if needed). Head every entry with the topic slug and the date, so one file holds the whole library.
 
-Read it before step 1. Earlier entries already name what would invalidate them, so they say where this run starts looking, and a run that only re-derives what the log already holds is a run spent twice.
+Read this topic's entries before step 1, and skim the slugs of the others for a chain that already touches this one. Earlier entries already name what would invalidate them, so they say where this run starts looking, and a run that only re-derives what the log already holds is a run spent twice.
 
-Append one entry at the end of the run, dated, covering the judgments the run actually turned on: the thesis, the bottleneck call, and any evidence tag that moved. Carry each one over with the evidence and the invalidation conditions step 3 already attached to it, in a few lines each. Leave the rest out.
+Append one entry at the end of the run, slugged and dated, covering the judgments the run actually turned on: the thesis, the bottleneck call, and any evidence tag that moved. Carry each one over with the evidence and the invalidation conditions step 3 already attached to it, in a few lines each. Leave the rest out.
 
 Let earlier entries stand as written. When a run overturns one, write the reversal as a new entry naming the entry it overturns and what changed the read. The log is then a record of how the thesis moved, which is the thing a later run cannot reconstruct from the artifact.
 
@@ -49,7 +49,7 @@ The artifact carries the analysis; the chat carries a short brief pointing at it
 
 In Thai, roughly 150 to 250 words, in this order:
 
-1. What changed since the last run, when the artifact covered the same subject: evidence that moved a tag, judgments that changed and why, figures that went stale. Build this by diffing against the decision log rather than from memory. On a new subject, say in one line that the artifact held a different one.
+1. What changed since this topic's last run: evidence that moved a tag, judgments that changed and why, figures that went stale. Build this by diffing against the decision log rather than from memory. On a topic new to the library, say in one line that it is new, and name the topics already on the shelf whose chains it touches.
 2. The thesis in two or three sentences: the mechanism, the bottleneck, who gates it and who captures the value.
 3. The unknown that matters most, and what would settle it.
 4. What you stopped short of, so a later run starts there instead of repeating this one.
@@ -59,7 +59,7 @@ Go past that only for a section the user asks to see in full.
 
 ### Artifact
 
-Publish one page, in Thai, holding the whole analysis. Before writing it, call the Skill tool with "artifact-design", then call the Skill tool with "artifact-diagramming".
+Publish the run's topic page, in Thai, holding the whole analysis. It goes into a library of topics rather than replacing what is there; Library below has the mechanics. Before writing it, call the Skill tool with "artifact-design", then call the Skill tool with "artifact-diagramming".
 
 Open with a branching diagram of the Causal Chain (fall back to the Value Chain if it has more layers worth showing). Draw one branch per link in the chain, with a short callout beside each node giving its role and its FACT / ASSUMPTION / INFERENCE / UNKNOWN tag.
 
@@ -84,11 +84,31 @@ Below the diagram, carry the rest of the analysis as sections on the same page:
 
 Mark in the company tables whichever names the Most Advantaged and Overlooked but Critical sections carry, as a third encoding kept clear of the weight colours and the evidence ramp.
 
-Reuse one artifact across runs instead of publishing a new one each time: check `~/.cache/abc/artifact-url` for a saved URL first.
-- If it exists, read the artifact at that URL, then republish to it (this overwrites its previous contents with the current run).
-- If it doesn't, publish a new artifact, then save the returned URL to `~/.cache/abc/artifact-url` (create the directory if needed).
+#### Library
 
-Give the user the link either way.
+The artifact is one library, not one report. Each run adds a topic or refreshes a topic already on the shelf, and every other topic stays exactly as it was. Opening the artifact lands on the shelf, and a topic opens from there.
+
+Structure it as a multi-file artifact:
+
+- `index.html`, the shell: the shelf, the topic switcher, and all rendering and styling for a topic page.
+- `topics/<slug>.json`, one per topic: everything that run researched, as data.
+- `topics/index.json`: one entry per topic, carrying slug, title, the date of its last run, and the thesis in a line.
+
+A run touches only its own topic file, the index, and the shell. Files left out of a publish are kept, so earlier topics survive without being read back or re-emitted, which is what stops a run from costing more as the library grows.
+
+Steps for a run:
+
+1. Read `~/.cache/abc/artifact-url`. No file means a fresh library: build the shell, publish, then save the returned URL there (create the directory if needed).
+2. Read `topics/index.json` from the artifact. Match the subject against the slugs already there before minting a new one, so a refresh lands on the existing topic instead of forking it into a near-duplicate.
+3. Publish `topics/<slug>.json`, the updated `topics/index.json`, and the shell. Pass no other topic file.
+
+Two rules keep the older topics from rotting as the shell moves on. Add fields, never repurpose one, because a field that quietly changes meaning corrupts every topic written before the change. And render defensively, so a topic missing a field the shell now knows about drops that section instead of failing to draw. The shell holds the rendering, so a later improvement to the diagram or the counter-thesis cards reaches topics researched months earlier.
+
+Where a company or a layer appears in more than one topic, say so on its detail panel and link across to the other topic. This is the part a stack of separate pages cannot do: the same chokepoint surfacing in two unrelated chains is a finding, not a coincidence.
+
+The shelf carries each topic's title, the date of its last run, the thesis in a line, and a mark where that date is old enough that its figures need re-checking under Evidence Rules.
+
+Give the user the link to the topic either way.
 
 ## Evidence Rules
 
