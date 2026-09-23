@@ -84,6 +84,8 @@ Below the diagram, carry the rest of the analysis as sections on the same page:
 
 Mark in the company tables whichever names the Most Advantaged and Overlooked but Critical sections carry, as a third encoding kept clear of the weight colours and the evidence ramp.
 
+Fold each section to what the thesis turns on, with the rest behind a "ดูข้อมูลเพิ่มเติม (อีก N)" button that expands in place and folds back. What stays open: in the summary, the core thesis, the bottleneck and the major unknown; in the value chain, the bottleneck rows; in the company map, the marked names; the first of the advantaged and of the overlooked; the first two counter-thesis cards; the first three indicators. Sources stay folded. The shell decides this from fields the topic already carries, so every topic on the shelf folds the same way.
+
 #### Library
 
 The artifact is one library, not one report. Each run adds a topic or refreshes a topic already on the shelf, and every other topic stays exactly as it was. Opening the artifact lands on the shelf, and a topic opens from there.
@@ -99,8 +101,9 @@ A run touches only its own topic file, the index, and the shell. Files left out 
 Steps for a run:
 
 1. Read `~/.cache/abc/artifact-url`. No file means a fresh library: build the shell, publish, then save the returned URL there (create the directory if needed).
-2. Read `topics/index.json` from the artifact. Match the subject against the slugs already there before minting a new one, so a refresh lands on the existing topic instead of forking it into a near-duplicate.
-3. Publish `topics/<slug>.json`, the updated `topics/index.json`, and the shell. Pass no other topic file.
+2. Read `topics/index.json` and one existing topic file from the artifact. Match the subject against the slugs already there before minting a new one, so a refresh lands on the existing topic instead of forking it into a near-duplicate. The topic file's fields are the current shape: write the new topic in that shape, adding fields only where it has none for what this run found.
+3. Serve the shell with every topic locally and click every node of every topic in a browser. The check is done when each node opens its panel and the page raises no error. It covers the whole shelf, not this run's topic, because a new topic changes the cross-links drawn in the older ones.
+4. Publish `topics/<slug>.json`, the updated `topics/index.json`, and the shell. Pass no other topic file. A change to the shell alone publishes the shell alone, after the same check.
 
 A saved URL pointing at an artifact built before the library existed is the one case that needs a migration, and it happens once. List the artifact's files: no `topics/index.json` means the URL holds a single-page report from an earlier run. Read that page, lift the analysis it already carries into `topics/<slug>.json` under the current shape, and publish it together with the new shell and index, before the topic this run researched. Two things keep the migration honest. Date the migrated topic by the run that produced it, never by today, because its figures are as old as they were. And carry across only what the page actually says: a field the old page has no answer for is left absent, which the shell already renders as a missing section, rather than filled in from a guess. Nothing is re-researched here, the page is only moved onto the shelf. Head the decision log entries that pre-date slugs with that topic's slug at the same time.
 
