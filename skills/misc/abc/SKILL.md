@@ -33,7 +33,9 @@ Work through these steps in order. Do not skip ahead to a company before the val
 
 ## Decision Log
 
-The artifact carries the current read of each topic, and a refresh overwrites that topic's page. The decision log is what survives underneath it: `~/.cache/abc/decision-log.md`, append-only (create the directory if needed). Head every entry with the topic slug and the date, so one file holds the whole library.
+The artifact carries the current read of each topic, and a refresh overwrites that topic's page. The decision log is what survives underneath it: `decision-log.md`, append-only. Head every entry with the topic slug and the date, so one file holds the whole library.
+
+The log lives in the private GitHub repo `artitthesun14-ux/abc-decision-log`, cloned at `~/.cache/abc/`, beside `artifact-url`. The repo is the source of truth because a container is ephemeral: a file only in `~/.cache/abc/` is lost with it. Sync before reading either file: pull when the clone exists, otherwise clone it there (in a cloud session, attach the repo with `add_repo` first). After every write to either file, commit and push. When the repo is unreachable, work on the local files and say in the chat brief that the log was not pushed, so the next run reconciles it first.
 
 Read this topic's entries before step 1, and skim the slugs of the others for a chain that already touches this one. Earlier entries already name what would invalidate them, so they say where this run starts looking, and a run that only re-derives what the log already holds is a run spent twice.
 
@@ -102,7 +104,7 @@ A run touches only its own topic file, the index, and the shell. Files left out 
 
 Steps for a run:
 
-1. Read `~/.cache/abc/artifact-url`. No file means a fresh library: build the shell, publish, then save the returned URL there (create the directory if needed).
+1. Read `~/.cache/abc/artifact-url` after the sync under Decision Log. No file means a fresh library: build the shell, publish, then save the returned URL there and push it.
 2. Read `topics/index.json` and one existing topic file from the artifact. Match the subject against the slugs already there before minting a new one, so a refresh lands on the existing topic instead of forking it into a near-duplicate. The topic file's fields are the current shape: write the new topic in that shape, adding fields only where it has none for what this run found.
 3. Serve the shell with every topic locally and click every node of every topic in a browser. The check is done when each node opens its panel and the page raises no error. It covers the whole shelf, not this run's topic, because a new topic changes the cross-links drawn in the older ones.
 4. Publish `topics/<slug>.json`, the updated `topics/index.json`, and the shell. Pass no other topic file. A change to the shell alone publishes the shell alone, after the same check. Removing a topic is the same publish with its index entry dropped and its file mapped to null.
