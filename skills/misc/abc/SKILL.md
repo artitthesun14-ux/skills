@@ -4,7 +4,7 @@ description: Research an investment thesis from megatrend to company, following 
 disable-model-invocation: true
 ---
 
-Personal research tool. Not investment advice, not for distribution. Write all analysis output in Thai; these instructions stay in English.
+Research tool whose output may be shared. Not investment advice. Write all analysis output in Thai; these instructions stay in English.
 
 ## Principles
 
@@ -162,4 +162,4 @@ Before finalizing a thesis, the analysis should be able to answer: what the tren
 
 ## Compliance
 
-Evidence status only, never investment advice. For personal research; do not distribute the output.
+Evidence status only, never investment advice. The output may be shared, so every page carries a notice that it reports evidence status and is not investment advice, and that its figures carry the dates and sources they were true at. Because readers other than the user may act on it, hold the Don't list under Agent Behavior strictly: name no best stock, and say nothing on valuation, entry, or timing.
