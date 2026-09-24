@@ -96,6 +96,8 @@ Structure it as a multi-file artifact:
 - `topics/<slug>.json`, one per topic: everything that run researched, as data.
 - `topics/index.json`: one entry per topic, carrying slug, title, the date of its last run, and the thesis in a line.
 
+A topic file's `tickers` field maps each company name, exactly as the topic writes it, to its ticker: a bare symbol for a US listing, an exchange suffix otherwise (`.T`, `.HK`, `.L`), `A · B` for a company reached through its listed owners, and `ไม่จดทะเบียน` for one that cannot be bought. A combined name such as `Dell / HPE / Lenovo` takes one entry per part. Confirm each ticker by search before writing it, since listings move (a secondary listing, an IPO, a delisting).
+
 A run touches only its own topic file, the index, and the shell. Files left out of a publish are kept, so earlier topics survive without being read back or re-emitted, which is what stops a run from costing more as the library grows.
 
 Steps for a run:
@@ -103,7 +105,7 @@ Steps for a run:
 1. Read `~/.cache/abc/artifact-url`. No file means a fresh library: build the shell, publish, then save the returned URL there (create the directory if needed).
 2. Read `topics/index.json` and one existing topic file from the artifact. Match the subject against the slugs already there before minting a new one, so a refresh lands on the existing topic instead of forking it into a near-duplicate. The topic file's fields are the current shape: write the new topic in that shape, adding fields only where it has none for what this run found.
 3. Serve the shell with every topic locally and click every node of every topic in a browser. The check is done when each node opens its panel and the page raises no error. It covers the whole shelf, not this run's topic, because a new topic changes the cross-links drawn in the older ones.
-4. Publish `topics/<slug>.json`, the updated `topics/index.json`, and the shell. Pass no other topic file. A change to the shell alone publishes the shell alone, after the same check.
+4. Publish `topics/<slug>.json`, the updated `topics/index.json`, and the shell. Pass no other topic file. A change to the shell alone publishes the shell alone, after the same check. Removing a topic is the same publish with its index entry dropped and its file mapped to null.
 
 A saved URL pointing at an artifact built before the library existed is the one case that needs a migration, and it happens once. List the artifact's files: no `topics/index.json` means the URL holds a single-page report from an earlier run. Read that page, lift the analysis it already carries into `topics/<slug>.json` under the current shape, and publish it together with the new shell and index, before the topic this run researched. Two things keep the migration honest. Date the migrated topic by the run that produced it, never by today, because its figures are as old as they were. And carry across only what the page actually says: a field the old page has no answer for is left absent, which the shell already renders as a missing section, rather than filled in from a guess. Nothing is re-researched here, the page is only moved onto the shelf. Head the decision log entries that pre-date slugs with that topic's slug at the same time.
 
