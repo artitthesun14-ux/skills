@@ -75,7 +75,7 @@ Carry a second reading beside the evidence tag: your own judgment of how much ea
 
 Rate every node and company as one of: critical (a chokepoint with no substitute, the chain breaks without it), watch (a risk or assumption that could break the thesis), interesting (an asymmetry worth digging into next), or context (background, not a decision point). Colour those four red, amber, green and neutral, and move the evidence tags to a quiet monochrome ramp so the two encodings never compete for the same red. Write the judgment in your own voice, one or two sentences, saying what makes the point worth attention and what would change your mind. It explains reasoning and never recommends buying or selling.
 
-The บทวิเคราะห์ view carries the rest of the analysis as sections:
+The บทวิเคราะห์ view opens with a layer overview: one row per node with its weight and evidence tag, the important nodes (critical or watch) resting on anything short of FACT first, since that pair is where the next search pays most. The chain's `caption` sits under the Layer Map, so write it about the map's bottlenecks. Then it carries the rest of the analysis as sections:
 
 - **Executive Summary**: trend, core thesis, key mechanism, most important bottleneck, major unknowns.
 - **Value Chain**: Layer, Function, Bottleneck, Companies, Evidence. Shown only in the fallback chain view.
