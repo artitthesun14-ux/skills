@@ -16,16 +16,16 @@ A multi-file artifact:
 
 ## The company page
 
-The page carries every section of `templates/thesis-template.md`, in its order, written in the user's language. Adjacent sections may share a plate, as the existing pages do. Every page shows the as-of date, the notice that it analyses a thesis and is not a recommendation to buy or sell, the legend of the four evidence labels, the Thesis History, and its sources.
+The page carries every section of `templates/thesis-template.md`, written in the user's language and laid out per [`thesis-page.md`](thesis-page.md): five acts with progressive disclosure, not the template's order. Every page shows the as-of date, the notice that it analyses a thesis and is not a recommendation to buy or sell, the legend of the four evidence labels, the Thesis History, and its sources.
 
-Pages share one design. Build a new page from the stylesheet and plate structure of the most recently published company page, replacing the content. Before the first page of a new library, or any change to the shared design, call the Skill tool with "artifact-design". Before adding or changing a chart, call the Skill tool with "dataviz".
+Pages share one design. Build a new page from the stylesheet, act structure and scripts of the most recently published company page, replacing the content. A page still in the older plate layout (Roman-numbered plates in template order) moves to the act layout the next time its company is updated, carrying its content unchanged. Before the first page of a new library, or any change to the shared design, call the Skill tool with "artifact-design". Before adding or changing a chart, call the Skill tool with "dataviz".
 
 ## A run
 
 1. **Read** the shelf, `companies/index.json`, and the page of this company if it is on the shelf, otherwise the newest page for its design. Match the company against the slugs before minting a new one, so an update lands on the existing page instead of forking a near-duplicate.
 2. **Migrate once.** No `companies/index.json` means the library still holds a single company's page at the root. Move that page unchanged to `companies/<slug>.html`, give it a Thesis History with one NEW row dated by its own as-of date (never today), build the shelf and the index, and publish them before this run's page. Carry across only what the page says.
 3. **Write** the page. A new company gets a full page with one NEW history row. An update edits the existing page per `thesis-tracker.md` and adds its history row at the top; earlier rows stay as written. A narrow request (one link only) on a company already on the shelf updates only those plates and still adds a history row. A narrow request on a company not on the shelf is answered in chat, with an offer to publish a full page.
-4. **Check** locally in a browser: serve the shelf with every company page, open the shelf and every page. Done when the shelf shows one entry per index entry, every entry opens its page, every page links back, and no page raises an error.
+4. **Check** locally in a browser: serve the shelf with every company page, open the shelf and every page. Done when the shelf shows one entry per index entry, every entry opens its page, every page links back, no page raises an error, and this company's page meets the done-when list of `thesis-page.md`.
 5. **Publish** this company's page, the updated `companies/index.json`, and `index.html` only when the shelf changed. Pass no other company's page: files left out of a publish are kept.
 
 ## Chat brief

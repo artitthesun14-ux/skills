@@ -53,6 +53,7 @@ Load a reference only when you reach its link.
 | Valuation and embedded expectations | [`references/valuation.md`](references/valuation.md) |
 | Tracking or updating an existing thesis | [`references/thesis-tracker.md`](references/thesis-tracker.md) |
 | Publishing the page, or updating a company already on the shelf | [`references/thesis-library.md`](references/thesis-library.md) |
+| Laying out the company page | [`references/thesis-page.md`](references/thesis-page.md) |
 | Unsure what good output looks like | [`examples/example-thesis.md`](examples/example-thesis.md) |
 
 ## Research principles
@@ -93,4 +94,5 @@ Before delivering, confirm each item and fix any that fail:
 - [ ] Key claims labelled FACT / INFERENCE / ASSUMPTION / UNKNOWN, with sources and dates.
 - [ ] Scorecard is multi-dimensional, with no single overall score.
 - [ ] No buy or sell call.
+- [ ] Page laid out in five acts per `thesis-page.md`, with every template section placed and no figure lost.
 - [ ] Page published to the library, shelf entry updated, history row added.

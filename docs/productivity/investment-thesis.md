@@ -39,6 +39,8 @@ Type `/investment-thesis`, or the agent reaches for it when you ask whether a co
 
 Every run writes into one artifact: a shelf of companies, each with its own page. A new company adds a page; an update edits that company's page and adds a dated MAINTAIN, REVISE or BREAK row to its history, so you can see how the thesis moved. The chat gets a short brief and the link, not a reprint.
 
+Each page reads as a story before it reads as a report. It opens with the thesis in one sentence and four 30-second cards (why now, why this industry, why this company, what can break it), then a tappable thesis chain. Below that sit five acts, each answering one question: The Setup (what is happening), The Battlefield (where the fight is), The Moat (why it wins), The Money (where the value goes), and The Test (what proves it wrong). Evidence, full tables and sources stay one tap away, so the first screens stay short without dropping any of the research.
+
 ## Progressive disclosure
 
 `SKILL.md` holds the chain, the workflow, the routing table and the verification checklist. The method for each link lives in its own file under `references/`, loaded only when the analysis reaches that link. `templates/` holds the output shapes, and `examples/` holds one fictional worked example (a transformer maker in the AI power chain) that shows the reasoning, not a stock pick.
