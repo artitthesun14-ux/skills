@@ -1,7 +1,7 @@
 # Investment Thesis: [Company] ([Ticker])
 
 > Investment question: [question from step 1]
-> As of: [date]. Sources: cited inline. Labels: FACT / INFERENCE / ASSUMPTION.
+> As of: [date]. Sources: cited inline. Labels: FACT / INFERENCE / ASSUMPTION / UNKNOWN.
 > This is an analysis of a thesis, not a recommendation to buy or sell.
 
 ## 1. Executive Thesis
@@ -31,15 +31,15 @@ MEGATREND        → [driver]
 
 ## 5. Value Chain
 
-[Stage map with players, margins, commoditized and constrained stages. Where economic profit pools.]
+[Stage map with players, margins, commoditized and constrained stages. The inputs one unit of the product consumes, each on the map or excluded. Where economic profit pools.]
 
 ## 6. Bottleneck
 
-[The constraint, its evidence, its expected duration, and whether this company captures it.]
+[Bottlenecks on the company's path, ranked; which gate and which capture; the buyer's way around each gating one; its evidence, its expected duration, and whether this company captures it.]
 
 ## 7. Company Position
 
-[Current exposure versus future economic exposure; from `company-analysis.md`.]
+[Current exposure versus future economic exposure, and the peer comparison; from `company-analysis.md`.]
 
 ## 8. Competitive Advantage
 
@@ -63,7 +63,7 @@ MEGATREND        → [driver]
 
 ## 13. Counter-Thesis
 
-[The bear's best case with its causal chain, evidence, and probability rating.]
+[The bear's best case with its causal chain, evidence, and probability rating. Then one card per claim the thesis rests on: for, against, key unknown, breaker. Unchallenged assumptions labelled as such.]
 
 ## 14. Thesis Breakers
 
@@ -106,3 +106,12 @@ MEGATREND        → [driver]
 ### What must be true
 
 ### What would change my mind
+
+### What this run stopped short of
+
+[Searches left thin, inputs or stages left off the map, and why.]
+
+## 21. Thesis History
+
+| Date | Decision (NEW / MAINTAIN / REVISE / BREAK) | What changed and why |
+| --- | --- | --- |

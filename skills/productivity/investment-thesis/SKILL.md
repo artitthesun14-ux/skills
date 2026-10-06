@@ -27,8 +27,9 @@ Industry comes before company. "The industry grows" reaches "this company captur
 3. **Walk the chain**, loading only the reference for the link you are on (routing table). Done when each link has a conclusion, its evidence, and its unknowns.
 4. **Attack the thesis**: counter-thesis, then thesis breakers with indicators. Done when you have searched for disconfirming evidence as hard as for confirming evidence.
 5. **Value it**: reverse-engineer what today's price assumes, then bear, base, bull.
-6. **Write the output** into [`templates/thesis-template.md`](templates/thesis-template.md), scored with [`templates/thesis-scorecard.md`](templates/thesis-scorecard.md).
-7. **Verify** against the checklist below, fix what fails, then deliver.
+6. **Write the output** in the shape of [`templates/thesis-template.md`](templates/thesis-template.md), scored with [`templates/thesis-scorecard.md`](templates/thesis-scorecard.md).
+7. **Verify** against the checklist below and fix what fails.
+8. **Publish** the company's page into the thesis library per [`references/thesis-library.md`](references/thesis-library.md). Done when the page is live, the shelf lists it, and the chat carries a short brief with the link.
 
 For a narrower request (only the moat, only valuation, only an update), run just the matching links and say which links were skipped.
 
@@ -51,6 +52,7 @@ Load a reference only when you reach its link.
 | Counter-thesis and thesis breakers | [`references/counter-thesis.md`](references/counter-thesis.md) |
 | Valuation and embedded expectations | [`references/valuation.md`](references/valuation.md) |
 | Tracking or updating an existing thesis | [`references/thesis-tracker.md`](references/thesis-tracker.md) |
+| Publishing the page, or updating a company already on the shelf | [`references/thesis-library.md`](references/thesis-library.md) |
 | Unsure what good output looks like | [`examples/example-thesis.md`](examples/example-thesis.md) |
 
 ## Research principles
@@ -61,6 +63,9 @@ Load a reference only when you reach its link.
   - **FACT**: directly supported by cited evidence.
   - **INFERENCE**: your conclusion drawn from evidence; name the evidence.
   - **ASSUMPTION**: not yet supported; state what would confirm it.
+  - **UNKNOWN**: no evidence either way; name what would settle it. A gap stays labelled UNKNOWN, never filled with plausible prose: an unsupported paragraph reads exactly like a researched one.
+- **Two decay speeds.** Structure (who is sole source, how concentrated a layer is, what qualification demands) holds for years; figures (lead times, backlog, share, guidance, price) can go stale within a quarter. State structure plainly, and give every figure the date it was true. A figure older than the pace of its own layer is a lead to verify, not evidence.
+- **Stop when the shape stops moving.** Stop searching when another search stops changing the thesis, not when it stops returning results. An unresolved counter-thesis keeps the search open. Before stopping, say what you stopped short of, so a later run starts there.
 - **Ask why until you reach economics.** Each answer gets a further "why?" until it lands on who captures the money and the evidence for it (see `investment-framework.md`).
 - **Disconfirm actively.** For each link, look for the evidence that would make it wrong. Treat these as separate claims that each need their own proof: industry growth versus company success, growth versus moat, high margin versus moat, brand versus moat, low P/E versus undervaluation. Check how each market share figure is defined before using it.
 
@@ -76,12 +81,16 @@ Before delivering, confirm each item and fix any that fail:
 - [ ] Every chain link present, or marked skipped with the reason.
 - [ ] Each link shows its mechanism, not just a label.
 - [ ] Industry analysed before the company.
+- [ ] Bottlenecks on the company's path ranked, gate separated from capture, and each gating one answered with the buyer's way around.
+- [ ] Every input the company's product consumes sits on the value chain map or is named as excluded.
+- [ ] Peers in the company's own layer compared on the same figures.
 - [ ] Bottleneck exposure and pricing power evidenced for this company specifically.
 - [ ] Moat has a cause, evidence, replication difficulty and a durability horizon.
 - [ ] Financials explicitly confirm or contradict the advantage.
 - [ ] Counter-thesis built from real disconfirming evidence.
 - [ ] Every thesis breaker has a monitoring indicator.
 - [ ] Valuation states what must be true for today's price.
-- [ ] Key claims labelled FACT / INFERENCE / ASSUMPTION, with sources and dates.
+- [ ] Key claims labelled FACT / INFERENCE / ASSUMPTION / UNKNOWN, with sources and dates.
 - [ ] Scorecard is multi-dimensional, with no single overall score.
 - [ ] No buy or sell call.
+- [ ] Page published to the library, shelf entry updated, history row added.

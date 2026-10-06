@@ -22,9 +22,9 @@ Typical indicators: revenue exposure, market share, backlog, pricing, margin, RO
 
 When the user brings new evidence (an earnings report, a competitor announcement):
 
-1. Load the previous thesis and its tracker.
+1. Load the previous thesis and its tracker from the company's page in the thesis library (`thesis-library.md`). Its earlier history rows name what would invalidate the thesis, so they say where this run starts looking.
 2. Map the new evidence to the rows it affects; leave unaffected rows unchanged.
 3. Update each affected value with source and date.
 4. Re-judge only the chain links those rows feed.
 5. Decide: **MAINTAIN** (assumptions intact), **REVISE** (a link changed, the thesis survives in altered form; state the new version), or **BREAK** (a breaker threshold crossed; state which).
-6. Record the decision and its reason at the top of the tracker, newest first.
+6. Record the decision and its reason as a new row at the top of the page's history, newest first. Earlier rows stay as written; a reversal names the row it overturns and what changed.

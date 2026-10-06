@@ -20,6 +20,15 @@ Working sheet for the company position step. Its conclusions go into section 7 o
 - Distance to the bottleneck (in / adjacent / far):
 - Share of revenue in commoditized stages:
 
+## Peers in the same stage
+
+Same figures, same period basis, for the company and each direct peer. Note where periods differ (fiscal years that end in different months).
+
+| Company | Revenue in this stage (period) | Growth | Margin | Share | Source |
+| --- | --- | --- | --- | --- | --- |
+
+Then one line: where the company leads, where it trails, and whether the gap is widening.
+
 ## Current versus future
 
 - **Current exposure**: what today's reported numbers tie to the thesis.

@@ -23,6 +23,8 @@ Search for real disconfirming evidence across:
 - Capital cycle (overbuilding after the shortage).
 - Commoditization.
 
+Then test the thesis **claim by claim**. For each claim the thesis rests on, write one card: the claim, the evidence for it and the evidence against it facing each other, the key unknown between them, and the thesis breaker that would settle it. A claim with no evidence against it yet is not countered, it is an **unchallenged assumption**: label it so and name the evidence that would fill the gap.
+
 Search for it with the same effort you spent on confirming evidence: query the bear case directly, read short reports and competitor filings, and note which supportive sources have an interest in the story. Rate the counter-thesis **Low / Medium / High** probability with the evidence behind the rating.
 
 ## Thesis breakers

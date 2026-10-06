@@ -13,7 +13,7 @@ MEGATREND → INDUSTRY IMPORTANCE → INDUSTRY STRUCTURE → VALUE CHAIN → BOT
 
 Each link has to show the mechanism that carries value to the next one. "The industry is growing" never jumps straight to "this company is attractive": the value chain, the bottleneck, pricing power and the financials stand in between.
 
-The output is a 20-section thesis with a multi-dimensional scorecard and a KPI tracker. It is not a recommendation: the skill writes about thesis strength, risks and what must be true, and leaves the decision to you.
+The output is a thesis page with a multi-dimensional scorecard, a KPI tracker and a dated history, published into one thesis library artifact with a page per company. It is not a recommendation: the skill writes about thesis strength, risks and what must be true, and leaves the decision to you.
 
 ## When to reach for it
 
@@ -28,10 +28,16 @@ Type `/investment-thesis`, or the agent reaches for it when you ask whether a co
 
 ## How it keeps the thesis honest
 
-- **Fact, inference, assumption.** Every key claim carries one of the three labels, so a conclusion never passes for evidence.
+- **Fact, inference, assumption, unknown.** Every key claim carries one of the four labels, so a conclusion never passes for evidence and a gap is named rather than filled.
+- **Bottlenecks ranked from the company's side.** It ranks the constraints on the company's own path, separates who gates the chain from who keeps the profit, and asks what the buyer can turn to when each one jams.
+- **Every input on the map.** It lists what one unit of the product consumes and goes a level deeper wherever the thesis leans, until every input is mapped or named as excluded.
 - **Source hierarchy.** It ranks filings and official data above earnings calls and research, those above media, and forums last (used only for leads). With web access it searches before it concludes, and never pulls figures such as revenue, share, backlog or valuation from memory.
 - **Disconfirmation.** It writes the counter-thesis as the bear's best case and searches for disconfirming evidence as hard as for confirming evidence. Each thesis breaker comes with a monitoring indicator and a threshold.
 - **No single score.** The scorecard rates eleven dimensions separately, each with evidence, confidence and unknowns.
+
+## The thesis library
+
+Every run writes into one artifact: a shelf of companies, each with its own page. A new company adds a page; an update edits that company's page and adds a dated MAINTAIN, REVISE or BREAK row to its history, so you can see how the thesis moved. The chat gets a short brief and the link, not a reprint.
 
 ## Progressive disclosure
 
