@@ -4,9 +4,9 @@ Every thesis lives in the **Investment Thesis** category of one artifact, Rack t
 
 **https://claude.ai/artifact/H9siQaJEitHLDuQ3Zsmu8t**
 
-The artifact is built from source in the repository `artitthesun14-ux/chip-artifacts` and published as one file. Never edit the published page by hand: edit the source, rebuild, publish. A run adds a company or updates one already in the category; every other topic and company stays exactly as it was. When the repository is not in the session, add it (read and push access) before starting. When the user cannot edit the artifact, publish the built page as a new artifact and give the user its link instead.
+The artifact is built from source in the repository `artitthesun14-ux/chip-artifacts` and published as a small shell (`rack-to-chip/index.html`) plus one file per view (`rack-to-chip/v/<hash>.html`). Never edit the published page by hand: edit the source, rebuild, publish. A run adds a company or updates one already in the category; every other topic and company stays exactly as it was. When the repository is not in the session, add it (read and push access) before starting. When the user cannot edit the artifact, publish the built page as a new artifact and give the user its link instead.
 
-Read `HANDOFF.md` in that repository first: its design system and motion sections are the rules every tab follows.
+Read `HANDOFF.md` in that repository first: its design system and motion sections are the rules every tab follows. Per-topic notes live in `handoff/`; a thesis run needs none of them.
 
 ## Structure
 
@@ -23,7 +23,7 @@ Pages share one design: the host's black-and-white design system. Build a new co
 
 - **Color.** Ink and greys from the host tokens only. `--crit` (oxblood) marks only bottlenecks, breakers, leaks and what contradicts the thesis. `--cool` (petrol) marks only the second side of a pair: the main rival against the company, the counter-thesis against the thesis, FCF after SBC against reported FCF. No other color.
 - **Each tab** opens with the host header: `header.ds-hd` with the act's question as `h1`, its one-sentence answer as the lead and the tab number as `ds-num`. Deep research folds into `details.more`.
-- **Names.** Every class starts with `th-`, or is a child class written only under a `th-` parent. Every id starts with the slug (`snps-ev-mix`, `snps-br-1`). Pages of other topics define global classes (`.f`, `.u`, `.stage`, `.lab`, `.seg`, `.cap`), so a bare short class collides.
+- **Names.** Every class starts with `th-`, or is a child class written only under a `th-` parent. Every id starts with the slug (`snps-ev-mix`, `snps-br-1`). Pages of other topics define global classes (`.f`, `.u`, `.note`, `.stage`, `.cap`), so a bare short class collides; the build stops and names the class when one does.
 - **Links between parts** are buttons: `button.th-ev[data-ev=<card id>]` opens an evidence card, `button.th-go[data-to=<tab or element id>]` jumps to a tab or an element. The viewer app intercepts taps on `<a>`, so keep `<a>` for external sources only.
 - Change `thesis.css` or `thesis.js` only for something every company needs. Before such a change call the Skill tool with "artifact-design"; before adding or changing a chart, with "dataviz".
 
@@ -31,9 +31,9 @@ Pages share one design: the host's black-and-white design system. Build a new co
 
 1. **Read** `HANDOFF.md`, `THESIS` in `build.py`, and this company's six files if it is already in the category, otherwise the newest company's files for their structure. Match the company against the slugs before minting a new one, so an update lands on the existing page instead of forking a near-duplicate.
 2. **Write** the page. A new company gets six files, a group in `GROUPS` with its six tabs, its slug in the `thesis` category of `CATS`, and its `THESIS` entry, plus one NEW history row. An update edits the existing files per `thesis-tracker.md`, adds its history row at the top (earlier rows stay as written), and updates the as-of date and decision in `THESIS`. A narrow request (one link only) on a company already in the category updates only those parts and still adds a history row. A narrow request on a company not in the category is answered in chat, with an offer to publish a full page.
-3. **Build** with `python3 build.py`.
-4. **Check** the built page in a browser at 390 and 1280 wide, light and dark. Done when the home page and the category list every company, every company opens on `#<slug>`, its six tabs show, no page raises an error, the body has no horizontal scroll, and the page meets the done-when list of `thesis-page.md`.
-5. **Publish** `rack-to-chip/index.html` to the artifact URL above, then commit and push the source.
+3. **Build** with `python3 build.py`. A class collision stops it; rename the class and rebuild.
+4. **Check** with `node check/check.js` (run `npm install` in `check/` once per session). It opens every view at 390 and 1280 wide, light and dark, and exits 0 when nothing fails. Done when it passes, the home page and the category list every company, every company opens on `#<slug>`, its six tabs show, no page raises an error, the body has no horizontal scroll, and the page meets the done-when list of `thesis-page.md`.
+5. **Publish** per the "Publish" note in `HANDOFF.md`: read the artifact URL (only the shell comes back), list its files (`scope: "files"`), copy `rack-to-chip/` to the scratchpad, and publish `index.html` with `root` set to that copy and `files` naming only the `v/` files this run changed. A new company adds views, so it always sends `index.html` too. Then commit and push the source.
 
 ## Chat brief
 
