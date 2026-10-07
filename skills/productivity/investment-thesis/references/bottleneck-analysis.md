@@ -35,7 +35,7 @@ Then separate **gating** from **capturing**: whoever controls the queue is not a
 
 At every gating bottleneck, ask: if this jams, what can the buyer turn to? Walk the options: another technology, capacity already built, making it in-house, another supplier, or waiting for new capacity, each with when it arrives and what it still depends on. An option that still routes through the same bottleneck is no way around it; say so. "No real alternative" is a valid answer and makes the bottleneck stronger; say why.
 
-Read the result from the company's side. Where the company holds the bottleneck, each way around is a threat to its capture and belongs in the counter-thesis. Where the company depends on someone else's bottleneck, the lack of a way around is a risk to its supply and margin.
+Read the result from the company's side. Where the company holds the bottleneck, each way around is a threat to its capture and goes to the Bear in the investment debate. Where the company depends on someone else's bottleneck, the lack of a way around is a risk to its supply and margin.
 
 ## Bottleneck versus investment
 

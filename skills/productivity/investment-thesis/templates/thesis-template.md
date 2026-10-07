@@ -6,7 +6,7 @@
 
 ## 1. Executive Thesis
 
-[3 to 5 sentences: why the company can win, how it captures value, what the price assumes, what breaks it.]
+[3 to 5 sentences, written after the debate: the thesis the debate left standing, how the company captures value, what the price assumes, what would break it.]
 
 ## 2. Thesis Chain
 
@@ -57,24 +57,11 @@ MEGATREND        → [driver]
 
 [Key figures with sources. Verdict: support, mixed or contradict, and the deciding figures.]
 
-## 12. Second-Order Effects
-
-[Layered effects, each marked helps or hurts, with the evidence frontier.]
-
-## 13. Counter-Thesis
-
-[The bear's best case with its causal chain, evidence, and probability rating. Then one card per claim the thesis rests on: for, against, key unknown, breaker. Unchallenged assumptions labelled as such.]
-
-## 14. Thesis Breakers
-
-| Breaker | Indicator | Threshold | Source |
-| --- | --- | --- | --- |
-
-## 15. Valuation & Expectations
+## 12. Valuation & Expectations
 
 [Reverse-engineered expectations. "For today's valuation to make sense, ... must be true."]
 
-## 16. Bull / Base / Bear
+## 13. Bull / Base / Bear
 
 | | Bear | Base | Bull |
 | --- | --- | --- | --- |
@@ -83,35 +70,67 @@ MEGATREND        → [driver]
 | Implied value | | | |
 | What has to happen | | | |
 
-## 17. Thesis Scorecard
-
-[Filled from `thesis-scorecard.md`.]
-
-## 18. Key Assumptions
-
-| Assumption | Label | What would confirm it | What would refute it |
-| --- | --- | --- | --- |
-
-## 19. KPI Tracker
-
-| Indicator | Current value (date) | Supports if | Breaks if | Source | Frequency |
-| --- | --- | --- | --- | --- | --- |
-
-## 20. Final Conclusion
-
-### Why it can win
-
-### Why it can fail
+## 14. Investment Debate
 
 ### What must be true
 
-### What would change my mind
+| # | Load-bearing assumption | Label | After the debate (held / weakened / broken / unknown / unchallenged) |
+| --- | --- | --- | --- |
 
-### What this run stopped short of
+### Exchanges
 
-[Searches left thin, inputs or stages left off the map, and why.]
+[One block per exchange, per `investment-debate.md`:]
 
-## 21. Thesis History
+> **Exchange N. [Key question]** · Lens: [optional]
+> **Bull**: claim → evidence [card] → interpretation. **Bear**: claim → evidence [card] → interpretation. (Further turns as the question demands.)
+> **Concession**: [what each side grants]. **Updated view**: Bull [Strengthened / Unchanged / Weakened], Bear [...], because [...].
+> **Implication**: [what changes in the thesis]. Second-order layers, an evidence conflict, or a breaker found here go in this block.
 
-| Date | Decision (NEW / MAINTAIN / REVISE / BREAK) | What changed and why |
+### Evidence conflicts
+
+| Evidence A | Evidence B | Why they differ | What would resolve it | Status |
+| --- | --- | --- | --- | --- |
+
+### Thesis breakers found
+
+| Breaker | Found in exchange | Indicator | Threshold | Source |
+| --- | --- | --- | --- | --- |
+
+## 15. Debate Verdict & Thesis Update
+
+**Thesis status**: [Strengthening / Stable / Weakening / Uncertain / Broken] · **Confidence**: [High / Medium / Low]
+
+### Survived because
+
+### Weakened because
+
+### Still uncertain
+
+### Strongest argument (Bull, Bear) and weakest assumption
+
+### What would change our mind
+
+### Thesis update
+
+| | Before the debate | After the debate |
 | --- | --- | --- |
+| Thesis | | |
+| [each assumption the debate moved] | | |
+
+## 16. Thesis Scorecard
+
+[Filled from `thesis-scorecard.md`.]
+
+## 17. What to Watch
+
+| Indicator | Current value (date) | Supports if | Breaks if | From (breaker or unknown) | Source | Frequency |
+| --- | --- | --- | --- | --- | --- | --- |
+
+## 18. What This Run Stopped Short Of
+
+[Searches left thin, inputs or stages left off the map, exchanges cut short for lack of evidence, and why.]
+
+## 19. Thesis History
+
+| Date | Decision (NEW / MAINTAIN / REVISE / BREAK) | Thesis status | What changed and why |
+| --- | --- | --- | --- |

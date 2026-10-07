@@ -1,6 +1,6 @@
 ---
 name: investment-thesis
-description: Build or stress-test a deep investment thesis for a company the user picks, tracing value from megatrend through industry, value chain and bottleneck to the company's advantage, economic capture, financials, counter-thesis and valuation. Use when the user asks whether a company can win its industry, wants an investment thesis, moat or bottleneck analysis, wants to know what a valuation implies, or wants to track or update an existing thesis.
+description: Build or stress-test a deep investment thesis for a company the user picks, tracing value from megatrend through industry, value chain and bottleneck to the company's advantage, economic capture, financials and valuation, then stress-tests it in a bull-versus-bear investment debate. Use when the user asks whether a company can win its industry, wants an investment thesis, moat or bottleneck analysis, wants to know what a valuation implies, or wants to track or update an existing thesis.
 ---
 
 # Investment Thesis
@@ -14,19 +14,19 @@ Every thesis walks this chain in order. Each link must show the **mechanism** th
 ```
 MEGATREND → INDUSTRY IMPORTANCE → INDUSTRY STRUCTURE → VALUE CHAIN → BOTTLENECK
 → COMPANY POSITION → COMPETITIVE ADVANTAGE → MOAT → ECONOMIC CAPTURE
-→ FINANCIAL OUTCOME → SECOND-ORDER EFFECTS → COUNTER-THESIS → THESIS BREAKERS
-→ VALUATION → THESIS → THESIS TRACKER
+→ FINANCIAL OUTCOME → VALUATION → INVESTMENT DEBATE → VERDICT → THESIS UPDATE
+→ THESIS TRACKER
 ```
 
-Industry comes before company. "The industry grows" reaches "this company captures it" only through the value chain, the bottleneck, pricing power and the financials.
+Industry comes before company. "The industry grows" reaches "this company captures it" only through the value chain, the bottleneck, pricing power and the financials. The debate comes last: a Bull and a Bear attack every load-bearing assumption of the finished chain, and the thesis that survives is the one published.
 
 ## Workflow
 
 1. **Frame the investment question.** Write it before any research, e.g. "How structural is X's advantage in industry Y, and how much of Y's growth can X capture?" Resolve ambiguity yourself; ask the user only when the answer would change the company, the industry, or the time horizon. Done when the question names company, industry, and what "winning" means.
 2. **Gather evidence** per the research principles below. Done when every number you will cite has a source and a date.
 3. **Walk the chain**, loading only the reference for the link you are on (routing table). Done when each link has a conclusion, its evidence, and its unknowns.
-4. **Attack the thesis**: counter-thesis, then thesis breakers with indicators. Done when you have searched for disconfirming evidence as hard as for confirming evidence.
-5. **Value it**: reverse-engineer what today's price assumes, then bear, base, bull.
+4. **Value it**: reverse-engineer what today's price assumes, then bear, base, bull.
+5. **Debate it** per [`references/investment-debate.md`](references/investment-debate.md): list what must be true, then let the Bull and the Bear test it exchange by exchange until the verdict and the thesis update are written. Done when every load-bearing assumption has been attacked or labelled unchallenged, every breaker found has an indicator, and you have searched for disconfirming evidence as hard as for confirming evidence.
 6. **Write the output** in the shape of [`templates/thesis-template.md`](templates/thesis-template.md), scored with [`templates/thesis-scorecard.md`](templates/thesis-scorecard.md).
 7. **Verify** against the checklist below and fix what fails.
 8. **Publish** the company's page into the thesis library per [`references/thesis-library.md`](references/thesis-library.md). Done when the page is live, the Investment Thesis category lists it, and the chat carries a short brief with the link.
@@ -48,9 +48,8 @@ Load a reference only when you reach its link.
 | Moat durability | [`references/moat-analysis.md`](references/moat-analysis.md) |
 | How much value the company keeps | [`references/economic-capture.md`](references/economic-capture.md) |
 | Financials versus the thesis | [`references/financial-analysis.md`](references/financial-analysis.md) |
-| Second- and third-order effects | [`references/second-order-effects.md`](references/second-order-effects.md) |
-| Counter-thesis and thesis breakers | [`references/counter-thesis.md`](references/counter-thesis.md) |
 | Valuation and embedded expectations | [`references/valuation.md`](references/valuation.md) |
+| Investment debate: what must be true, counter-arguments, second-order effects, thesis breakers, verdict | [`references/investment-debate.md`](references/investment-debate.md) |
 | Tracking or updating an existing thesis | [`references/thesis-tracker.md`](references/thesis-tracker.md) |
 | Publishing the page, or updating a company already in the library | [`references/thesis-library.md`](references/thesis-library.md) |
 | Laying out the company page | [`references/thesis-page.md`](references/thesis-page.md) |
@@ -88,11 +87,14 @@ Before delivering, confirm each item and fix any that fail:
 - [ ] Bottleneck exposure and pricing power evidenced for this company specifically.
 - [ ] Moat has a cause, evidence, replication difficulty and a durability horizon.
 - [ ] Financials explicitly confirm or contradict the advantage.
-- [ ] Counter-thesis built from real disconfirming evidence.
-- [ ] Every thesis breaker has a monitoring indicator.
+- [ ] What must be true listed, and every item attacked by the Bear or labelled an unchallenged assumption.
+- [ ] Each exchange's question follows from the previous answer; every factual argument runs claim, evidence, interpretation, and missing evidence is said to be missing.
+- [ ] Conflicting evidence laid out as a conflict, resolved or labelled UNKNOWN.
+- [ ] Every thesis breaker came out of an exchange and has a monitoring indicator.
+- [ ] Verdict gives thesis status and confidence in words, and the thesis update states Before and After.
 - [ ] Valuation states what must be true for today's price.
 - [ ] Key claims labelled FACT / INFERENCE / ASSUMPTION / UNKNOWN, with sources and dates.
 - [ ] Scorecard is multi-dimensional, with no single overall score.
 - [ ] No buy or sell call.
-- [ ] Page laid out in five acts per `thesis-page.md`, with every template section placed and no figure lost.
+- [ ] Page laid out in eight tabs per `thesis-page.md`, with every template section placed and no figure lost.
 - [ ] Page published to the library, category entry updated, history row added.

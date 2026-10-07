@@ -1,43 +1,59 @@
 # Thesis page
 
-The company page tells the thesis as a story first and lets the reader dig for evidence second. A reader should grasp why the company wins, where the money goes and what breaks it within a minute, then open detail only where they care. The page changes how the analysis is shown, never what it says.
+The company page tells the thesis as a story first and lets the reader dig for evidence second. A reader should grasp why the company wins, where the money goes and what survived the debate within a minute, then open detail only where they care. The page changes how the analysis is shown, never what it says.
 
 ## Levels
 
 Detail is disclosed in four levels. The first phone screens hold only Level 1.
 
 1. **The 30-second thesis**: the hero and four short cards.
-2. **The thesis chain**: one line per link, each opening to its detail.
+2. **The thesis chain and the debate**: one line per link or exchange, each opening to its detail.
 3. **Evidence**: label tags, evidence markers and the cards they open.
 4. **Deep research**: full tables, charts, scorecard, history and sources, behind a disclosure or in the Evidence section.
 
 ## Layout
 
-Six sections in story order, each one tab of the company's group in the library (`thesis-library.md`). Each act opens with its question as the heading and a one-sentence answer beneath it, so a reader skimming headings alone gets the thesis. Section numbers refer to `templates/thesis-template.md`.
+Eight sections in story order, each one tab of the company's group in the library (`thesis-library.md`): the thesis, why it can be right, the debate that tries to break it, and what is left to watch. Each tab opens with its question as the heading and a one-sentence answer beneath it, so a reader skimming headings alone gets the thesis. Section numbers refer to `templates/thesis-template.md`.
 
 | Nav | Contents | Template sections |
 | --- | --- | --- |
-| 01 Thesis | **Hero**: ticker, company, price, as-of date, the thesis in one sentence, a short flow from megatrend to the company, thesis strength on Industry, Moat, Economic Capture and Durability (from the scorecard, with confidence, no overall score), the not-a-recommendation notice. **The thesis in 30 seconds**: four cards, Why now, Why this industry, Why this company, What can break it, at most three sentences each. **Thesis chain**: Megatrend, Industry demand, Bottleneck, Company position, Competitive advantage, Economic capture, Financial outcome, Thesis; one open at a time; the last node holds the investment question and the executive thesis. | 1, 2, 17 (four rows) |
-| 02 Industry | **Act I, The Setup** (what is happening, why now): a vertical causal flow from megatrend to industry demand, and the importance rating with its reasons. **Act II, The Battlefield** (where the fight is): the value chain as a horizontally scrolling map with the company's stage highlighted and toggles that light up the bottleneck stages and the stage where the company captures; tapping a stage shows its role. Market share as bars. Structure verdict, bottleneck evidence, revenue mix and current versus future business behind a disclosure. | 3, 4, 5, 6, 7 |
-| 03 Moat | **Act III, The Moat** (why it wins): the visual hero of the page. One expandable card per advantage showing how hard it is to copy and how long it lasts; open, it shows why it exists, evidence, what strengthens it and what can destroy it (linking the matching breaker). A durability timeline across 0 to 3, 3 to 7 and 7 to 15+ years. A competitive landscape table comparing the company with its direct peers on the dimensions the thesis uses. | 7 (peers), 8, 9 |
-| 04 Money | **Act IV, The Money** (where the value goes): a value creation chain from industry growth through demand, position, pricing power, revenue, margin and FCF to ROIC, each node marked supports, mixed, contradicts or unknown, with the capture points and the leaks highlighted. A value capture map: value created, where it accumulates, who captures it, the company's share and its leaks, showing that industry growth is not company profit. Valuation as what the price assumes, then Bear, Base and Bull cards showing only the assumptions that move the result. Full figures, multiples and the reverse DCF behind disclosures. | 10, 11, 15, 16 |
-| 05 Risks | **Act V, The Test** (what proves us wrong): thesis and counter-thesis side by side with equal visual weight, then evidence for and against (second-order effects sort into these two columns). Thesis breakers, each with its trigger, current status and what to monitor; opening one highlights its KPI or assumption. What would change my mind. KPI cards. Key assumptions. The final conclusion. | 12, 13, 14, 18, 19, 20 |
-| 06 Evidence | The legend of the four labels, the evidence cards, the full scorecard, Thesis History, limitations and sources. | 17, 21 |
+| 01 Thesis | **Hero**: ticker, company, price, as-of date, the thesis in one sentence (the After version from the debate), a short flow from megatrend to the company, thesis strength on Industry, Moat, Economic Capture and Durability (from the scorecard, with confidence, no overall score), the debate's thesis status and confidence, the not-a-recommendation notice. **The thesis in 30 seconds**: four cards, Why now, Why this company, What must be true, What the debate found, at most three sentences each. **Thesis chain**: Megatrend, Industry demand, Bottleneck, Company position, Competitive advantage, Economic capture, Financial outcome, Thesis; one open at a time; the last node holds the investment question and the executive thesis. | 1, 2, 15 (status), 16 (four rows) |
+| 02 Why now | What is happening and where the fight is: a vertical causal flow from megatrend to industry demand, the importance rating with its reasons, the value chain as a horizontally scrolling map with the company's stage highlighted and toggles that light the bottleneck stages and the stage where the company captures; tapping a stage shows its role. Structure verdict and bottleneck evidence behind a disclosure. | 3, 4, 5, 6 |
+| 03 Why this company | Why it wins: market share bars, one expandable card per advantage showing how hard it is to copy and how long it lasts (open: why it exists, evidence, what strengthens it, the exchange that attacked it), a durability timeline across 0 to 3, 3 to 7 and 7 to 15+ years, and the peer table on the dimensions the thesis uses. Revenue mix and current versus future business behind a disclosure. | 7, 8, 9 |
+| 04 Debate | The investment committee (Debate UI below): What must be true as a numbered list, each item showing where the debate left it; the exchanges in order; evidence conflicts and breakers where the debate found them. It closes on the **verdict**: a framed status and confidence, then Survived because, Weakened because, Still uncertain, strongest argument on each side, weakest assumption, and the thesis update as Before and After. | 14, 15 |
+| 05 Economic capture | Where the value goes: a value creation chain from industry growth through demand, position, pricing power, revenue, margin and FCF to ROIC, each node marked supports, mixed, contradicts or unknown, with capture points and leaks highlighted; a value capture map (value created, where it accumulates, who captures it, the company's share and its leaks). Full financial figures behind a disclosure. | 10, 11 |
+| 06 Valuation | What the price assumes: the required growth, margin and conditions as figures, then Bear, Base and Bull cards showing only the assumptions that move the result. Multiples and the reverse DCF behind disclosures. | 12, 13 |
+| 07 What to watch | One KPI card per indicator, each naming the breaker or unknown it comes from and its supports-if and breaks-if readings; What would change our mind. | 15 (change our mind), 17 |
+| 08 Evidence | The legend of the four labels, the evidence cards, the full scorecard, Thesis History, what this run stopped short of, limitations and sources. | 16, 18, 19 |
+
+## Debate UI
+
+The debate reads as an investment committee stress-testing a thesis, never as a chat: no bubbles, no avatars, no typing rhythm.
+
+- **Two sides, one table.** The Bull speaks in ink from the left, the Bear in petrol from the right (`--cool`, the second side of a pair). Each side is marked by a small label and a rule; alignment and color carry the side, so no extra badge is needed. Oxblood (`--crit`) marks only a breaker the debate found and a point that broke an assumption.
+- **The key question leads.** Each exchange opens with its question as a full-width line between two rules, the lens (when there is one) as a small label above it. On a wide screen the two sides answer in two columns beneath it; on a phone the turns stack in speaking order, Bull aligned left and Bear indented from the right, each with its evidence markers in place.
+- **Short first, deep on tap.** Closed, an exchange shows its question, one line per side and the updated view. Opened, it shows every turn as claim, evidence marker and interpretation, the concession, second-order layers, and any conflict or breaker it produced. One exchange open at a time.
+- **Updated view as marks.** Strengthened, Unchanged and Weakened for each side, in words with a small arrow, never as points.
+- **Evidence conflict** sits inside its exchange as two facing cells, A and B, with why they differ and its status; UNKNOWN when unresolved.
+- **Breaker found** sits inside its exchange in oxblood and links to its card in What to watch.
+- **What must be true** links each item to the exchanges that attacked it, and shows where the debate left it: held, weakened, broken, unknown or unchallenged.
+- **The verdict** is the one framed box of the tab: status in large type, confidence beside it.
 
 ## Rules
 
 - **Same substance.** Every claim, figure, label, verdict and source of the analysis appears on the page; a fact moves to a deeper level, never off the page. Visual levels (a difficulty meter, a horizon bar, a status mark) come from the analysis's own ratings, and the page says so. Where a visual needs a value the analysis lacks, show UNKNOWN in that slot. If the analysis contradicts itself, show both figures and flag the conflict as UNKNOWN.
 - **Labels on key claims.** FACT, INFERENCE, ASSUMPTION and UNKNOWN tags go on the claims a conclusion rests on, not on every sentence.
 - **Evidence markers.** A compact bracketed marker named by source type (Company Filing, Industry Data, Management, Research, Media) opens its evidence card in place. Each card states source (linked), date, claim and why it matters to the thesis. Write a card only when the analysis names the claim's source; other claims keep their label tag alone.
-- **Mobile first.** The host's sticky tab bar is the navigation: it marks the act in view and fits all six tabs in one row on a phone. The acts stack in one column; the value chain and wide tables scroll sideways inside their own containers; cards expand in place.
+- **Mobile first.** The host's sticky tab bar is the navigation: it marks the tab in view and keeps all eight tabs reachable on a phone. Sections stack in one column; the value chain and wide tables scroll sideways inside their own containers; cards expand in place.
 - **Black and white.** Ink and greys only, oxblood for what is critical or contradicts the thesis, petrol for the second side of a pair (`thesis-library.md`, The company page).
-- **Visuals answer questions.** Each visual answers its act's question. Prefer causal flows, value chains, timelines, comparisons, scenario cards and evidence cards to paragraphs; keep a paragraph where a visual would only decorate.
-- **Interaction teaches.** Tapping a bottleneck toggle lights the bottleneck on the map; tapping a breaker highlights the KPI that monitors it; tapping a durability row opens that advantage; tapping an evidence marker opens its card.
+- **Visuals answer questions.** Each visual answers its tab's question. Prefer causal flows, value chains, timelines, comparisons, scenario cards and evidence cards to paragraphs; keep a paragraph where a visual would only decorate.
+- **Interaction teaches.** Tapping a bottleneck toggle lights the bottleneck on the map; tapping a breaker found in the debate opens the KPI that monitors it; tapping an item of What must be true opens the exchange that attacked it; tapping a durability row opens that advantage; tapping an evidence marker opens its card.
 
 ## Done when
 
 - Hero and 30-second cards fit roughly the first two phone screens.
 - Every section of the thesis template is placed per the layout table, and every figure of the analysis appears on the page.
-- No act opens with a wall of text: each opens with its question, its answer, then a visual.
+- No tab opens with a wall of text: each opens with its question, its answer, then a visual.
+- Every exchange of the debate opens and closes, every breaker reaches its KPI card, and the verdict is visible without opening an exchange.
 - At 375px wide the page body has no horizontal scroll.
-- Every evidence marker opens a card, every breaker highlights its monitor or says none exists, and the value chain toggles light their stages.
+- Every evidence marker opens a card, every breaker reaches its monitor or says none exists, and the value chain toggles light their stages.
