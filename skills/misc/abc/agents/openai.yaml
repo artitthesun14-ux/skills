@@ -1,0 +1,5 @@
+interface:
+  display_name: "Abc"
+  short_description: "Research an investment thesis, trend to company"
+policy:
+  allow_implicit_invocation: false

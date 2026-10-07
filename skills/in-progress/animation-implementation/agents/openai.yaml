@@ -1,0 +1,3 @@
+interface:
+  display_name: "Animation Implementation"
+  short_description: "Build performant UI animation"

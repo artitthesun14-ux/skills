@@ -1,0 +1,3 @@
+interface:
+  display_name: "Interaction Motion"
+  short_description: "Motion for interaction states"
