@@ -17,5 +17,5 @@ Reachable only when you type them (Claude Code: `disable-model-invocation: true`
 Model- or user-reachable (rich trigger phrasing so the model can reach for them).
 
 - **[grilling](./grilling/SKILL.md)**: Interview the user relentlessly about a plan, decision, or idea until every branch of the design tree is resolved.
-- **[investment-thesis](./investment-thesis/SKILL.md)**: Build a deep investment thesis for a company you pick, tracing value from megatrend through value chain and bottleneck to moat, economic capture, financials, counter-thesis, thesis breakers and valuation expectations.
+- **[investment-thesis](./investment-thesis/SKILL.md)**: Build a deep investment thesis for a company you pick, tracing value from megatrend through value chain and bottleneck to moat, economic capture, financials and valuation expectations, then stress-testing it in a bull-versus-bear investment debate.
 - **[writing-for-agents](./writing-for-agents/SKILL.md)**: Writing documents for agents: skills, AGENTS.md/CLAUDE.md, and any doc an agent reaches by a pointer.

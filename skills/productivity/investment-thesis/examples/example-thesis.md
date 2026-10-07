@@ -52,25 +52,56 @@ Grid spend ↑ → transformer spend ↑ → Northfield revenue ↑ → price re
 - Contradicts: margins were 12% in the previous downcycle, so part of today's margin is cyclical scarcity, not moat (INFERENCE).
 - Verdict: **mixed**, decided by the downcycle margin and the incremental ROIC.
 
-## Second-order effects
+## Investment debate
 
-- Lead times ↑ → utilities sign multi-year framework agreements → revenue visibility ↑ (helps; FACT, two such agreements disclosed).
-- Prices ↑ → rivals and new entrants add capacity → pricing ↓ from year 3 (hurts; INFERENCE from announced factories).
-- Frontier: whether utilities redesign grids to need fewer large units is unevidenced, so the chain stops here.
+### What must be true
 
-## Counter-thesis
+For a valuation that implies 10% revenue growth for 7 years and a 27% steady-state gross margin:
 
-AI efficiency gains plus on-site generation at data centers slow grid connection demand, while announced capacity from three rivals lands in the same 2-year window, turning today's shortage into a capital-cycle glut. Probability: **Medium** (evidence: announced capacity totals about 40% of current regional output).
+1. Lead times stay above 24 months through year 4 (INFERENCE).
+2. Pre-qualification keeps Northfield's win rate above unqualified rivals' (FACT today).
+3. Price realisation outruns specialty steel costs (FACT today).
+4. Legacy fixed-price contracts roll off on schedule (FACT, contract disclosures).
 
-## Thesis breakers
+### Exchanges
 
-| Breaker | Indicator | Threshold | Source |
-| --- | --- | --- | --- |
-| Bottleneck relieved | Industry lead time | Below 18 months | Industry association survey |
-| Pricing power gone | Price on new orders versus backlog | New orders priced below backlog for 2 quarters | Earnings calls |
-| Moat erodes | Northfield tender win rate where pre-qualified | Falls toward the non-qualified rate | Investor day, filings |
-| Economics deteriorate | ROIC versus WACC | Below WACC for a full year | Annual report |
+**1. Is the margin moat or scarcity?** · Lens: base rate
 
-## What must be true
+- **Bull**: margins rose with price realisation, not volume alone, and incremental ROIC is above the cost of capital (FACT, filings), so the scarcity is being captured.
+- **Bear**: margins were 12% in the last downcycle (FACT). Scarcity margins in heavy equipment usually revert once capacity catches up (INFERENCE, base rate). Which part of 29% survives a normal lead time?
+- **Bull**: "That's a fair point." Only the pre-qualification premium is structural; the rest is cyclical.
+- **Updated view**: Bull weakened, Bear strengthened. **Implication**: the thesis rests on assumption 2, not on today's margin.
 
-For a valuation that implies 10% revenue growth for 7 years and a 27% steady-state gross margin: lead times stay above 24 months through year 4, Northfield holds share as rival capacity arrives, and legacy fixed-price contracts roll off on schedule.
+**2. Does pre-qualification hold when rivals add capacity?** (follows from 1) · Lens: reflexivity
+
+- **Bear**: three rivals announced capacity equal to about 40% of regional output, landing in the same 2-year window (FACT). Prices fall from year 3 (INFERENCE).
+- **Bull**: utilities qualify a new factory over 18 to 24 months, so new capacity reaches tenders late, and utilities are signing multi-year framework agreements (FACT, two disclosed). Second order: lead times ↑ → framework agreements → revenue visibility ↑ (helps).
+- **Bear**: framework agreements fix volume, not price. Evidence insufficient on their pricing terms (UNKNOWN).
+- **Updated view**: both unchanged. **Breaker found**: new orders priced below backlog for two quarters, meaning qualification no longer protects price.
+
+**3. Is grid demand itself at risk?** (follows from 2: if price holds, does volume?)
+
+- **Bear**: AI efficiency gains and on-site generation at data centers could slow grid connections (ASSUMPTION; no evidence of redesigned grids needing fewer large units).
+- **Bull**: interconnection queues are still growing (FACT, industry association).
+- **Updated view**: both unchanged. **Frontier**: grid redesign is unevidenced, so this line stops here and becomes a key unknown.
+
+### Thesis breakers found
+
+| Breaker | Found in | Indicator | Threshold | Source |
+| --- | --- | --- | --- | --- |
+| Pricing power gone | Exchange 2 | Price on new orders versus backlog | Below backlog for 2 quarters | Earnings calls |
+| Bottleneck relieved | Exchange 1 | Industry lead time | Below 18 months | Industry association survey |
+| Moat erodes | Exchange 2 | Win rate where pre-qualified | Falls toward the non-qualified rate | Investor day, filings |
+| Economics deteriorate | Exchange 1 | ROIC versus WACC | Below WACC for a full year | Annual report |
+
+## Debate verdict
+
+**Thesis status: Stable · Confidence: Medium**
+
+- **Survived because**: price realisation and incremental ROIC are real (FACT); qualification time delays rival capacity; demand evidence is intact.
+- **Weakened because**: most of today's margin is cyclical; announced rival capacity is large and dated.
+- **Still uncertain**: pricing terms of framework agreements; grid redesign.
+- **Weakest assumption**: 1, lead times above 24 months through year 4.
+- **What would change our mind**: new orders priced below backlog for two quarters.
+
+**Thesis update.** Before: Northfield holds a durable pricing moat. After: Northfield holds a qualification moat worth a structural premium; most of today's margin is cyclical scarcity that fades from year 3.

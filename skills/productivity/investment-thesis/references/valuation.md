@@ -23,7 +23,7 @@ A simple reverse DCF is enough: solve for the revenue growth and steady-state ma
 | Implied value | | | |
 | What has to happen | | | |
 
-Tie each scenario to the chain: the bear case is the counter-thesis playing out, the bull case is the thesis plus second-order effects.
+Tie each scenario to the chain: the bear case is the strongest counter-argument playing out, the bull case is the thesis plus the second-order effects that help. The investment debate then attacks what the price assumes, and the scenarios move if the debate moves them.
 
 ## Traps
 
