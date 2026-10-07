@@ -13,7 +13,7 @@ MEGATREND → INDUSTRY IMPORTANCE → INDUSTRY STRUCTURE → VALUE CHAIN → BOT
 
 Each link has to show the mechanism that carries value to the next one. "The industry is growing" never jumps straight to "this company is attractive": the value chain, the bottleneck, pricing power and the financials stand in between.
 
-The output is a thesis page with a multi-dimensional scorecard, a KPI tracker and a dated history, published into one thesis library artifact with a page per company. It is not a recommendation: the skill writes about thesis strength, risks and what must be true, and leaves the decision to you.
+The output is a thesis page with a multi-dimensional scorecard, a KPI tracker and a dated history, published into the Investment Thesis category of one artifact (Rack to Chip), with a page per company. It is not a recommendation: the skill writes about thesis strength, risks and what must be true, and leaves the decision to you.
 
 ## When to reach for it
 
@@ -37,7 +37,7 @@ Type `/investment-thesis`, or the agent reaches for it when you ask whether a co
 
 ## The thesis library
 
-Every run writes into one artifact: a shelf of companies, each with its own page. A new company adds a page; an update edits that company's page and adds a dated MAINTAIN, REVISE or BREAK row to its history, so you can see how the thesis moved. The chat gets a short brief and the link, not a reprint.
+Every run writes into the Investment Thesis category of one artifact, a black-and-white page per company split into six tabs (Thesis, Industry, Moat, Money, Risks, Evidence). The artifact is built from source, so a run edits the company's source files, rebuilds and publishes. A new company adds a page; an update edits that company's page and adds a dated MAINTAIN, REVISE or BREAK row to its history, so you can see how the thesis moved. The chat gets a short brief and the link, not a reprint.
 
 Each page reads as a story before it reads as a report. It opens with the thesis in one sentence and four 30-second cards (why now, why this industry, why this company, what can break it), then a tappable thesis chain. Below that sit five acts, each answering one question: The Setup (what is happening), The Battlefield (where the fight is), The Moat (why it wins), The Money (where the value goes), and The Test (what proves it wrong). Evidence, full tables and sources stay one tap away, so the first screens stay short without dropping any of the research.
 

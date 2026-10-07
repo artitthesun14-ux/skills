@@ -13,7 +13,7 @@ Detail is disclosed in four levels. The first phone screens hold only Level 1.
 
 ## Layout
 
-Six sections in story order, each a navigation entry. Each act opens with its question as the heading and a one-sentence answer beneath it, so a reader skimming headings alone gets the thesis. Section numbers refer to `templates/thesis-template.md`.
+Six sections in story order, each one tab of the company's group in the library (`thesis-library.md`). Each act opens with its question as the heading and a one-sentence answer beneath it, so a reader skimming headings alone gets the thesis. Section numbers refer to `templates/thesis-template.md`.
 
 | Nav | Contents | Template sections |
 | --- | --- | --- |
@@ -29,7 +29,8 @@ Six sections in story order, each a navigation entry. Each act opens with its qu
 - **Same substance.** Every claim, figure, label, verdict and source of the analysis appears on the page; a fact moves to a deeper level, never off the page. Visual levels (a difficulty meter, a horizon bar, a status mark) come from the analysis's own ratings, and the page says so. Where a visual needs a value the analysis lacks, show UNKNOWN in that slot. If the analysis contradicts itself, show both figures and flag the conflict as UNKNOWN.
 - **Labels on key claims.** FACT, INFERENCE, ASSUMPTION and UNKNOWN tags go on the claims a conclusion rests on, not on every sentence.
 - **Evidence markers.** A compact bracketed marker named by source type (Company Filing, Industry Data, Management, Research, Media) opens its evidence card in place. Each card states source (linked), date, claim and why it matters to the thesis. Write a card only when the analysis names the claim's source; other claims keep their label tag alone.
-- **Mobile first.** Under about 720px the navigation is a bottom bar and the acts stack in one column; the value chain and wide tables scroll sideways inside their own containers; cards expand in place. On desktop the navigation is a sticky top bar that marks the act in view.
+- **Mobile first.** The host's sticky tab bar is the navigation: it marks the act in view and fits all six tabs in one row on a phone. The acts stack in one column; the value chain and wide tables scroll sideways inside their own containers; cards expand in place.
+- **Black and white.** Ink and greys only, oxblood for what is critical or contradicts the thesis, petrol for the second side of a pair (`thesis-library.md`, The company page).
 - **Visuals answer questions.** Each visual answers its act's question. Prefer causal flows, value chains, timelines, comparisons, scenario cards and evidence cards to paragraphs; keep a paragraph where a visual would only decorate.
 - **Interaction teaches.** Tapping a bottleneck toggle lights the bottleneck on the map; tapping a breaker highlights the KPI that monitors it; tapping a durability row opens that advantage; tapping an evidence marker opens its card.
 

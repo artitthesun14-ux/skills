@@ -29,7 +29,7 @@ Industry comes before company. "The industry grows" reaches "this company captur
 5. **Value it**: reverse-engineer what today's price assumes, then bear, base, bull.
 6. **Write the output** in the shape of [`templates/thesis-template.md`](templates/thesis-template.md), scored with [`templates/thesis-scorecard.md`](templates/thesis-scorecard.md).
 7. **Verify** against the checklist below and fix what fails.
-8. **Publish** the company's page into the thesis library per [`references/thesis-library.md`](references/thesis-library.md). Done when the page is live, the shelf lists it, and the chat carries a short brief with the link.
+8. **Publish** the company's page into the thesis library per [`references/thesis-library.md`](references/thesis-library.md). Done when the page is live, the Investment Thesis category lists it, and the chat carries a short brief with the link.
 
 For a narrower request (only the moat, only valuation, only an update), run just the matching links and say which links were skipped.
 
@@ -52,7 +52,7 @@ Load a reference only when you reach its link.
 | Counter-thesis and thesis breakers | [`references/counter-thesis.md`](references/counter-thesis.md) |
 | Valuation and embedded expectations | [`references/valuation.md`](references/valuation.md) |
 | Tracking or updating an existing thesis | [`references/thesis-tracker.md`](references/thesis-tracker.md) |
-| Publishing the page, or updating a company already on the shelf | [`references/thesis-library.md`](references/thesis-library.md) |
+| Publishing the page, or updating a company already in the library | [`references/thesis-library.md`](references/thesis-library.md) |
 | Laying out the company page | [`references/thesis-page.md`](references/thesis-page.md) |
 | Unsure what good output looks like | [`examples/example-thesis.md`](examples/example-thesis.md) |
 
@@ -95,4 +95,4 @@ Before delivering, confirm each item and fix any that fail:
 - [ ] Scorecard is multi-dimensional, with no single overall score.
 - [ ] No buy or sell call.
 - [ ] Page laid out in five acts per `thesis-page.md`, with every template section placed and no figure lost.
-- [ ] Page published to the library, shelf entry updated, history row added.
+- [ ] Page published to the library, category entry updated, history row added.
