@@ -65,25 +65,43 @@ For a valuation that implies 10% revenue growth for 7 years and a 27% steady-sta
 
 ### Exchanges
 
-**1. Is the margin moat or scarcity?** · Lens: base rate
+**Debate 01. Is the margin moat or scarcity?** · Lens: base rate · Under test: "Price realisation outruns specialty steel costs" (3) · Status: Leaning Bear
 
-- **Bull**: margins rose with price realisation, not volume alone, and incremental ROIC is above the cost of capital (FACT, filings), so the scarcity is being captured.
-- **Bear**: margins were 12% in the last downcycle (FACT). Scarcity margins in heavy equipment usually revert once capacity catches up (INFERENCE, base rate). Which part of 29% survives a normal lead time?
-- **Bull**: "That's a fair point." Only the pre-qualification premium is structural; the rest is cyclical.
-- **Updated view**: Bull weakened, Bear strengthened. **Implication**: the thesis rests on assumption 2, not on today's margin.
+*Round 01 · The challenge*: does today's margin prove a moat?
 
-**2. Does pre-qualification hold when rivals add capacity?** (follows from 1) · Lens: reflexivity
+- **Bull** · Testing: economic capture. Margins rose with price realisation, not volume alone, and incremental ROIC is above the cost of capital (FACT, filings). Proves: the scarcity is being captured today. Does not prove: the capture lasts.
+- **Bear** · Challenging: that capture. Margins were 12% in the last downcycle (FACT). Scarcity margins in heavy equipment usually revert once capacity catches up (INFERENCE, base rate).
 
-- **Bear**: three rivals announced capacity equal to about 40% of regional output, landing in the same 2-year window (FACT). Prices fall from year 3 (INFERENCE).
-- **Bull**: utilities qualify a new factory over 18 to 24 months, so new capacity reaches tenders late, and utilities are signing multi-year framework agreements (FACT, two disclosed). Second order: lead times ↑ → framework agreements → revenue visibility ↑ (helps).
-- **Bear**: framework agreements fix volume, not price. Evidence insufficient on their pricing terms (UNKNOWN).
-- **Updated view**: both unchanged. **Breaker found**: new orders priced below backlog for two quarters, meaning qualification no longer protects price.
+**Key question**: which part of 29% survives a normal lead time?
 
-**3. Is grid demand itself at risk?** (follows from 2: if price holds, does volume?)
+*Round 02 · The resolution*
 
-- **Bear**: AI efficiency gains and on-site generation at data centers could slow grid connections (ASSUMPTION; no evidence of redesigned grids needing fewer large units).
-- **Bull**: interconnection queues are still growing (FACT, industry association).
-- **Updated view**: both unchanged. **Frontier**: grid redesign is unevidenced, so this line stops here and becomes a key unknown.
+- **Bull**: "That's a fair point." Only the pre-qualification premium is structural; the rest is cyclical. Position: reframe, from margin to qualification.
+- **What changed**: Durable pricing moat: Supported → Weakened. Thesis impact: ↓ Weakens.
+- **What did we learn**: Bull proved the scarcity is captured now. Bear proved most of the margin is cyclical. Unresolved: whether pre-qualification protects price (assumption 2), which Debate 02 takes up.
+
+**Debate 02. Does pre-qualification hold when rivals add capacity?** · Lens: reflexivity · Under test: "Pre-qualification keeps Northfield's win rate above unqualified rivals'" (2) · Status: Unresolved
+
+*Round 01 · The challenge*
+
+- **Bear** · Attacking: pre-qualification. Three rivals announced capacity equal to about 40% of regional output, landing in the same 2-year window (FACT). Prices fall from year 3 (INFERENCE). Proves: supply is coming. Does not prove: it wins tenders.
+- **Bull** · Answering that timing. Utilities qualify a new factory over 18 to 24 months, so new capacity reaches tenders late, and utilities are signing multi-year framework agreements (FACT, two disclosed). Second order: lead times ↑ → framework agreements → revenue visibility ↑ (helps).
+
+**Key question**: do the framework agreements protect price, or only volume?
+
+*Round 02 · The counter-evidence*
+
+- **Bear** · Challenging: the agreements. They fix volume, not price. Evidence insufficient on their pricing terms (UNKNOWN). Thesis impact: ? Creates uncertainty.
+- **Breaker found**: new orders priced below backlog for two quarters, meaning qualification no longer protects price.
+- **What did we learn**: Bull proved qualification delays rivals by 18 to 24 months. Bear proved rival capacity is large and dated. Unresolved: the pricing terms of the framework agreements. If price holds, does volume?
+
+**Debate 03. Is grid demand itself at risk?** · Under test: the demand behind assumption 1 · Status: Unresolved
+
+*Round 01 · The challenge*
+
+- **Bear** · Testing: demand. AI efficiency gains and on-site generation at data centers could slow grid connections (ASSUMPTION; no evidence of redesigned grids needing fewer large units).
+- **Bull** · Answering that. Interconnection queues are still growing (FACT, industry association). Proves: demand is intact today. Does not prove: grid design stays the same.
+- **What did we learn**: Bull proved current demand. Bear raised a risk with no evidence yet. Unresolved: grid redesign. **Frontier**: the line stops here and becomes a key unknown.
 
 ### Thesis breakers found
 
@@ -96,12 +114,10 @@ For a valuation that implies 10% revenue growth for 7 years and a 27% steady-sta
 
 ## Debate verdict
 
-**Thesis status: Stable · Confidence: Medium**
+**Thesis: Unchanged · Confidence: Medium**
 
-- **Survived because**: price realisation and incremental ROIC are real (FACT); qualification time delays rival capacity; demand evidence is intact.
-- **Weakened because**: most of today's margin is cyclical; announced rival capacity is large and dated.
-- **Still uncertain**: pricing terms of framework agreements; grid redesign.
+- **Why**: most of today's margin is cyclical scarcity (Debate 01); qualification delays rivals but the agreements' pricing terms are unknown (Debate 02); demand evidence is intact (Debate 03).
 - **Weakest assumption**: 1, lead times above 24 months through year 4.
 - **What would change our mind**: new orders priced below backlog for two quarters.
 
-**Thesis update.** Before: Northfield holds a durable pricing moat. After: Northfield holds a qualification moat worth a structural premium; most of today's margin is cyclical scarcity that fades from year 3.
+**What changed.** Before: Northfield holds a durable pricing moat. After: Northfield holds a qualification moat worth a structural premium; most of today's margin is cyclical scarcity that fades from year 3.

@@ -25,6 +25,7 @@ Pages share one design: the host's black-and-white design system. Build a new co
 - **Each tab** opens with the host header: `header.ds-hd` with the tab's question as `h1`, its one-sentence answer as the lead and the tab number as `ds-num`. Deep research folds into `details.more`.
 - **Names.** Every class starts with `th-`, or is a child class written only under a `th-` parent. Every id starts with the slug (`snps-ev-mix`, `snps-br-1`). Pages of other topics define global classes (`.f`, `.u`, `.note`, `.stage`, `.cap`), so a bare short class collides; the build stops and names the class when one does.
 - **Links between parts** are buttons: `button.th-ev[data-ev=<card id>]` opens an evidence card, `button.th-go[data-to=<tab or element id>]` jumps to a tab or an element. The viewer app intercepts taps on `<a>`, so keep `<a>` for external sources only.
+- **Glosses** (`thesis-page.md`, Glossed terms) are `<span class="th-gl">(gloss)</span>` right after the term; inside a `.th-k` label, put the span inside the label.
 - Change `thesis.css` or `thesis.js` only for something every company needs. Before such a change call the Skill tool with "artifact-design"; before adding or changing a chart, with "dataviz".
 
 ## A run
