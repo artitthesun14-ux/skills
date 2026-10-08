@@ -43,6 +43,7 @@ The debate reads as an investment committee stress-testing a thesis, never as a 
 
 - **Same substance.** Every claim, figure, label, verdict and source of the analysis appears on the page; a fact moves to a deeper level, never off the page. Visual levels (a difficulty meter, a horizon bar, a status mark) come from the analysis's own ratings, and the page says so. Where a visual needs a value the analysis lacks, show UNKNOWN in that slot. If the analysis contradicts itself, show both figures and flag the conflict as UNKNOWN.
 - **Labels on key claims.** FACT, INFERENCE, ASSUMPTION and UNKNOWN tags go on the claims a conclusion rests on, not on every sentence.
+- **Glossed terms.** When the page is in a language other than English, a term left in English (switching cost, ROIC, royalty, Concession) carries a short gloss in the page's language in parentheses the first time it appears in each section and each exchange, since exchanges open one at a time; every English label gets one wherever it appears. Company and product names, evidence-marker names and the four label tags stay unglossed (the legend covers the tags). A gloss says what the term means here in a few words, and comes from the analysis or a plain definition; where the analysis never defines a term, gloss its role on the page.
 - **Evidence markers.** A compact bracketed marker named by source type (Company Filing, Industry Data, Management, Research, Media) opens its evidence card in place. Each card states source (linked), date, claim and why it matters to the thesis. Write a card only when the analysis names the claim's source; other claims keep their label tag alone.
 - **Mobile first.** The host's sticky tab bar is the navigation: it marks the tab in view and keeps all eight tabs reachable on a phone. Sections stack in one column; the value chain and wide tables scroll sideways inside their own containers; cards expand in place.
 - **Black and white.** Ink and greys only, oxblood for what is critical or contradicts the thesis, petrol for the second side of a pair (`thesis-library.md`, The company page).
@@ -55,5 +56,6 @@ The debate reads as an investment committee stress-testing a thesis, never as a 
 - Every section of the thesis template is placed per the layout table, and every figure of the analysis appears on the page.
 - No tab opens with a wall of text: each opens with its question, its answer, then a visual.
 - Every exchange of the debate opens and closes, every breaker reaches its KPI card, and the verdict is visible without opening an exchange.
+- On a page not in English, every English term and label has its gloss per Glossed terms, and the gloss stays secondary to the text it explains.
 - At 375px wide the page body has no horizontal scroll.
 - Every evidence marker opens a card, every breaker reaches its monitor or says none exists, and the value chain toggles light their stages.
