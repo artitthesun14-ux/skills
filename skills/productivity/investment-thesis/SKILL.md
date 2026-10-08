@@ -26,7 +26,7 @@ Industry comes before company. "The industry grows" reaches "this company captur
 2. **Gather evidence** per the research principles below. Done when every number you will cite has a source and a date.
 3. **Walk the chain**, loading only the reference for the link you are on (routing table). Done when each link has a conclusion, its evidence, and its unknowns.
 4. **Value it**: reverse-engineer what today's price assumes, then bear, base, bull.
-5. **Debate it** per [`references/investment-debate.md`](references/investment-debate.md): list what must be true, then let the Bull and the Bear test it exchange by exchange until the verdict and the thesis update are written. Done when every load-bearing assumption has been attacked or labelled unchallenged, every breaker found has an indicator, and you have searched for disconfirming evidence as hard as for confirming evidence.
+5. **Debate it** per [`references/investment-debate.md`](references/investment-debate.md): list what must be true, then let the Bull and the Bear test it exchange by exchange until the verdict and What changed are written. Done when every load-bearing assumption has been attacked or labelled unchallenged, every breaker found has an indicator, and you have searched for disconfirming evidence as hard as for confirming evidence.
 6. **Write the output** in the shape of [`templates/thesis-template.md`](templates/thesis-template.md), scored with [`templates/thesis-scorecard.md`](templates/thesis-scorecard.md).
 7. **Verify** against the checklist below and fix what fails.
 8. **Publish** the company's page into the thesis library per [`references/thesis-library.md`](references/thesis-library.md). Done when the page is live, the Investment Thesis category lists it, and the chat carries a short brief with the link.
@@ -88,10 +88,10 @@ Before delivering, confirm each item and fix any that fail:
 - [ ] Moat has a cause, evidence, replication difficulty and a durability horizon.
 - [ ] Financials explicitly confirm or contradict the advantage.
 - [ ] What must be true listed, and every item attacked by the Bear or labelled an unchallenged assumption.
-- [ ] Each exchange's question follows from the previous answer; every factual argument runs claim, evidence, interpretation, and missing evidence is said to be missing.
+- [ ] Each exchange states its core question, what it tests and its status; each round's question is the previous round's key question; every turn answers the turn before it and runs claim, evidence, reasoning, implication; every figure leaned on says what it proves and does not prove; missing evidence is said to be missing.
 - [ ] Conflicting evidence laid out as a conflict, resolved or labelled UNKNOWN.
 - [ ] Every thesis breaker came out of an exchange and has a monitoring indicator.
-- [ ] Verdict gives thesis status and confidence in words, and the thesis update states Before and After.
+- [ ] Every exchange ends on What did we learn; the verdict gives the thesis verdict, confidence and at most three reasons in words; What changed states Before and After.
 - [ ] Valuation states what must be true for today's price.
 - [ ] Key claims labelled FACT / INFERENCE / ASSUMPTION / UNKNOWN, with sources and dates.
 - [ ] Scorecard is multi-dimensional, with no single overall score.

@@ -81,10 +81,17 @@ MEGATREND        → [driver]
 
 [One block per exchange, per `investment-debate.md`:]
 
-> **Exchange N. [Key question]** · Lens: [optional]
-> **Bull**: claim → evidence [card] → interpretation. **Bear**: claim → evidence [card] → interpretation. (Further turns as the question demands.)
-> **Concession**: [what each side grants]. **Updated view**: Bull [Strengthened / Unchanged / Weakened], Bear [...], because [...].
-> **Implication**: [what changes in the thesis]. Second-order layers, an evidence conflict, or a breaker found here go in this block.
+> **Debate N. [Core question]** · Lens: [optional] · Under test: "[What must be true item]" · Status: [Open / Leaning Bull / Leaning Bear / Unresolved / Resolved]
+>
+> **Round 01 · [The challenge / The rebuttal / The deeper question / The counter-evidence / The resolution]**: [the round's question]
+> **[Bull or Bear]** · [Attacking / Challenging / Testing]: [part of the thesis]. Claim → evidence [card, label; proves / does not prove] → reasoning → implication. **[Other side]** answers that turn the same way. (Further turns as the round demands.)
+> **Key question**: [the point the round left open, which is the next round's question]. Thesis impact: [↑ / → / ↓ / ?, only when material]
+>
+> (Further rounds only as the question demands.)
+>
+> **Concession**: [who grants what]. What changed: [claim or side]: [Before] → [After]. Position: [Maintain / Weaken / Withdraw / Concede / Reframe].
+> **Question path** (when it moved): initial → deeper → real investment question.
+> **What did we learn**: Bull proved [...]. Bear proved [...]. Unresolved: [...]. Second-order layers, an evidence conflict, or a breaker found here go in this block.
 
 ### Evidence conflicts
 
@@ -96,21 +103,19 @@ MEGATREND        → [driver]
 | Breaker | Found in exchange | Indicator | Threshold | Source |
 | --- | --- | --- | --- | --- |
 
-## 15. Debate Verdict & Thesis Update
+## 15. Debate Verdict & What Changed
 
-**Thesis status**: [Strengthening / Stable / Weakening / Uncertain / Broken] · **Confidence**: [High / Medium / Low]
+**Thesis**: [Strengthened / Unchanged / Weakened / Unresolved / Broken] · **Confidence**: [High / Medium / Low]
 
-### Survived because
+### Why
 
-### Weakened because
+[At most three bullets.]
 
-### Still uncertain
-
-### Strongest argument (Bull, Bear) and weakest assumption
+### Weakest assumption
 
 ### What would change our mind
 
-### Thesis update
+### What changed
 
 | | Before the debate | After the debate |
 | --- | --- | --- |
