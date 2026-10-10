@@ -11,3 +11,5 @@ It also ranks bottlenecks on the company's path (gate versus capture, the buyer'
 Each company page is laid out in five acts with progressive disclosure (a 30-second thesis, a tappable thesis chain, then The Setup, The Battlefield, The Moat, The Money and The Test, with evidence cards one tap away), per the new `references/thesis-page.md`.
 
 Each company page now opens on a Company tab, a plain-language profile for a reader new to the company (who it is, how the product works, customers with payer and user, how it earns, where it sits, a four-line snapshot), per the new `references/company-profile.md` and section 1 of the template. The page moves from eight tabs to seven, each with one job: Company, Thesis (absorbing Why now, Why this company and economic capture), Financials, Valuation, Debate, What to watch and Evidence.
+
+The Debate tab reads as a guided conversation: Bull bubbles on the left and Bear on the right, a flow stepper tied to each message, one issue at a time read round by round, and a verdict that gathers what each side proved.
