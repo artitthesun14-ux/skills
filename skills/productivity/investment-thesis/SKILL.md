@@ -24,12 +24,13 @@ Industry comes before company. "The industry grows" reaches "this company captur
 
 1. **Frame the investment question.** Write it before any research, e.g. "How structural is X's advantage in industry Y, and how much of Y's growth can X capture?" Resolve ambiguity yourself; ask the user only when the answer would change the company, the industry, or the time horizon. Done when the question names company, industry, and what "winning" means.
 2. **Gather evidence** per the research principles below. Done when every number you will cite has a source and a date.
-3. **Walk the chain**, loading only the reference for the link you are on (routing table). Done when each link has a conclusion, its evidence, and its unknowns.
-4. **Value it**: reverse-engineer what today's price assumes, then bear, base, bull.
-5. **Debate it** per [`references/investment-debate.md`](references/investment-debate.md): list what must be true, then let the Bull and the Bear test it exchange by exchange until the verdict and What changed are written. Done when every load-bearing assumption has been attacked or labelled unchallenged, every breaker found has an indicator, and you have searched for disconfirming evidence as hard as for confirming evidence.
-6. **Write the output** in the shape of [`templates/thesis-template.md`](templates/thesis-template.md), scored with [`templates/thesis-scorecard.md`](templates/thesis-scorecard.md).
-7. **Verify** against the checklist below and fix what fails.
-8. **Publish** the company's page into the thesis library per [`references/thesis-library.md`](references/thesis-library.md). Done when the page is live, the Investment Thesis category lists it, and the chat carries a short brief with the link.
+3. **Profile the company** per [`references/company-profile.md`](references/company-profile.md), for a reader who has never heard of it. Done when its six parts are written and each one rests on a source or says UNKNOWN.
+4. **Walk the chain**, loading only the reference for the link you are on (routing table). Done when each link has a conclusion, its evidence, and its unknowns.
+5. **Value it**: reverse-engineer what today's price assumes, then bear, base, bull.
+6. **Debate it** per [`references/investment-debate.md`](references/investment-debate.md): list what must be true, then let the Bull and the Bear test it exchange by exchange until the verdict and What changed are written. Done when every load-bearing assumption has been attacked or labelled unchallenged, every breaker found has an indicator, and you have searched for disconfirming evidence as hard as for confirming evidence.
+7. **Write the output** in the shape of [`templates/thesis-template.md`](templates/thesis-template.md), scored with [`templates/thesis-scorecard.md`](templates/thesis-scorecard.md).
+8. **Verify** against the checklist below and fix what fails.
+9. **Publish** the company's page into the thesis library per [`references/thesis-library.md`](references/thesis-library.md). Done when the page is live, the Investment Thesis category lists it, and the chat carries a short brief with the link.
 
 For a narrower request (only the moat, only valuation, only an update), run just the matching links and say which links were skipped.
 
@@ -39,6 +40,7 @@ Load a reference only when you reach its link.
 
 | Link or question | Load |
 | --- | --- |
+| Company profile: what it does, how the product works, customers, business model | [`references/company-profile.md`](references/company-profile.md) |
 | Investment question, megatrend, first-principles "why" chain | [`references/investment-framework.md`](references/investment-framework.md) |
 | Industry importance and structure | [`references/industry-analysis.md`](references/industry-analysis.md) |
 | Value chain, where the company sits | [`references/value-chain-analysis.md`](references/value-chain-analysis.md) |
@@ -78,6 +80,7 @@ Write about thesis strength, risks, required assumptions, and what would prove i
 Before delivering, confirm each item and fix any that fail:
 
 - [ ] Investment question stated up front.
+- [ ] Company profile answers its six parts in plain words, names customers only with evidence, and carries no thesis argument or financial figures.
 - [ ] Every chain link present, or marked skipped with the reason.
 - [ ] Each link shows its mechanism, not just a label.
 - [ ] Industry analysed before the company.
@@ -96,5 +99,5 @@ Before delivering, confirm each item and fix any that fail:
 - [ ] Key claims labelled FACT / INFERENCE / ASSUMPTION / UNKNOWN, with sources and dates.
 - [ ] Scorecard is multi-dimensional, with no single overall score.
 - [ ] No buy or sell call.
-- [ ] Page laid out in eight tabs per `thesis-page.md`, with every template section placed and no figure lost.
+- [ ] Page laid out in seven tabs per `thesis-page.md`, with every template section placed and no figure lost.
 - [ ] Page published to the library, category entry updated, history row added.

@@ -4,11 +4,22 @@
 > As of: [date]. Sources: cited inline. Labels: FACT / INFERENCE / ASSUMPTION / UNKNOWN.
 > This is an analysis of a thesis, not a recommendation to buy or sell.
 
-## 1. Executive Thesis
+## 1. Company Profile
+
+[Per `company-profile.md`, for a reader new to the company. No figures beyond what the model needs.]
+
+- **Who is this company**: [2 to 3 plain sentences]
+- **How the product works**: [problem → product steps in → how it works → result]
+- **Customers**: [per group: who, what for, why, payer versus user]
+- **How it earns**: [what is sold, how it is billed, main revenue source, what brings customers back]
+- **Where it sits**: [receives from → does → delivers to; why its step matters]
+- **Snapshot**: What it does · What it sells · Who pays · How it earns
+
+## 2. Executive Thesis
 
 [3 to 5 sentences, written after the debate: the thesis the debate left standing, how the company captures value, what the price assumes, what would break it.]
 
-## 2. Thesis Chain
+## 3. Thesis Chain
 
 ```
 MEGATREND        → [driver]
@@ -21,47 +32,47 @@ MEGATREND        → [driver]
 → THESIS         → [one line]
 ```
 
-## 3. Why This Industry Matters
+## 4. Why This Industry Matters
 
 [Importance rating (Low / Medium / High / Critical) with the evidence that drives it. Megatrend chain with why now, why it matters, what changes, where value flows.]
 
-## 4. Industry Structure
+## 5. Industry Structure
 
 [Size, growth, concentration, power of customers and suppliers, barriers. Verdict: does the structure let winners keep profits?]
 
-## 5. Value Chain
+## 6. Value Chain
 
 [Stage map with players, margins, commoditized and constrained stages. The inputs one unit of the product consumes, each on the map or excluded. Where economic profit pools.]
 
-## 6. Bottleneck
+## 7. Bottleneck
 
 [Bottlenecks on the company's path, ranked; which gate and which capture; the buyer's way around each gating one; its evidence, its expected duration, and whether this company captures it.]
 
-## 7. Company Position
+## 8. Company Position
 
 [Current exposure versus future economic exposure, and the peer comparison; from `company-analysis.md`.]
 
-## 8. Competitive Advantage
+## 9. Competitive Advantage
 
 [Each advantage: why, evidence, replication difficulty. The one the thesis depends on most.]
 
-## 9. Moat & Durability
+## 10. Moat & Durability
 
 [Each moat: horizon (Short / Medium / Long), what protects, strengthens, weakens, destroys it.]
 
-## 10. Economic Capture
+## 11. Economic Capture
 
 [Capture chain, where value leaks, capture verdict.]
 
-## 11. Financial Quality
+## 12. Financial Quality
 
 [Key figures with sources. Verdict: support, mixed or contradict, and the deciding figures.]
 
-## 12. Valuation & Expectations
+## 13. Valuation & Expectations
 
 [Reverse-engineered expectations. "For today's valuation to make sense, ... must be true."]
 
-## 13. Bull / Base / Bear
+## 14. Bull / Base / Bear
 
 | | Bear | Base | Bull |
 | --- | --- | --- | --- |
@@ -70,7 +81,7 @@ MEGATREND        → [driver]
 | Implied value | | | |
 | What has to happen | | | |
 
-## 14. Investment Debate
+## 15. Investment Debate
 
 ### What must be true
 
@@ -103,7 +114,7 @@ MEGATREND        → [driver]
 | Breaker | Found in exchange | Indicator | Threshold | Source |
 | --- | --- | --- | --- | --- |
 
-## 15. Debate Verdict & What Changed
+## 16. Debate Verdict & What Changed
 
 **Thesis**: [Strengthened / Unchanged / Weakened / Unresolved / Broken] · **Confidence**: [High / Medium / Low]
 
@@ -122,20 +133,20 @@ MEGATREND        → [driver]
 | Thesis | | |
 | [each assumption the debate moved] | | |
 
-## 16. Thesis Scorecard
+## 17. Thesis Scorecard
 
 [Filled from `thesis-scorecard.md`.]
 
-## 17. What to Watch
+## 18. What to Watch
 
 | Indicator | Current value (date) | Supports if | Breaks if | From (breaker or unknown) | Source | Frequency |
 | --- | --- | --- | --- | --- | --- | --- |
 
-## 18. What This Run Stopped Short Of
+## 19. What This Run Stopped Short Of
 
 [Searches left thin, inputs or stages left off the map, exchanges cut short for lack of evidence, and why.]
 
-## 19. Thesis History
+## 20. Thesis History
 
 | Date | Decision (NEW / MAINTAIN / REVISE / BREAK) | Thesis status | What changed and why |
 | --- | --- | --- | --- |
