@@ -139,8 +139,8 @@ MEGATREND        → [driver]
 
 ## 18. What to Watch
 
-| Indicator | Current value (date) | Supports if | Breaks if | From (breaker or unknown) | Source | Frequency |
-| --- | --- | --- | --- | --- | --- | --- |
+| Indicator | Baseline (date) | Latest (date) | Direction the thesis needs | Supports if | Breaks if | From (breaker or unknown) | Source | Frequency |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
 
 ## 19. What This Run Stopped Short Of
 
