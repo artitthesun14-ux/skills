@@ -13,14 +13,13 @@ Read `HANDOFF.md` in that repository first: its design system and motion section
 - `build.py`: `GROUPS` lists every topic as a group of tabs, `CATS` the categories on the home page, `THESIS` the thesis companies (exchange, ticker, as-of date, latest decision). The category card shows the as-of date and marks it for re-checking when it is more than a quarter old.
 - A company is one group whose id is its slug (the lowercase ticker, `snps`) with seven tabs, one per section of `thesis-page.md`: `<slug>` (Company), `<slug>-thesis`, `<slug>-fin`, `<slug>-valuation`, `<slug>-debate`, `<slug>-watch`, `<slug>-evidence`. `#<slug>` opens the company on its profile.
 - `thesis/<slug>/01-company.html`, `02-thesis.html`, `03-financials.html`, `04-valuation.html`, `05-debate.html`, `06-watch.html`, `07-evidence.html`: one source file per tab, page fragments with no `<!doctype>`, `<head>` or `<style>`.
-- A company still in the older eight-tab layout (`-now`, `-company`, `-capture`) moves to the seven tabs on its next run: its content is redistributed per the layout table, nothing dropped, and the Company tab is written fresh per `company-profile.md`.
 - `thesis/thesis.css` and `thesis/thesis.js`: the one stylesheet and the one runtime that every company page shares. The build inlines each once.
 
 ## The company page
 
 The page carries every section of `templates/thesis-template.md`, written in the user's language and laid out per [`thesis-page.md`](thesis-page.md). Every page shows the as-of date, the notice that it analyses a thesis and is not a recommendation to buy or sell, the legend of the four evidence labels, the Thesis History, and its sources.
 
-Pages share one design: the host's black-and-white design system. Build a new company from the seven files of the newest company in the seven-tab layout, replacing the content, and use only classes that `thesis.css` already defines.
+Pages share one design: the host's black-and-white design system. Build a new company from the newest company's seven files, replacing the content, and use only classes that `thesis.css` already defines.
 
 - **Color.** Ink and greys from the host tokens only. `--crit` (oxblood) marks only bottlenecks, breakers the debate found, leaks and what broke an assumption. `--cool` (petrol) marks only the second side of a pair: the Bear against the Bull, the main rival against the company, FCF after SBC against reported FCF. No other color.
 - **Each tab** opens with the host header: `header.ds-hd` with the tab's question as `h1`, its one-sentence answer as the lead and the tab number as `ds-num`. Deep research folds into `details.more`.
@@ -31,7 +30,7 @@ Pages share one design: the host's black-and-white design system. Build a new co
 
 ## A run
 
-1. **Read** `HANDOFF.md`, `THESIS` in `build.py`, and this company's tab files if it is already in the category, otherwise the files of the newest company in the seven-tab layout for their structure. Match the company against the slugs before minting a new one, so an update lands on the existing page instead of forking a near-duplicate.
+1. **Read** `HANDOFF.md`, `THESIS` in `build.py`, and this company's tab files if it is already in the category, otherwise the newest company's files for their structure. Match the company against the slugs before minting a new one, so an update lands on the existing page instead of forking a near-duplicate.
 2. **Write** the page. A new company gets seven files, a group in `GROUPS` with its seven tabs, its slug in the `thesis` category of `CATS`, and its `THESIS` entry, plus one NEW history row. An update edits the existing files per `thesis-tracker.md`, adds its history row at the top (earlier rows stay as written), and updates the as-of date and decision in `THESIS`. An update reopens only the exchanges its new evidence touches and rewrites the verdict. A narrow request (one link only) on a company already in the category updates only those parts and still adds a history row. A narrow request on a company not in the category is answered in chat, with an offer to publish a full page.
 3. **Build** with `python3 build.py`. A class collision stops it; rename the class and rebuild.
 4. **Check** with `node check/check.js` (run `npm install` in `check/` once per session). It opens every view at 390 and 1280 wide, light and dark, and exits 0 when nothing fails. Done when it passes, the home page and the category list every company, every company opens on `#<slug>`, its seven tabs show, no page raises an error, the body has no horizontal scroll, and the page meets the done-when list of `thesis-page.md`.
