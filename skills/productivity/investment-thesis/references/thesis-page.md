@@ -1,17 +1,15 @@
 # Thesis page
 
-The company page introduces the company first, then tells the thesis as a story, and lets the reader dig for evidence last. Every section starts from its core point and the form its content's shape calls for ([`visual-forms.md`](visual-forms.md)), with words only for what the form cannot carry. A reader new to the company should know what it does and how it earns before the first thesis claim, grasp why the company wins, where the money goes and what survived the debate within a minute more, then open detail only where they care. The page changes how the analysis is shown, never what it says.
+The company page introduces the company first, then tells the thesis as a story, and lets the reader dig for evidence last. Before laying out a section, call the Skill tool with "visual-forms": every section starts from its core point and the form its content's shape calls for, with words only for what the form cannot carry. A reader new to the company should know what it does and how it earns before the first thesis claim, grasp why the company wins, where the money goes and what survived the debate within a minute more, then open detail only where they care. The page changes how the analysis is shown, never what it says.
 
 ## Levels
 
-Detail is disclosed in four levels. The first phone screens of the Company and Thesis tabs hold only Level 1.
+Detail is disclosed in the four levels of `visual-forms`. The first phone screens of the Company and Thesis tabs hold only Level 1.
 
 1. **Core point** (the first minute): the profile's opening answer, and the thesis hero with its four short cards.
 2. **Visual explanation**: the product flow, the revenue tree, the thesis chain and the debate, one line per step, branch, link or exchange, each opening to its detail.
 3. **Supporting evidence**: label tags, evidence markers and the cards they open.
 4. **Deep dive**: full tables, charts, scorecard, history and sources, behind a disclosure or in the Evidence section.
-
-A reader understands the page from Levels 1 and 2 alone; every detail of Levels 3 and 4 stays one tap away.
 
 ## Layout
 
@@ -51,7 +49,7 @@ The debate reads as a guided conversation between two investors who answer each 
 - **Evidence markers.** A compact bracketed marker named by source type (Company Filing, Industry Data, Management, Research, Media) opens its evidence card in place. Each card states source (linked), date, claim and why it matters to the thesis. Write a card only when the analysis names the claim's source; other claims keep their label tag alone.
 - **Mobile first.** The host's sticky tab bar is the navigation: it marks the tab in view and keeps all seven tabs reachable on a phone. Sections stack in one column; the value chain and wide tables scroll sideways inside their own containers; cards expand in place.
 - **Black and white.** Ink and greys only, oxblood for what is critical or contradicts the thesis, petrol for the second side of a pair (`thesis-library.md`, The company page).
-- **Form follows content.** Each visual answers its tab's question in the form [`visual-forms.md`](visual-forms.md) picks for its content's shape, and passes that form's fit test.
+- **Form follows content.** Each visual answers its tab's question in the form `visual-forms` picks for its content's shape, and passes that form's fit test.
 - **Interaction teaches.** Tapping a bottleneck toggle lights the bottleneck on the map; tapping a breaker found in the debate opens the KPI that monitors it; tapping an item of What must be true opens the exchange that attacked it; tapping a durability row opens that advantage; tapping an evidence marker opens its card.
 
 ## Done when
@@ -60,7 +58,7 @@ The debate reads as a guided conversation between two investors who answer each 
 - The thesis hero and 30-second cards fit roughly the first two phone screens of the Thesis tab.
 - Every section of the thesis template is placed per the layout table, every figure of the analysis appears on the page, and no fact is repeated across tabs.
 - No tab opens with a wall of text: each opens with its question, its answer, then a visual.
-- Every visual fits its content's shape per `visual-forms.md`, and no sentence repeats what the visual beside it already shows.
+- Every visual fits its content's shape per `visual-forms`, and no sentence repeats what the visual beside it already shows.
 - Every issue of the debate opens from its chip and reads to its end with read on, every step of the stepper lands on a message of that step, every breaker reaches its KPI card, and the verdict is reachable from the room head.
 - Every issue shows its core question, Under test and status; every round its indicator; every message its side mark, number and attack target; and the debate tab reads no longer than the debate needs.
 - On a page not in English, every English term and label has its gloss per Glossed terms, and the gloss stays secondary to the text it explains.

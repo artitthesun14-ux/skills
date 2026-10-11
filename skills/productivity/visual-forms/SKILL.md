@@ -1,4 +1,9 @@
-# Visual forms
+---
+name: visual-forms
+description: Pick the form that explains a piece of content fastest (tree, stack, flow, system diagram, timeline, matrix, animation or plain cards) and cut the prose around it to its core point. Use when explaining a business, product, system or process on a page, choosing a diagram or chart type, deciding whether something should animate at all, or tightening a long explanation without losing facts.
+---
+
+# Visual Forms
 
 Distil first, then pick the form, then write only what the form cannot carry. The order is fixed:
 
@@ -11,7 +16,7 @@ CORE POINT → RELATIONSHIP → FORM → FEWEST WORDS → DETAIL BEHIND A DISCLO
 Before writing a section, answer: what is the one point, how many key points hold it up, how they relate, which form shows that relation fastest, and which details the reader truly needs.
 
 - One heading, one point. One box or node, one idea.
-- A heading states the point ("Starlink earns, Starship and AI spend"), not the topic ("Segments").
+- A heading states the point ("Licenses earn, hardware shrinks"), not the topic ("Segments").
 - Words carry what the form cannot: the why, the condition, the exception.
 - Cut lead-ins, restatements and sentences that add no understanding. Keep every figure, condition, risk and exception: cutting moves detail down a level, never off the page.
 - Length follows the topic's complexity, never a quota of words or bullets.
@@ -31,6 +36,15 @@ Before writing a section, answer: what is the one point, how many key points hol
 | Short items with no structure between them | **Cards or bullets** | three strengths, key risks, KPIs, open questions | (the default; no diagram needed) |
 
 A page uses only the forms its content needs; a question gets one form.
+
+## Disclose in levels
+
+1. **Core point**: what the reader must take away.
+2. **Visual explanation**: the form that shows how the points relate.
+3. **Supporting evidence**: figures, sources, assumptions.
+4. **Deep dive**: technical detail and full tables.
+
+A reader understands the whole from Levels 1 and 2; every detail of Levels 3 and 4 stays one tap away.
 
 ## Accuracy over polish
 

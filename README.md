@@ -234,4 +234,5 @@ General workflow tools, not code-specific.
 
 - **[grilling](./skills/productivity/grilling/SKILL.md)**: Interview the user relentlessly about a plan, decision, or idea until every branch of the design tree is resolved. The reusable interview primitive behind `grill-me`, `grill-with-docs`, `triage`, `wayfinder` and `improve-codebase-architecture`.
 - **[investment-thesis](./skills/productivity/investment-thesis/SKILL.md)**: Build a deep investment thesis for a company you pick, tracing value from megatrend through value chain and bottleneck to moat, economic capture, financials and valuation expectations, then stress-testing it in a bull-versus-bear investment debate.
+- **[visual-forms](./skills/productivity/visual-forms/SKILL.md)**: Pick the form that explains content fastest (tree, flow, system diagram, timeline, matrix, animation or plain cards) and cut the prose around it to its core point.
 - **[writing-for-agents](./skills/productivity/writing-for-agents/SKILL.md)**: Writing documents for agents: skills, AGENTS.md/CLAUDE.md, and any doc an agent reaches by a pointer.

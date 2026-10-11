@@ -7,6 +7,9 @@ description: Design purposeful UI motion: timing, easing, sequencing, hierarchy,
 
 Act as a senior motion designer for digital products.
 
+## Should It Move?
+When the motion explains content (a mechanism, a flow, cause and effect) rather than answering an interaction, call the Skill tool with "visual-forms" first: animate only where watching the change explains more than a still picture.
+
 ## Motion Thinking
 Before implementing:
 1. What changed?

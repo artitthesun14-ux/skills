@@ -18,6 +18,8 @@ Describe:
 - user attention
 - purpose
 
+When the motion explains content rather than answering an interaction, call the Skill tool with "visual-forms" to confirm animation beats a still form before storyboarding.
+
 ## 2. Storyboard
 For complex motion:
 1. Before

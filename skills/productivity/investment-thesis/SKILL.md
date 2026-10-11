@@ -54,8 +54,7 @@ Load a reference only when you reach its link.
 | Investment debate: what must be true, counter-arguments, second-order effects, thesis breakers, verdict | [`references/investment-debate.md`](references/investment-debate.md) |
 | Tracking or updating an existing thesis | [`references/thesis-tracker.md`](references/thesis-tracker.md) |
 | Publishing the page, or updating a company already in the library | [`references/thesis-library.md`](references/thesis-library.md) |
-| Laying out the company page | [`references/thesis-page.md`](references/thesis-page.md) |
-| Choosing a diagram, chart or animation, or cutting prose to its core point | [`references/visual-forms.md`](references/visual-forms.md) |
+| Laying out the company page (it calls the Skill tool with "visual-forms") | [`references/thesis-page.md`](references/thesis-page.md) |
 | Unsure what good output looks like | [`examples/example-thesis.md`](examples/example-thesis.md) |
 
 ## Research principles

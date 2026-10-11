@@ -12,6 +12,7 @@ Review animation as a product interaction, not merely as visual decoration.
 ### Purpose
 - What problem does the motion solve?
 - Is it necessary?
+- For motion that explains content: does it show what changes and why, where a still would not? Call the Skill tool with "visual-forms" for the fit test.
 
 ### Timing
 - Too fast to perceive?

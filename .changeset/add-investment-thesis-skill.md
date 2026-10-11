@@ -14,4 +14,4 @@ Each company page now opens on a Company tab, a plain-language profile for a rea
 
 The Debate tab reads as a guided conversation: Bull bubbles on the left and Bear on the right, a flow stepper tied to each message, one issue at a time read round by round, and a verdict that gathers what each side proved.
 
-Pages are written visual first: each section starts from its core point and picks its form (tree, stack, flow, system diagram, timeline, matrix, animation or cards) from the shape of its content, per the new `references/visual-forms.md`, with prose only for what the form cannot carry. The tracker and the What to watch cards carry a fixed baseline, the latest value and the direction the thesis needs.
+Pages are written visual first: each section starts from its core point and picks its form (tree, stack, flow, system diagram, timeline, matrix, animation or cards) from the shape of its content, per the `visual-forms` skill, with prose only for what the form cannot carry. The tracker and the What to watch cards carry a fixed baseline, the latest value and the direction the thesis needs.
