@@ -37,3 +37,4 @@ Turn a validated UX into a UI that is attractive, usable, consistent, and ready 
 - Avoid arbitrary styling decisions that cannot be explained.
 - Keep content hierarchy obvious.
 - Design for real data, not only ideal placeholder content.
+- When a screen explains content (a diagram, chart or explainer), call the Skill tool with "visual-forms" to pick its form.

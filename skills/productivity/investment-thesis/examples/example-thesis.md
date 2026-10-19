@@ -8,6 +8,15 @@ Condensed to the chain links that show the method; a full thesis fills all 20 se
 
 How structural is Northfield's advantage in large power transformers, and how much of the value created by grid investment for AI data centers can it capture over the next 7 years?
 
+## Company profile
+
+- **Who is this company**: Northfield builds the large transformers that step electricity down from long-distance power lines to the voltage a city district or a data center can use. Utilities and data center developers buy them because nothing reaches the building without one (FACT, would cite the annual report).
+- **How the product works**: a new data center needs power → the utility must connect it to a high-voltage line → a Northfield transformer, built to order for that site, converts the line's voltage → the site gets usable power.
+- **Customers**: utilities (pay and operate), data center developers (pay for their own substation; the utility often operates it). No named customer: none is disclosed (UNKNOWN).
+- **How it earns**: one-off sales of custom units, paid in stages from order to delivery, plus service contracts on installed units (FACT, would cite the segment note). Whether service carries higher margins is left to the financials.
+- **Where it sits**: buys steel, copper and insulation → designs and builds the unit → delivers to the utility's substation.
+- **Snapshot**: makes grid transformers · sells custom units and service · utilities and data center developers pay · earns per unit plus service.
+
 ## Megatrend
 
 ```
