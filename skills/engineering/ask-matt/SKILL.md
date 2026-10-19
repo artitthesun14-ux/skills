@@ -95,6 +95,7 @@ Off the main flow entirely.
 - **`/wait-what`** is the corrective for a message that didn't land. Use it mid-conversation, inside any other skill, and the agent re-pitches what it just said with the context you were missing, in plain English, using the `CONTEXT.md` vocabulary. It works after the fact; `/grill-with-docs` is the upfront cure, because a shared language agreed early is what stops the jargon arriving at all.
 - **`/teach`**: learn a concept over multiple sessions, using the current directory as a stateful workspace.
 - **`/investment-thesis`** builds a deep thesis on whether a company can win its industry: megatrend, value chain, bottleneck, moat, economic capture, financials and what the valuation assumes, then a Bull and a Bear debate it until it survives or breaks. It labels every key claim fact, inference or assumption, and stops short of a buy or sell call. Model-invoked, so the agent reaches for it when you ask about a company as an investment; bring it back with new evidence to update the thesis tracker.
+- **`/visual-forms`** picks the form that explains content fastest (a tree, flow, system diagram, timeline, matrix, animation, or plain cards) and cuts the words around it to the core point. Model-invoked: `/investment-thesis` pages and the animation and UI skills reach for it before drawing or animating anything that explains content.
 - **`/writing-for-agents`** is the reference for writing documents agents consume: skills, AGENTS.md, pointed-at docs.
 
 ## Precondition

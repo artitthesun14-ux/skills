@@ -1,6 +1,6 @@
 # Company analysis: [Company]
 
-Working sheet for the company position step. Its conclusions go into section 7 of the thesis.
+Working sheet for the company position step. Its conclusions go into section 8 of the thesis.
 
 ## Exposure map
 
